@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		// add Bun type definitions
 		"types": ["bun-types"],
 
 		// enable latest features
@@ -24,11 +23,7 @@
 		"useUnknownInCatchVariables": true,
 		"noUncheckedIndexedAccess": true,
 		"noPropertyAccessFromIndexSignature": true,
-		"exactOptionalPropertyTypes": true,
-
-		"paths": {
-			"@/*": ["./*"]
-		}
+		"exactOptionalPropertyTypes": true
 	},
-	"include": ["app", "lib"]
+	"include": ["apps", "packages"]
 }
