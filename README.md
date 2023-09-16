@@ -84,7 +84,7 @@ It's a complementent to native vanilla browser APIs.
 
 ### Q3: What About Library Size? 🍘
 
-**A3:** **master-ts** is one of the smallest TypeScript libraries, making it a great choice for performance-conscious applications.
+**A3:** **master-ts** is one of the smallest DOM libraries, making it a great choice for performance-conscious applications.
 
 ## Addressing Concerns 🍚
 
