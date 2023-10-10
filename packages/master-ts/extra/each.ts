@@ -3,9 +3,9 @@ import { signal, signalFrom } from "master-ts/core.ts"
 
 export let each = <T>(arr: SignalOrFn<T[]>) => ({
 	key: (getKey: (value: T, index: number) => unknown) => ({
-		as: <R>(as: (value: Readonly<Signal<T>>, index: Readonly<Signal<number>>) => R) => {
+		as: <R>(as: (value: Signal<T>, index: Signal<number>) => R) => {
 			const arrSignal = signalFrom(arr)
-			const cache = new Map<unknown, [R, Signal<T>, Signal<number>]>()
+			const cache = new Map<unknown, [R, Signal.Mut<T>, Signal.Mut<number>]>()
 			return signal<R[]>(
 				undefined!,
 				(set) =>

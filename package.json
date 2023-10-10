@@ -9,11 +9,15 @@
 		"format": "bunx --bun prettier -w ./",
 		"docs:dev": "bun run ./apps/docs/scripts/dev.ts",
 		"docs:build": "bun run ./apps/docs/scripts/build.ts",
+		"docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
 		"html-experiment:start": "bun run ./apps/html-experiment/src/server.ts",
+		"html-experiment:typecheck": "bunx --bun tsc -p ./apps/html-experiment --noEmit",
 		"spa-example:dev": "bunx --bun vite ./apps/spa-example --host",
 		"spa-example:build": "bunx --bun vite build ./apps/spa-example",
 		"spa-example:preview": "bunx --bun vite preview ./apps/spa-example --host",
-		"test": "bunx --bun tsc --noEmit && bun test"
+		"spa-example:typecheck": "bunx --bun tsc -p ./apps/spa-example --noEmit",
+		"master-ts:typecheck": "bunx --bun tsc -p ./packages/master-ts --noEmit",
+		"test": "bun master-ts:typecheck && bun docs:typecheck && bun spa-example:typecheck && bun html-experiment:typecheck && bun test"
 	},
 	"devDependencies": {
 		"prettier": "^2.8.8",

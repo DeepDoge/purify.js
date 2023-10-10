@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test"
 import type { Signal } from "master-ts/core.ts"
 import { signal } from "master-ts/core.ts"
+import { Utils } from "../utils"
 import { INSTANCEOF, TYPEOF, match } from "./match"
 
 const describe = () => {
@@ -21,7 +22,7 @@ test(describe(), () => {
 			expect(value.ref).toBeTypeOf("string")
 			return toUpperCase(value.ref)
 		})
-	result satisfies Readonly<Signal<string>>
+	result satisfies Signal<string>
 	expect(result.ref).toBe("YO!")
 })
 
@@ -44,7 +45,7 @@ test(describe(), () => {
 			return value.ref
 		})
 
-	result satisfies Readonly<Signal<MyId | null>>
+	result satisfies Signal<MyId | null>
 
 	signalValue.ref = null
 	signalValue.ref = createMyId("yo!")
@@ -66,7 +67,7 @@ test(describe(), () => {
 		.default((value) => {
 			value.ref satisfies MyId
 			acceptMyId(value.ref)
-		}) satisfies Readonly<Signal<MyId | void>>
+		}) satisfies Signal<MyId | void>
 })
 
 test(describe(), () => {
@@ -107,7 +108,7 @@ test(describe(), () => {
 		})
 		.default()
 
-	result satisfies Readonly<Signal<"foo" | "bar" | "baz">>
+	result satisfies Signal<"foo" | "bar" | "baz">
 
 	expect(result.ref).toBe("foo")
 })
@@ -121,7 +122,7 @@ test(describe(), () => {
 		.case(value, (value) => "foo" as const)
 		.default((value) => "other" as const)
 
-	result satisfies Readonly<Signal<"foo" | "other">>
+	result satisfies Signal<"foo" | "other">
 	expect(result.ref).toBe("foo")
 })
 
@@ -145,7 +146,7 @@ test(describe(), () => {
 			return value.ref
 		})
 
-	result satisfies Readonly<Signal<"null" | "error" | { foo: string }>>
+	result satisfies Signal<"null" | "error" | { foo: string }>
 })
 
 test(describe(), () => {
@@ -167,7 +168,7 @@ test(describe(), () => {
 			return value.ref
 		})
 
-	result satisfies Readonly<Signal<"null" | "error" | { foo: string }>>
+	result satisfies Signal<"null" | "error" | { foo: string }>
 	expect(result.ref).toBe("error")
 })
 

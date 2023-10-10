@@ -124,33 +124,31 @@ function matchPattern<TValue, const TPattern extends PatternOf<TValue>>(
 type MatchBuilder<TValue, TReturns = never> = {
 	case<const TPattern extends PatternOf<TValue>, TResult>(
 		pattern: TPattern,
-		then: (value: Readonly<Signal<Narrow<TValue, TPattern>>>) => TResult
+		then: (value: Signal<Narrow<TValue, TPattern>>) => TResult
 	): MatchBuilder<ExhaustWithPattern<TValue, TPattern>, TReturns | TResult>
 } & MatchBuilder.Default<TValue, TReturns>
 namespace MatchBuilder {
 	export type Default<TValue, TReturns> = [TValue] extends [never]
 		? {
-				default(): Readonly<Signal<TReturns>>
+				default(): Signal<TReturns>
 		  }
 		: {
-				default<TDefault>(
-					fallback: (value: Readonly<Signal<TValue>>) => TDefault
-				): Readonly<Signal<TReturns | TDefault>>
+				default<TDefault>(fallback: (value: Signal<TValue>) => TDefault): Signal<TReturns | TDefault>
 		  }
 }
 
-export function match<TValue>(valueSignal: Readonly<Signal<TValue>>): MatchBuilder<TValue> {
+export function match<TValue>(valueSignal: Signal<TValue>): MatchBuilder<TValue> {
 	let cases: {
 		pattern: Utils.DeepOptional<TValue>
-		then: (value: Readonly<Signal<TValue>>) => unknown
+		then: (value: Signal<TValue>) => unknown
 	}[] = []
 
 	// Builder type is way too funky, so gotta act like it doesn't exist here
 	let self = {
-		case: (pattern: Utils.DeepOptional<TValue>, then: (value: Readonly<Signal<TValue>>) => unknown) => (
+		case: (pattern: Utils.DeepOptional<TValue>, then: (value: Signal<TValue>) => unknown) => (
 			cases.push({ pattern, then }), self
 		),
-		default: (fallback?: (value: Readonly<Signal<TValue>>) => unknown) =>
+		default: (fallback?: (value: Signal<TValue>) => unknown) =>
 			signal<unknown>(undefined, (set) => {
 				let currentIndex = -1
 				return valueSignal.follow(

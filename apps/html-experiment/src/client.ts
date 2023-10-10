@@ -2,13 +2,13 @@ import { Signal, signal, tagsNS } from "master-ts/core"
 import { css } from "master-ts/extra/css"
 import { WeakCache } from "./utils/weakCache"
 
-const responseCache = new WeakCache<string, Signal<string | null>>()
+const responseCache = new WeakCache<string, Signal.Mut<string | null>>()
 
-function set(key: string, value: string): Signal<string> {
+function set(key: string, value: string): Signal.Mut<string> {
 	const cache = responseCache.get(key)
 	if (!cache) return responseCache.set(key, signal(value))
 	cache.ref = value
-	return cache as Signal<string>
+	return cache as Signal.Mut<string>
 }
 
 const fetchGETCache = new Map<string, Promise<string>>()

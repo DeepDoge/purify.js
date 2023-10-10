@@ -1,7 +1,9 @@
 {
 	"compilerOptions": {
+		"types": ["bun-types"],
+
 		// enable latest features
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"lib": ["ESNext"],
 		"module": "ESNext",
 		"target": "ESNext",
 

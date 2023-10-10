@@ -7,6 +7,7 @@ import { defer } from "master-ts/extra/defer.ts"
 import { each } from "master-ts/extra/each.ts"
 import { html } from "master-ts/extra/html.ts"
 import { INSTANCEOF, TYPEOF, match } from "master-ts/extra/match.ts"
+import { Utils } from "master-ts/utils"
 
 function code<T extends Utils.Fn>(block: T): () => ReturnType<T> {
 	return () => block()
@@ -349,29 +350,28 @@ export const derivedSignalMemoizationExample = code(() => {
 
 //#endregion
 
-//#region Read-only Signal
+//#region Signal Mutability
 /* 
-As you may have noticed [#Derived Signals](#/usage/signals/derived-signals) returns a read-only signal.
+**master-ts** both have mutable and immutable signals.
 
-**master-ts** has read-only signals, hurray!🎊<br/>
-But its probably not what you think it is. 
+But it's probably not what you think.
 
-Good thing about being a TypeScript only library is we can do stuff with types that would normally require runtime logic.
-
-Yes, read-only signals are just signals with a read-only type.
+**master-ts** signals are always mutable on runtime, but we have two typescript types for signals:
+- `Signal<T>`: Which is Immutable
+- `Signal.Mut<T>`: Which is Mutable
 
 Let's see an example:
 */
 code(() => {
-	const count: Readonly<Signal<number>> = signal(0)
+	const count: Signal<number> = signal(0)
 	// @ts-expect-error
 	count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
 	// end
 })
 /* As an easier way you can also do this: */
 code(() => {
-	// `asReadonly()` returns the same signal with the read-only type
-	const count = signal(0).asReadonly()
+	// `asImmutable()` returns the same signal with the read-only type
+	const count = signal(0).asImmutable()
 	// @ts-expect-error
 	count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
 	// end

@@ -69,18 +69,22 @@ if (doc) {
 	}
 }
 
-export type SignalOrValue<T> = T | Readonly<Signal<T>>
+export type SignalOrValue<T> = T | Signal<T>
 export type SignalOrValueOrFn<T> = SignalOrValue<T> | ((...args: unknown[]) => T)
-export type SignalOrFn<T> = Readonly<Signal<T>> | ((...args: unknown[]) => T)
+export type SignalOrFn<T> = Signal<T> | ((...args: unknown[]) => T)
 export interface Signal<T> {
-	ref: T
+	readonly ref: T
 	follow(follower: Signal.Follower<T>, options?: Signal.Follow.Options): Signal.Follow
 	follow$<T extends Node>(node: T, ...args: Parameters<this["follow"]>): void
 	ping(): void
-	asReadonly(): Readonly<this>
 }
 export namespace Signal {
-	export type Builder = <T>(initial: T, pong?: Pong<T>) => Signal<T>
+	export interface Mut<T> extends Signal<T> {
+		ref: T
+		asImmutable(): Signal<T>
+	}
+
+	export type Builder = <T>(initial: T, pong?: Pong<T>) => Signal.Mut<T>
 	export type Pong<T> = (set: (value: T) => void) => (() => void) | void
 
 	export type Follow = { unfollow: Unfollow }
@@ -104,16 +108,11 @@ let FOLLOW_IMMEDIATE_OPTION = { mode: FOLLOW_MODE_IMMEDIATE } as const satisfies
 
 let signals = new WeakSet<Signal<unknown>>()
 
-export let isSignal: <U extends boolean = false>(
-	value: any,
-	castAsWritable?: U
-) => value is U extends true ? Signal<unknown> : Readonly<Signal<unknown>> = (
-	value: any
-): value is Readonly<Signal<unknown>> => signals.has(value)
+export let isSignal = (value: any): value is Signal<unknown> => signals.has(value)
 
 export let isSignalOrFn = <T>(value: any): value is SignalOrFn<T> => isSignal(value) || isFunction(value)
 
-export let signalFrom = <T>(src: SignalOrFn<T>): Readonly<Signal<T>> => (isFunction(src) ? derive(src) : src)
+export let signalFrom = <T>(src: SignalOrFn<T>): Signal<T> => (isFunction(src) ? derive(src) : src)
 
 export let signal: Signal.Builder = (currentValue, pong) => {
 	type T = typeof currentValue
@@ -127,7 +126,7 @@ export let signal: Signal.Builder = (currentValue, pong) => {
 	let passive = () => cleanup && (cleanup(), (cleanup = void 0))
 	let active = () => pong && !cleanup && (cleanup = pong(set))
 
-	let self: Signal<T> = {
+	let self: Signal.Mut<T> = {
 		set ref(value) {
 			set(value)
 		},
@@ -148,7 +147,7 @@ export let signal: Signal.Builder = (currentValue, pong) => {
 			}
 		),
 		[FOLLOW$]: (node, ...args) => onConnected$(node, () => self[FOLLOW](...args)[UNFOLLOW]),
-		asReadonly: () => self
+		asImmutable: () => self
 	}
 	signals.add(self)
 	return self
@@ -171,9 +170,9 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
 	}
 }
 
-let deriveCache = new weakMap<Function, Signal<unknown>>()
-export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Readonly<Signal<T>> => {
-	let value = deriveCache.get(fn) as Signal<T> | undefined
+let deriveCache = new weakMap<Function, Signal.Mut<unknown>>()
+export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
+	let value = deriveCache.get(fn) as Signal.Mut<T> | undefined
 	if (!value) {
 		let dynamicDependencies: Set<Signal<unknown>> | undefined
 		let dependencies = staticDependencies ?? (dynamicDependencies = new Set())
@@ -362,7 +361,7 @@ export namespace TagsNS {
 		} & (T extends InputElement
 			? {
 					type?: TInputType
-					"bind:value"?: Signal<InputValueTypeMap<TInputType>>
+					"bind:value"?: Signal.Mut<InputValueTypeMap<TInputType>>
 			  }
 			: {})
 
@@ -385,7 +384,7 @@ export let tagsNS = new Proxy(
 let bindOrSet = <T>(element: Element, value: SignalOrValueOrFn<T>, then: (value: T) => void): void =>
 	isSignalOrFn(value) ? signalFrom(value)[FOLLOW$](element, then, FOLLOW_IMMEDIATE_OPTION) : then(value)
 
-let bindSignalAsValue = <T extends InputElement>(element: T, signal: Signal<InputValueTypeMap<T["type"]>>) => {
+let bindSignalAsValue = <T extends InputElement>(element: T, signal: Signal.Mut<InputValueTypeMap<T["type"]>>) => {
 	onConnected$(element, () => {
 		let onInput = (event: Event) => (signal.ref = (event.target as T)[getInputValueKey(element.type)])
 		element.addEventListener("input", onInput)
