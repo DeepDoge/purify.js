@@ -79,9 +79,9 @@ export namespace Utils {
 		? "symbol"
 		: T extends undefined
 		? "undefined"
+		: T extends ((...args: any) => any)
+		? "function"
 		: T extends object | null
 		? "object"
-		: T extends Fn
-		? "function"
 		: never
 }
