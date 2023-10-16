@@ -18,5 +18,5 @@
 		"noPropertyAccessFromIndexSignature": true,
 		"exactOptionalPropertyTypes": true
 	},
-	"include": ["src"]
+	"include": ["."]
 }

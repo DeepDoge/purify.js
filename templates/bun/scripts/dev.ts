@@ -12,7 +12,7 @@ Bun.spawn(["bun", "build", "--watch", Config.srcApp, "--target", "browser", "--o
 Bun.serve({
 	development: true,
 	async fetch() {
-		const output = await Bun.file(devApp).arrayBuffer()
+		const output = await Bun.file(devApp).text()
 
 		return new Response(
 			await Bun.file(Config.srcHtml)

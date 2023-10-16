@@ -7,12 +7,7 @@
 	"postCreateCommand": "bun install",
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode",
-				"dbaeumer.vscode-eslint",
-				"pushqrdx.inline-html",
-				"EditorConfig.EditorConfig"
-			]
+			"extensions": ["esbenp.prettier-vscode", "pushqrdx.inline-html"]
 		}
 	}
 }

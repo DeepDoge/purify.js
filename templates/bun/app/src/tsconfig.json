@@ -16,7 +16,11 @@
 		"useUnknownInCatchVariables": true,
 		"noUncheckedIndexedAccess": true,
 		"noPropertyAccessFromIndexSignature": true,
-		"exactOptionalPropertyTypes": true
+		"exactOptionalPropertyTypes": true,
+
+		"paths": {
+			"~/*": ["./*"]
+		}
 	},
-	"include": ["src"]
+	"include": ["."]
 }

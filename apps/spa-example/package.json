@@ -1,7 +1,0 @@
-{
-	"type": "module",
-	"name": "spa-example",
-	"devDependencies": {
-		"vite": "^4.4.9"
-	}
-}
