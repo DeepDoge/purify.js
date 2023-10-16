@@ -12,12 +12,8 @@
 		"docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
 		"html:start": "bun run ./apps/html-experiment/src/server.ts",
 		"html:typecheck": "bunx --bun tsc -p ./apps/html-experiment --noEmit",
-		"bun:dev": "bunx --bun bun ./apps/spa-example-with-bun --host",
-		"bun:build": "bunx --bun bun build ./apps/spa-example-with-bun",
-		"bun:preview": "bunx --bun bun preview ./apps/spa-example-with-bun --host",
-		"bun:typecheck": "bunx --bun tsc -p ./apps/spa-example-with-bun --noEmit",
 		"master-ts:typecheck": "bunx --bun tsc -p ./packages/master-ts --noEmit",
-		"test": "bun master-ts:typecheck && bun docs:typecheck && bun bun:typecheck && bun html-experiment:typecheck && bun test"
+		"test": "bun master-ts:typecheck && bun docs:typecheck && bun html:typecheck && bun test"
 	},
 	"devDependencies": {
 		"bun-types": "^1.0.6",

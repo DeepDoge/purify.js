@@ -4,7 +4,7 @@
 	"features": {
 		"ghcr.io/shyim/devcontainers-features/bun:0": {}
 	},
-	"postCreateCommand": "bun install",
+	"postCreateCommand": "bun update",
 	"customizations": {
 		"vscode": {
 			"extensions": [
