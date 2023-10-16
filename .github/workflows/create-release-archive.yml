@@ -72,6 +72,6 @@ jobs:
 
                   if [ -z "$RELEASE_MESSAGE" ]; then
                     # Release message is empty, update it
-                    NEW_MESSAGE="# Install\n\`\`\`\nnpm i -D https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/package.tgz\n\`\`\`\n\`\`\`\nbun i -D https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/package.tgz\n\`\`\`"
+                    NEW_MESSAGE="# Install\n\`\`\`\nnpm i -D https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/package.tgz\n\`\`\`\n\`\`\`\nbun add -d https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/package.tgz\n\`\`\`"
                     curl -X PATCH -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" -H "Content-Type: application/json" -d "{\"body\":\"$NEW_MESSAGE\"}" "https://api.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}"
                   fi
