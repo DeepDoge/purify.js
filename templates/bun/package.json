@@ -10,9 +10,8 @@
 		"start": "bun ./scripts/start.ts"
 	},
 	"devDependencies": {
-		"prettier": "^3.0.3",
-		"prettier-plugin-organize-imports": "^3.2.3",
 		"bun-types": "^1.0.6",
-		"master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.112/package.tgz"
+		"prettier": "^3.0.3",
+		"prettier-plugin-organize-imports": "^3.2.3"
 	}
 }
