@@ -348,7 +348,8 @@ export namespace Template {
 						: never
 			  }
 			: {}) & {
-			[K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends keyof HTMLElementEventMap}`
+			[K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends
+				keyof HTMLElementEventMap}`
 				? (event: HTMLElementEventMap[EventName]) => void
 				: never
 		} & {
