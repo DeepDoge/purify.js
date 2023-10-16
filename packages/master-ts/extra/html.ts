@@ -52,22 +52,26 @@ let hydrate = (node: Node, args: HydrateArgs): Template.Member[] => {
 		return result ? (result.push(document.createTextNode(text.slice(i))), node.remove(), result) : [node]
 	}
 
-	return node instanceof Element
-		? [
-				populate(
-					node.tagName === "X"
-						? (node.remove(), args.v[args.i++] as Element)
-						: (node.attributes.getNamedItem(args.p[args.i]!) && args.i++, node),
-					Array.from(node.childNodes)
-						.map((childNode) => hydrate(childNode, args))
-						.flat(),
-					Array.from(node.attributes).reduce(
-						(attr, { name, value }) => (
-							(attr[name] = value === args.p[args.i] ? args.v[args.i++] : value), attr
-						),
-						{} as Template.Attributes<Element>
-					)
-				)
-		  ]
-		: [node]
+	if (node instanceof Element) {
+		// NOTE: Order here is important, attributes must be processed before children
+		let attributes = Array.from(node.attributes).reduce(
+			(attr, { name, value }) => ((attr[name] = value === args.p[args.i] ? args.v[args.i++] : value), attr),
+			{} as Template.Attributes<Element>
+		)
+		let children = Array.from(node.childNodes)
+			.map((childNode) => hydrate(childNode, args))
+			.flat()
+
+		return [
+			populate(
+				node.tagName === "X"
+					? (node.remove(), args.v[args.i++] as Element)
+					: (node.attributes.getNamedItem(args.p[args.i]!) && args.i++, node),
+				children,
+				attributes
+			)
+		]
+	}
+
+	return [node]
 }
