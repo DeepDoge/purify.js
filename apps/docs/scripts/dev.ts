@@ -1,10 +1,3 @@
-/* 
-	Ok this is not the best way to do this, but it works for now.
-	TODO: Make a better dev server and bundler.
-	TODO: Add auto reload.
-
-	Wait for this: https://bun.sh/blog/bun-bundler#sneak-peek-bun-app
-*/
 import path from "path"
 
 const root = path.resolve(path.join(import.meta.dir, ".."))
@@ -18,31 +11,16 @@ Bun.spawn(["bun", "build", "--watch", path.join(srcDirname, "app.ts"), "--target
 
 Bun.serve({
 	development: true,
-	async fetch(request, server) {
-		const url = new URL(request.url)
+	async fetch() {
+		const output = await Bun.file(path.join(devDirname, "app.js")).arrayBuffer()
 
-		switch (url.pathname) {
-			case "/app.js":
-				return new Response(await Bun.file(path.join(devDirname, "app.js")).arrayBuffer(), {
-					headers: { "Content-Type": "application/javascript" }
-				})
-			case "/":
-				return new Response(
-					await Bun.file(path.join(srcDirname, "index.html"))
-						.text()
-						.then((html) =>
-							html.replace("<!-- js -->", () => `<script type="module" src="/app.js"></script>`)
-						),
-					{
-						headers: {
-							"Content-Type": "text/html"
-						}
-					}
-				)
-			default:
-				return new Response("Not found", {
-					status: 404
-				})
-		}
+		return new Response(
+			await Bun.file(path.join(srcDirname, "index.html"))
+				.text()
+				.then((html) => html.replace("<!-- js -->", () => `<script type="module">${output}</script>`)),
+			{ headers: { "Content-Type": "text/html" } }
+		)
 	}
 })
+
+process.on("SIGINT", process.exit)
