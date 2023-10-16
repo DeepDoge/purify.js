@@ -1,9 +1,8 @@
 {
-	"name": "docs",
 	"type": "module",
+	"name": "docs",
 	"devDependencies": {
 		"@types/prismjs": "^1.26.0",
-		"marked": "^8.0.1",
-		"master-ts": "workspace:packages/master-ts"
+		"marked": "^8.0.1"
 	}
 }
