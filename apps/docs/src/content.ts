@@ -19,14 +19,13 @@ export function Docs() {
 	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, documentStyle)
 
-	dom.append(
-		fragment(
-			html`
-				<div class="content">
-					${parseDocumentation(inlineRaw("./apps/docs/src/doc.ts")).map((item) => renderItem(item))}
-				</div>
-			`
-		)
+	populate(
+		dom,
+		html`
+			<div class="content">
+				${parseDocumentation(inlineRaw("./apps/docs/src/doc.ts")).map((item) => renderItem(item))}
+			</div>
+		`
 	)
 
 	return host
@@ -58,7 +57,7 @@ function renderItem(item: ParseDocumentation.Item, parentId = "", depth = 0): No
 		case "demo": {
 			return fragment(
 				Codeblock(item.content),
-				populate(DemoWrapper(), {}, docNS[item.name as keyof typeof docNS]())
+				populate(DemoWrapper(), [docNS[item.name as keyof typeof docNS]()])
 			)
 		}
 		default:

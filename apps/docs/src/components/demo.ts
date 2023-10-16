@@ -1,4 +1,4 @@
-import { fragment } from "master-ts/core.ts"
+import { populate } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
 import { html } from "master-ts/extra/html.ts"
@@ -10,12 +10,13 @@ export function DemoWrapper() {
 	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	dom.append(
-		fragment(html`
+	populate(
+		dom,
+		html`
 			<div class="content">
 				<slot></slot>
 			</div>
-		`)
+		`
 	)
 
 	return host

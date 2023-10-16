@@ -1,5 +1,5 @@
 import type { Signal } from "master-ts/core.ts"
-import { derive, fragment, onConnected$, signal, tagsNS } from "master-ts/core.ts"
+import { derive, fragment, onConnected$, populate, signal, tagsNS } from "master-ts/core.ts"
 import { awaited } from "master-ts/extra/awaited.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
@@ -44,8 +44,9 @@ export const example = code(() => {
 
 		const counter = signal(0)
 
-		dom.append(
-			fragment(html`
+		populate(
+			dom,
+			html`
 				<div class="hello">
 					<div>Hello</div>
 					<form on:submit=${(e) => (e.preventDefault(), alert(`Hello ${world.ref}`))}>
@@ -58,7 +59,7 @@ export const example = code(() => {
 					<x ${Counter(counter)} class="counter"></x>
 					<div>Double: ${() => counter.ref * 2}</div>
 				</div>
-			`)
+			`
 		)
 
 		return host
@@ -82,12 +83,13 @@ export const example = code(() => {
 		const dom = host.attachShadow({ mode: "open" })
 		dom.adoptedStyleSheets.push(counterStyle)
 
-		dom.append(
-			fragment(html`
+		populate(
+			dom,
+			html`
 				<button on:click=${() => count.ref++}>+</button>
 				${count}
 				<button on:click=${() => count.ref--}>-</button>
-			`)
+			`
 		)
 
 		return host

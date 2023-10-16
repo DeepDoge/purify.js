@@ -1,4 +1,4 @@
-import { fragment, populate, signal } from "master-ts/core.ts"
+import { populate, signal } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { html } from "master-ts/extra/html.ts"
 import { commonStyle } from "../styles.ts"
@@ -9,7 +9,7 @@ const hash = signal(location.hash, (set) => {
 })
 
 export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
-	populate(host, {
+	populate(host, [], {
 		class: "heading",
 		id,
 		"class:active": () => hash.ref === `#${id}`
@@ -25,7 +25,7 @@ export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
 		{ mode: "immediate" }
 	)
 
-	dom.append(fragment(html`<a href=${`#${id}`}>#</a> <slot />`))
+	populate(dom, html`<a href=${`#${id}`}>#</a> <slot />`)
 
 	return host
 }

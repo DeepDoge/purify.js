@@ -1,6 +1,6 @@
 import "./styles.ts"
 
-import { fragment } from "master-ts/core.ts"
+import { populate } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
 import { html } from "master-ts/extra/html.ts"
@@ -14,8 +14,9 @@ function App() {
 	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	dom.append(
-		fragment(html`
+	populate(
+		dom,
+		html`
 			<header>
 				<div class="logo">
 					<img alt="master-ts logo" src=${IPFS.resolve("QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e")} />
@@ -29,7 +30,7 @@ function App() {
 			<main>
 				<x ${Docs()} class="docs"></x>
 			</main>
-		`)
+		`
 	)
 
 	return host

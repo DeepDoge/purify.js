@@ -288,9 +288,9 @@ let toNode = (value: unknown): Node => {
 		: doc.createTextNode(value + "")
 }
 
-export type Fragment = DocumentFragment & { append(...children: TagsNS.AcceptedChild[]): void }
+export type Fragment = DocumentFragment & { append(...children: Template.Member[]): void }
 export namespace Fragment {
-	export type Builder = (...children: TagsNS.AcceptedChild[]) => Fragment
+	export type Builder = (...children: Template.Member[]) => Fragment
 }
 export let fragment: Fragment.Builder = (...children) => {
 	let result = doc.createDocumentFragment()
@@ -323,13 +323,8 @@ let inputValueKeyMap = {
 let getInputValueKey = <Type extends keyof typeof inputValueKeyMap | (string & {})>(type: Type) =>
 	(inputValueKeyMap[type as keyof typeof inputValueKeyMap] ?? VALUE) as never as InputValueKeyMap<Type>
 
-export type TagsNS = {
-	[K in keyof HTMLElementTagNameMap]: TagsNS.Builder<HTMLElementTagNameMap[K]>
-} & {
-	[unknownTag: string]: TagsNS.Builder<HTMLElement>
-}
-export namespace TagsNS {
-	export type AcceptedChild = {} | null
+export namespace Template {
+	export type Member = {} | null
 
 	export type Attributes<
 		T extends Element,
@@ -366,18 +361,22 @@ export namespace TagsNS {
 			: {})
 
 	export type Builder<T extends Element> = {
-		<TInputType extends HTMLInputElement["type"]>(
-			attributes?: Attributes<T, TInputType>,
-			...children: AcceptedChild[]
-		): T
+		<TInputType extends HTMLInputElement["type"]>(attributes?: Attributes<T, TInputType>, ...children: Member[]): T
 	}
+}
+
+export type TagsNS = {
+	[K in keyof HTMLElementTagNameMap]: Template.Builder<HTMLElementTagNameMap[K]>
+} & {
+	[unknownTag: string]: Template.Builder<HTMLElement>
 }
 export let tagsNS = new Proxy(
 	{},
 	{
-		get: (_, tagName: string) =>
-			((...args: Parameters<TagsNS.Builder<HTMLElement>>) =>
-				populate(doc.createElement(tagName), ...args)) as TagsNS.Builder<HTMLElement>
+		get:
+			(_, tagName: string) =>
+			([attributes, ...children]: Parameters<Template.Builder<HTMLElement>> = []) =>
+				populate(doc.createElement(tagName), children, attributes)
 	}
 ) as TagsNS
 
@@ -397,9 +396,9 @@ let bindSignalAsValue = <T extends InputElement>(element: T, signal: Signal.Mut<
 }
 
 export let populate: {
-	<T extends Element>(element: T, attributes?: TagsNS.Attributes<T>, ...children: TagsNS.AcceptedChild[]): T
-	<T extends Node>(node: T, attributes?: Utils.EmptyObject, ...children: TagsNS.AcceptedChild[]): T
-} = <T extends HTMLElement>(element: T, attributes?: TagsNS.Attributes<T>, ...children: TagsNS.AcceptedChild[]): T => (
+	<T extends Element>(element: T, children?: Template.Member[], attributes?: Template.Attributes<T>): T
+	<T extends Node>(node: T, children?: Template.Member[]): T
+} = <T extends HTMLElement>(element: T, children?: Template.Member[], attributes?: Template.Attributes<T>): T => (
 	attributes &&
 		Object.keys(attributes)[FOR_EACH]((key) =>
 			key === (("bind:" + VALUE) as `bind:${typeof VALUE}`)
