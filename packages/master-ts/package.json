@@ -1,7 +1,4 @@
 {
 	"name": "master-ts",
-	"type": "module",
-	"devDependencies": {
-		"bun-types": "^1.0.4"
-	}
+	"type": "module"
 }

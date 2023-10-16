@@ -20,6 +20,7 @@
 		"test": "bun master-ts:typecheck && bun docs:typecheck && bun spa-example:typecheck && bun html-experiment:typecheck && bun test"
 	},
 	"devDependencies": {
+		"bun-types": "^1.0.6",
 		"prettier": "^2.8.8",
 		"prettier-plugin-organize-imports": "^3.2.2",
 		"typescript": "^5.2.2"
