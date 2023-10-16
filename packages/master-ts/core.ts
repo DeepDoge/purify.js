@@ -375,7 +375,7 @@ export let tagsNS = new Proxy(
 	{
 		get:
 			(_, tagName: string) =>
-			([attributes, ...children]: Parameters<Template.Builder<HTMLElement>> = []) =>
+			(...[attributes, ...children]: Parameters<Template.Builder<HTMLElement>>) =>
 				populate(doc.createElement(tagName), children, attributes)
 	}
 ) as TagsNS
