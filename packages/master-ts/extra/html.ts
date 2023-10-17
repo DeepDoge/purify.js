@@ -54,6 +54,7 @@ let hydrate = (node: Node, args: HydrateArgs): Template.Member[] => {
 
 	if (node instanceof Element) {
 		// NOTE: Order here is important, attributes must be processed before children
+		// 		because attributes are always before children in the raw html
 		let attributes = Array.from(node.attributes).reduce(
 			(attr, { name, value }) => ((attr[name] = value === args.p[args.i] ? args.v[args.i++] : value), attr),
 			{} as Template.Attributes<Element>

@@ -8,8 +8,8 @@
 		"noEmit": true,
 		"moduleDetection": "force",
 
-		"allowJs": true, // allow importing `.js` from `.ts`
-		"esModuleInterop": true, // allow default imports for CommonJS modules
+		"allowJs": true,
+		"esModuleInterop": true,
 
 		"skipLibCheck": true,
 		"strict": true,
