@@ -10,6 +10,7 @@
 		"docs:dev": "bun run ./apps/docs/scripts/dev.ts",
 		"docs:build": "bun run ./apps/docs/scripts/build.ts",
 		"docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
+		"empty:build": "bun run ./apps/empty/scripts/build.ts && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/min -x && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/gzip -g -x",
 		"html:start": "bun run ./apps/html-experiment/src/server.ts",
 		"html:typecheck": "bunx --bun tsc -p ./apps/html-experiment --noEmit",
 		"master-ts:typecheck": "bunx --bun tsc -p ./packages/master-ts --noEmit",

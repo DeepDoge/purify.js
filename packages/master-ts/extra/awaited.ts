@@ -1,10 +1,14 @@
-import type { Signal } from "master-ts/core.ts"
-import { signal } from "master-ts/core.ts"
+import type { Signal, SignalOrValueOrFn } from "master-ts/core.ts"
+import { derive, isSignalOrFn, signal, signalFrom } from "master-ts/core.ts"
 
 export let awaited: {
-	<T>(promise: Promise<T>): Signal<T | null>
-	<T, U>(promise: Promise<T>, until: U): Signal<T | U>
-} = (promise: Promise<unknown>, until: unknown = null) => {
+	<T>(promise: SignalOrValueOrFn<Promise<T>>): Signal<T | null>
+	<T, U>(promise: SignalOrValueOrFn<Promise<T>>, until: U): Signal<T | U>
+} = (promise: SignalOrValueOrFn<Promise<unknown>>, until: unknown = null) => {
+	if (isSignalOrFn(promise)) {
+		const promiseSignal = signalFrom(promise)
+		return derive(() => awaited(promiseSignal.ref, until), [promiseSignal])
+	}
 	const promiseSignal = signal(until)
 	promise.then((value) => (promiseSignal.ref = value))
 	return promiseSignal

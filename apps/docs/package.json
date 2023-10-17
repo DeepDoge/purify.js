@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "docs",
+	"name": "@app/docs",
 	"devDependencies": {
 		"@types/prismjs": "^1.26.0",
 		"marked": "^8.0.1"
