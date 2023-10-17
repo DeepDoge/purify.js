@@ -9,7 +9,8 @@ import type { Utils } from "./utils"
 let doc = (typeof window === "undefined" ? null : document) as Document
 let isFunction = (value: any): value is Function => typeof value === "function"
 let isArray = (value: unknown): value is unknown[] => Array.isArray(value)
-let weakMap = WeakMap
+let weakMap = <K extends object, V>() => new WeakMap<K, V>()
+let weakSet = WeakSet
 let startsWith = <const T extends string>(text: string, start: T): text is `${T}${string}` => text.startsWith(start)
 let timeout = setTimeout
 let createComment = (...args: Parameters<typeof document.createComment>) => doc.createComment(...args)
@@ -23,24 +24,32 @@ let REMOVE = "remove" as const
 export namespace Lifecycle {
 	export type OnConnected = () => void | Cleanup
 	export type Cleanup = () => void
-	export type Item = [Lifecycle.OnConnected, Lifecycle.Cleanup] | [Lifecycle.OnConnected]
+	export type Item =
+		| [connected: Lifecycle.OnConnected, cleanup: Lifecycle.Cleanup]
+		| [connected: Lifecycle.OnConnected]
+		| [connected: Lifecycle.OnConnected, void]
 }
 
-let lifecycleListeners = new weakMap<Node, Lifecycle.Item[]>()
+let lifecycleListeners = weakMap<Node, Lifecycle.Item[]>()
 export let onConnected$ = <T extends Node>(node: T, listener: Lifecycle.OnConnected): void => {
-	let lifecycleItem: Lifecycle.Item = [() => (lifecycleItem[1] = listener()!)]
+	let lifecycleItem: Lifecycle.Item = [() => (lifecycleItem[1] = listener())]
 	node.isConnected && lifecycleItem[0]()
 	lifecycleListeners.get(node)?.push(lifecycleItem) ?? lifecycleListeners.set(node, [lifecycleItem])
 }
 
 if (doc) {
-	let callFnOnTree = (node: Node, tupleIndex: Utils.Subtract<Lifecycle.Item["length"], 1>): void => {
-		if (tupleIndex === 0 && !node.isConnected) return
+	let connected = new weakSet<Node>()
+	let callFnOnTree = (node: Node, tupleIndex: 0 | 1): void => {
+		if (!!tupleIndex == !connected.has(node)) return
 		lifecycleListeners.get(node)?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.())
 		Array.from((node as Element).shadowRoot?.childNodes ?? [])[FOR_EACH]((childNode) =>
 			callFnOnTree(childNode, tupleIndex)
 		)
 		Array.from(node.childNodes)[FOR_EACH]((childNode) => callFnOnTree(childNode, tupleIndex))
+
+		// c[i?"delete":"add"](n)
+		// i?c.delete(n):c.add(n)
+		tupleIndex ? connected.delete(node) : connected.add(node)
 	}
 
 	let mutationObserver = new MutationObserver((mutations) =>
@@ -106,7 +115,7 @@ let FOLLOW_MODE_IMMEDIATE = "immediate" as const
 
 let FOLLOW_IMMEDIATE_OPTION = { mode: FOLLOW_MODE_IMMEDIATE } as const satisfies Signal.Follow.Options
 
-let signals = new WeakSet<Signal<unknown>>()
+let signals = new weakSet<Signal<unknown>>()
 
 export let isSignal = (value: any): value is Signal<unknown> => signals.has(value)
 
@@ -170,13 +179,13 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
 	}
 }
 
-let deriveCache = new weakMap<Function, Signal.Mut<unknown>>()
+let deriveCache = weakMap<Function, Signal.Mut<unknown>>()
 export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
 	let value = deriveCache.get(fn) as Signal.Mut<T> | undefined
 	if (!value) {
 		let dynamicDependencies: Set<Signal<unknown>> | undefined
 		let dependencies = staticDependencies ?? (dynamicDependencies = new Set())
-		let dependencyFollows = new weakMap<Signal<unknown>, Signal.Follow>()
+		let dependencyFollows = weakMap<Signal<unknown>, Signal.Follow>()
 
 		let update = () => (value!.ref = callAndCaptureUsedSignals(fn, dynamicDependencies))
 		let scheduled = false
@@ -207,7 +216,7 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
 
 	// TODO: Make all of these smaller
 	type Item = { v: unknown; s: Comment; e: Comment }
-	let itemNodes = new weakMap<ChildNode, Readonly<Item>>()
+	let itemNodes = weakMap<ChildNode, Readonly<Item>>()
 	let createItem = (value: unknown, insertBefore: ChildNode): Readonly<Item> => {
 		let itemStart = createComment("")
 		let itemEnd = createComment("")
