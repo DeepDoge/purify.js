@@ -21,6 +21,9 @@ let nextSibling = (node: ChildNode) => node.nextSibling
 let FOR_EACH = "forEach" as const
 let REMOVE = "remove" as const
 
+let allowNullOrString = <T>(value: T) =>
+	(value === null ? value : value + "") as Utils.Equals<T, null> extends true ? null : string
+
 export namespace Lifecycle {
 	export type OnConnected = () => void | Cleanup
 	export type Cleanup = () => void
@@ -297,11 +300,7 @@ let toNode = (value: unknown): Node => {
 		: doc.createTextNode(value + "")
 }
 
-export type Fragment = DocumentFragment & { append(...children: Template.Member[]): void }
-export namespace Fragment {
-	export type Builder = (...children: Template.Member[]) => Fragment
-}
-export let fragment: Fragment.Builder = (...children) => {
+export let fragment = (...children: Template.Member[]): DocumentFragment => {
 	let result = doc.createDocumentFragment()
 	result.append(...children.map(toNode))
 	return result
@@ -312,7 +311,6 @@ type InputValueKeyMap<Type extends string> = Type extends keyof typeof inputValu
 	? (typeof inputValueKeyMap)[Type]
 	: typeof VALUE
 type InputValueTypeMap<Type extends string> = HTMLInputElement[InputValueKeyMap<Type>]
-
 let CHECKED = "checked" as const
 let VALUE = "value" as const
 let VALUE_AS_NUMBER = (VALUE + "AsNumber") as `${typeof VALUE}AsNumber`
@@ -328,9 +326,8 @@ let inputValueKeyMap = {
 	time: VALUE_AS_DATE,
 	week: VALUE_AS_DATE
 } as const
-
 let getInputValueKey = <Type extends keyof typeof inputValueKeyMap | (string & {})>(type: Type) =>
-	(inputValueKeyMap[type as keyof typeof inputValueKeyMap] ?? VALUE) as never as InputValueKeyMap<Type>
+	(inputValueKeyMap[type as keyof typeof inputValueKeyMap] ?? VALUE) as InputValueKeyMap<Type>
 
 export namespace Template {
 	export type Member = {} | null
@@ -414,14 +411,18 @@ export let populate: {
 			key === (("bind:" + VALUE) as `bind:${typeof VALUE}`)
 				? isSignal(attributes[key])
 					? bindSignalAsValue(element as never, attributes[key] as never)
-					: element.setAttribute(VALUE, attributes[key] + "")
+					: element.setAttribute(VALUE, allowNullOrString(attributes[key]))
 				: startsWith(key, "style:")
-				? bindOrSet(element, attributes[key], (value) => element.style?.setProperty(key.slice(6), value + ""))
+				? bindOrSet(
+						element,
+						attributes[key],
+						(value) => element.style?.setProperty(key.slice(6), allowNullOrString(value))
+				  )
 				: startsWith(key, "class:")
 				? bindOrSet(element, attributes[key], (value) => element.classList.toggle(key.slice(6), !!value))
 				: startsWith(key, "on:")
 				? element.addEventListener(key.slice(3), attributes[key] as EventListener)
-				: bindOrSet(element, attributes[key], (value) => element.setAttribute(key, value + ""))
+				: bindOrSet(element, attributes[key], (value) => element.setAttribute(key, allowNullOrString(value)))
 		),
 	children?.[FOR_EACH]((child) => element.append(toNode(child))),
 	element
