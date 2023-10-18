@@ -21,9 +21,6 @@ let nextSibling = (node: ChildNode) => node.nextSibling
 let FOR_EACH = "forEach" as const
 let REMOVE = "remove" as const
 
-let allowNullOrString = <T>(value: T) =>
-	(value === null ? value : value + "") as Utils.Equals<T, null> extends true ? null : string
-
 export namespace Lifecycle {
 	export type OnConnected = () => void | Cleanup
 	export type Cleanup = () => void
@@ -411,18 +408,20 @@ export let populate: {
 			key === (("bind:" + VALUE) as `bind:${typeof VALUE}`)
 				? isSignal(attributes[key])
 					? bindSignalAsValue(element as never, attributes[key] as never)
-					: element.setAttribute(VALUE, allowNullOrString(attributes[key]))
+					: element.setAttribute(VALUE, attributes[key] + "")
 				: startsWith(key, "style:")
 				? bindOrSet(
 						element,
 						attributes[key],
-						(value) => element.style?.setProperty(key.slice(6), allowNullOrString(value))
+						(value) => element.style?.setProperty(key.slice(6), value === null ? value : value + "")
 				  )
 				: startsWith(key, "class:")
 				? bindOrSet(element, attributes[key], (value) => element.classList.toggle(key.slice(6), !!value))
 				: startsWith(key, "on:")
 				? element.addEventListener(key.slice(3), attributes[key] as EventListener)
-				: bindOrSet(element, attributes[key], (value) => element.setAttribute(key, allowNullOrString(value)))
+				: bindOrSet(element, attributes[key], (value) =>
+						value === null ? element.removeAttribute(key) : element.setAttribute(key, value + "")
+				  )
 		),
 	children?.[FOR_EACH]((child) => element.append(toNode(child))),
 	element
