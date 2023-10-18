@@ -65,7 +65,7 @@ export namespace Utils {
 		: T extends "object"
 		? object | null
 		: T extends "function"
-		? Fn
+		? Function
 		: never
 	export type TypeToTypeString<T> = T extends string
 		? "string"
@@ -79,7 +79,7 @@ export namespace Utils {
 		? "symbol"
 		: T extends undefined
 		? "undefined"
-		: T extends (...args: any) => any
+		: T extends Function
 		? "function"
 		: T extends object | null
 		? "object"

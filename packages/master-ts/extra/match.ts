@@ -84,15 +84,21 @@ type PatternOf<TValue> =
 			[TYPEOF]: Utils.TypeToTypeString<TValue>
 	  }
 
-type Narrow<TValue, TPattern> = INSTANCEOF extends keyof TPattern
-	? TPattern[INSTANCEOF] extends { new (...args: any[]): infer T }
-		? Extract<TValue, T>
-		: never
-	: TYPEOF extends keyof TPattern
-	? TPattern[TYPEOF] extends Utils.TypeString
-		? Extract<TValue, Utils.TypeStringToType<TPattern[TYPEOF]>>
-		: never
-	: TValue & TPattern
+type TypeOfPattern<TPattern> = TPattern extends object
+	? INSTANCEOF extends keyof TPattern
+		? TPattern[INSTANCEOF] extends { new (...args: any[]): infer T }
+			? T
+			: never
+		: TYPEOF extends keyof TPattern
+		? TPattern[TYPEOF] extends Utils.TypeString
+			? Utils.TypeStringToType<TPattern[TYPEOF]>
+			: never
+		: {
+				[K in keyof TPattern]: TypeOfPattern<TPattern[K]>
+		  }
+	: TPattern
+
+type Narrow<TValue, TPattern> = TValue & Extract<TValue, TypeOfPattern<TPattern>>
 
 function isObject(value: any): value is object {
 	return typeof value === "object" && value !== null
@@ -152,14 +158,13 @@ export function match<TValue>(valueSignal: Signal<TValue>): MatchBuilder<TValue>
 			signal<unknown>(undefined, (set) => {
 				let currentIndex = -1
 				return valueSignal.follow(
-					(signalValue) => {
-						if (currentIndex >= 0 && matchPattern(signalValue, cases[currentIndex]!.pattern as never))
-							return
+					(value) => {
+						if (currentIndex >= 0 && matchPattern(value, cases[currentIndex]!.pattern as never)) return
 
 						for (let i = 0; i < cases.length; i++) {
 							if (i === currentIndex) continue
 							const case_ = cases[i]!
-							if (matchPattern(signalValue, case_.pattern as never)) {
+							if (matchPattern(value, case_.pattern as never)) {
 								currentIndex = i
 								return set(case_.then(valueSignal))
 							}

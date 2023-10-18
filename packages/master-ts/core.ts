@@ -327,7 +327,15 @@ let getInputValueKey = <Type extends keyof typeof inputValueKeyMap | (string & {
 	(inputValueKeyMap[type as keyof typeof inputValueKeyMap] ?? VALUE) as InputValueKeyMap<Type>
 
 export namespace Template {
-	export type Member = {} | null
+	export type Member =
+		| string
+		| number
+		| boolean
+		| null
+		| Node
+		| Member[]
+		| (() => Member)
+		| (Signal<unknown> & { ref: Member })
 
 	export type Attributes<
 		T extends Element,

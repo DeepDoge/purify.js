@@ -3,7 +3,7 @@ import { Template, populate, tagsNS } from "master-ts/core.ts"
 let counter = 0n
 let uniqueId = () => Math.random().toString(36).slice(2) + (counter++).toString(36)
 document.createNodeIterator
-export let html = (strings: TemplateStringsArray, ...values: (Template.Member | EventListener)[]) => {
+export let html = (strings: TemplateStringsArray, ...values: HtmlTemplate.Value[]) => {
 	let placeholders: string[] = new Array(values.length)
 	let rawHtml = strings
 		.map((part, i) => part + (i < placeholders.length ? (placeholders[i] = `x${uniqueId()}`) : ""))
@@ -22,6 +22,10 @@ export let html = (strings: TemplateStringsArray, ...values: (Template.Member | 
 	return fn()
 }
 
+export namespace HtmlTemplate {
+	export type Value = Template.Member | EventListener | Function
+}
+
 interface HydrateArgs {
 	/**
 	 * @name placeholders
@@ -30,7 +34,7 @@ interface HydrateArgs {
 	/**
 	 * @name values
 	 */
-	v: Template.Member[]
+	v: HtmlTemplate.Value[]
 	/**
 	 * @name index
 	 */
@@ -46,7 +50,7 @@ let hydrate = (node: Node, args: HydrateArgs): Template.Member[] => {
 		let placeholderIndex: number
 		while (i < text.length && (placeholderIndex = text.indexOf(args.p[args.i]!, i)) >= 0) {
 			result ??= []
-			result.push(document.createTextNode(text.slice(i, placeholderIndex)), args.v[args.i++]!)
+			result.push(document.createTextNode(text.slice(i, placeholderIndex)), args.v[args.i++] as Template.Member)
 			i = placeholderIndex + args.p[args.i - 1]!.length
 		}
 		return result ? (result.push(document.createTextNode(text.slice(i))), node.remove(), result) : [node]
