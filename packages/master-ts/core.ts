@@ -181,32 +181,41 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
 
 let deriveCache = weakMap<Function, Signal.Mut<unknown>>()
 export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
-	let value = deriveCache.get(fn) as Signal.Mut<T> | undefined
-	if (!value) {
-		let dynamicDependencies: Set<Signal<unknown>> | undefined
-		let dependencies = staticDependencies ?? (dynamicDependencies = new Set())
-		let dependencyFollows = weakMap<Signal<unknown>, Signal.Follow>()
+	let value = deriveCache.get(fn)
+	if (value) value as Signal.Mut<T>
 
-		let update = () => (value!.ref = callAndCaptureUsedSignals(fn, dynamicDependencies))
+	if (staticDependencies) {
+		return signal<T>(fn(), (set) => {
+			let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
+			return () => follows.forEach((follow) => follow.unfollow())
+		})
+	}
+
+	return signal<T>(undefined!, (set) => {
+		let toUnfollow: Set<Signal<unknown>> | undefined
+		let follows = weakMap<Signal<unknown>, Signal.Follow>()
+		let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
 		let scheduled = false
 		let schedule = () =>
 			scheduled || ((scheduled = true), timeout(() => scheduled && ((scheduled = false), update())))
+		let update = () => {
+			let toFollow = new Set<Signal<unknown>>()
+			set(callAndCaptureUsedSignals(fn, toFollow))
+			toFollow[FOR_EACH]((signal) => {
+				!follows.has(signal) && follows.set(signal, signal.follow(schedule))
+				toUnfollow?.delete(signal)
+			})
+			unfollow()
+			toUnfollow = toFollow
+		}
 
-		value = signal<T>(
-			undefined!,
-			() => (
-				update(),
-				dependencies[FOR_EACH]((dependency) => dependencyFollows.set(dependency, dependency[FOLLOW](schedule))),
-				() => (
-					(scheduled = false),
-					dependencies[FOR_EACH]((dependency) => dependencyFollows.get(dependency)![UNFOLLOW]())
-				)
-			)
-		)
+		update()
 
-		deriveCache.set(fn, value)
-	}
-	return value
+		return () => {
+			scheduled = false
+			unfollow()
+		}
+	})
 }
 
 let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
