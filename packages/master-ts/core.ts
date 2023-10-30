@@ -397,7 +397,7 @@ export let tagsNS = new Proxy(
 		get:
 			(_, tagName: string) =>
 			(...[attributes, ...children]: Parameters<Template.Builder<HTMLElement>>) =>
-				populate(doc.createElement(tagName), children, attributes)
+				populate(doc.createElement(tagName), attributes, children)
 	}
 ) as TagsNS
 
@@ -417,9 +417,14 @@ let bindSignalAsValue = <T extends InputElement>(element: T, signal: Signal.Mut<
 }
 
 export let populate: {
-	<T extends Element>(element: T, children?: Template.Member[], attributes?: Template.Attributes<T>): T
+	<T extends Element>(element: T, attributes?: Template.Attributes<T>, children?: Template.Member[]): T
 	<T extends Node>(node: T, children?: Template.Member[]): T
-} = <T extends HTMLElement>(element: T, children?: Template.Member[], attributes?: Template.Attributes<T>): T => (
+} = <T extends HTMLElement>(
+	element: T,
+	childrenOrAttributes?: Template.Member[] | Template.Attributes<T>,
+	children?: Template.Member[],
+	attributes = !isArray(childrenOrAttributes) && childrenOrAttributes
+): T => (
 	attributes &&
 		Object.keys(attributes)[FOR_EACH]((key) =>
 			key === (("bind:" + VALUE) as `bind:${typeof VALUE}`)

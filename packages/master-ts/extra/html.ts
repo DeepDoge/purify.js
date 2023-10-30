@@ -72,8 +72,8 @@ let hydrate = (node: Node, args: HydrateArgs): Template.Member[] => {
 				node.tagName === "X"
 					? (node.remove(), args.v[args.i++] as Element)
 					: (node.attributes.getNamedItem(args.p[args.i]!) && args.i++, node),
-				children,
-				attributes
+				attributes,
+				children
 			)
 		]
 	}
