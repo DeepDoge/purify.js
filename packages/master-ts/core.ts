@@ -22,6 +22,7 @@ let FOR_EACH = "forEach" as const
 let REMOVE = "remove" as const
 
 export namespace Lifecycle {
+	export type Connectable = Element | CharacterData
 	export type OnConnected = () => void | Cleanup
 	export type Cleanup = () => void
 	export type Item =
@@ -31,7 +32,7 @@ export namespace Lifecycle {
 }
 
 let lifecycleListeners = weakMap<Node, Lifecycle.Item[]>()
-export let onConnected$ = <T extends Node>(node: T, listener: Lifecycle.OnConnected): void => {
+export let onConnected$ = <T extends Lifecycle.Connectable>(node: T, listener: Lifecycle.OnConnected): void => {
 	let lifecycleItem: Lifecycle.Item = [() => (lifecycleItem[1] = listener())]
 	node.isConnected && lifecycleItem[0]()
 	lifecycleListeners.get(node)?.push(lifecycleItem) ?? lifecycleListeners.set(node, [lifecycleItem])
@@ -84,7 +85,7 @@ export type SignalOrFn<T> = Signal<T> | ((...args: unknown[]) => T)
 export interface Signal<T> {
 	readonly ref: T
 	follow(follower: Signal.Follower<T>, options?: Signal.Follow.Options): Signal.Follow
-	follow$<T extends Node>(node: T, ...args: Parameters<this["follow"]>): void
+	follow$<T extends Lifecycle.Connectable>(node: T, ...args: Parameters<this["follow"]>): void
 	ping(): void
 }
 export namespace Signal {
@@ -93,8 +94,8 @@ export namespace Signal {
 		asImmutable(): Signal<T>
 	}
 
-	export type Builder = <T>(initial: T, pong?: Pong<T>) => Signal.Mut<T>
-	export type Pong<T> = (set: (value: T) => void) => (() => void) | void
+	export type Builder = <T>(initial: T, updater?: Updater<T>) => Signal.Mut<T>
+	export type Updater<T> = (set: (value: T) => void) => (() => void) | void
 
 	export type Follow = { unfollow: Unfollow }
 	export type Unfollow = () => void
@@ -123,7 +124,7 @@ export let isSignalOrFn = <T>(value: any): value is SignalOrFn<T> => isSignal(va
 
 export let signalFrom = <T>(src: SignalOrFn<T>): Signal<T> => (isFunction(src) ? derive(src) : src)
 
-export let signal: Signal.Builder = (currentValue, pong) => {
+export let signal: Signal.Builder = (currentValue, updater) => {
 	type T = typeof currentValue
 
 	let followers = new Set<Signal.Follower<T>>()
@@ -133,7 +134,7 @@ export let signal: Signal.Builder = (currentValue, pong) => {
 
 	let cleanup: (() => void) | void
 	let passive = () => cleanup && (cleanup(), (cleanup = void 0))
-	let active = () => pong && !cleanup && (cleanup = pong(set))
+	let active = () => updater && !cleanup && (cleanup = updater(set))
 
 	let self: Signal.Mut<T> = {
 		set ref(value) {
@@ -382,7 +383,7 @@ export namespace Template {
 			: {})
 
 	export type Builder<T extends Element> = {
-		<TInputType extends HTMLInputElement["type"]>(attributes?: Attributes<T, TInputType>, ...children: Member[]): T
+		<TInputType extends HTMLInputElement["type"]>(attributes?: Attributes<T, TInputType>, children?: Member[]): T
 	}
 }
 
@@ -396,8 +397,8 @@ export let tagsNS = new Proxy(
 	{
 		get:
 			(_, tagName: string) =>
-			(...[attributes, ...children]: Parameters<Template.Builder<HTMLElement>>) =>
-				populate(doc.createElement(tagName), attributes, children)
+			(...args: Parameters<Template.Builder<HTMLElement>>) =>
+				populate(doc.createElement(tagName), ...args)
 	}
 ) as TagsNS
 
@@ -422,8 +423,8 @@ export let populate: {
 } = <T extends HTMLElement>(
 	element: T,
 	childrenOrAttributes?: Template.Member[] | Template.Attributes<T>,
-	children = (isArray(childrenOrAttributes) && childrenOrAttributes) || undefined,
-	attributes = (!isArray(childrenOrAttributes) && childrenOrAttributes) || undefined
+	children = isArray(childrenOrAttributes) && childrenOrAttributes,
+	attributes = !isArray(childrenOrAttributes) && childrenOrAttributes
 ): T => (
 	attributes &&
 		Object.keys(attributes)[FOR_EACH]((key) =>
@@ -445,6 +446,6 @@ export let populate: {
 						value === null ? element.removeAttribute(key) : element.setAttribute(key, value + "")
 				  )
 		),
-	children?.[FOR_EACH]((child) => element.append(toNode(child))),
+	children && element.append(toNode(children)),
 	element
 )

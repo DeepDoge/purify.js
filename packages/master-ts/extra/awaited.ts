@@ -9,8 +9,9 @@ export let awaited: {
 		? signal(
 				until,
 				(set) =>
-					signalFrom(promise).follow((promise) => promise.then((value) => set(value)), { mode: "immediate" })
-						.unfollow
+					signalFrom(promise).follow((promise) => (set(until), promise.then((value) => set(value))), {
+						mode: "immediate"
+					}).unfollow
 		  )
 		: signal(until, (set) => {
 				promise.then((value) => set(value))

@@ -1,5 +1,5 @@
-import type { Signal } from "master-ts/core.ts"
-import { signal } from "master-ts/core.ts"
+import type { Signal, SignalOrFn } from "master-ts/core.ts"
+import { signal, signalFrom } from "master-ts/core.ts"
 import type { Utils } from "../utils"
 
 // TODO: Just copy pasted this from the old master-ts. Make it smaller and better later.
@@ -143,11 +143,12 @@ namespace MatchBuilder {
 		  }
 }
 
-export function match<TValue>(valueSignal: Signal<TValue>): MatchBuilder<TValue> {
+export function match<TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue> {
 	let cases: {
 		pattern: Utils.DeepOptional<TValue>
 		then: (value: Signal<TValue>) => unknown
 	}[] = []
+	let valueSignal = signalFrom(valueSignalOrFn)
 
 	// Builder type is way too funky, so gotta act like it doesn't exist here
 	let self = {

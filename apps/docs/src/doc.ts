@@ -435,17 +435,15 @@ export const htmlTemplateExample = code(() => {
 	const foo = signal(0)
 	const bar = signal(0)
 
-	const example1 = div(
-		{ class: "hello" },
-		div({}, "Foo:", foo),
-		div({}, "Bar:", bar),
-		div(
-			{ class: "actions" },
-			button({ "on:click": () => foo.ref++ }, "Increment Foo"),
+	const example1 = div({ class: "hello" }, [
+		div({}, ["Foo:", foo]),
+		div({}, ["Bar:", bar]),
+		div({ class: "actions" }, [
+			button({ "on:click": () => foo.ref++ }, ["Increment Foo"]),
 			" ",
-			button({ "on:click": () => bar.ref++ }, "Increment Bar")
-		)
-	)
+			button({ "on:click": () => bar.ref++ }, ["Increment Bar"])
+		])
+	])
 
 	const example2 = html`
 		<div class="hello">
