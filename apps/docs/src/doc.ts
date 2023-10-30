@@ -774,7 +774,7 @@ export const matchSignalExample4 = code(() => {
 	return html`
 		<div>
 			${match(foo)
-				.case({ [INSTANCEOF]: Date }, (value) => html`<div>${value}</div>`)
+				.case({ [INSTANCEOF]: Date }, (value) => html`<div>${() => value.ref.toDateString()}</div>`)
 				.default(() => html`<div>Foo is null</div>`)}
 		</div>
 	`
