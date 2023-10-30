@@ -422,8 +422,8 @@ export let populate: {
 } = <T extends HTMLElement>(
 	element: T,
 	childrenOrAttributes?: Template.Member[] | Template.Attributes<T>,
-	children?: Template.Member[],
-	attributes = !isArray(childrenOrAttributes) && childrenOrAttributes
+	children = (isArray(childrenOrAttributes) && childrenOrAttributes) || undefined,
+	attributes = (!isArray(childrenOrAttributes) && childrenOrAttributes) || undefined
 ): T => (
 	attributes &&
 		Object.keys(attributes)[FOR_EACH]((key) =>

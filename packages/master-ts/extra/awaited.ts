@@ -6,7 +6,12 @@ export let awaited: {
 	<T, U>(promise: SignalOrValueOrFn<Promise<T>>, until: U): Signal<T | U>
 } = (promise: SignalOrValueOrFn<Promise<unknown>>, until: unknown = null): Signal<unknown> =>
 	isSignalOrFn(promise)
-		? signal(until, (set) => signalFrom(promise).follow((promise) => promise.then((value) => set(value))).unfollow)
+		? signal(
+				until,
+				(set) =>
+					signalFrom(promise).follow((promise) => promise.then((value) => set(value)), { mode: "immediate" })
+						.unfollow
+		  )
 		: signal(until, (set) => {
 				promise.then((value) => set(value))
 		  })
