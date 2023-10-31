@@ -8,6 +8,8 @@
 
 ## Size ⚡
 
+**master-ts** has a really small bundle size. Yet it still has everything you need to build a SPA.
+
 **min.js:** 4.97kb<br/>
 **min.js.gz:** 2.5kb
 
@@ -187,7 +189,7 @@ It's a complementent to native vanilla browser APIs.
 
 ## Philosophy 🍜
 
--   **Lightweight** - It's only 2.6kb minified and gzipped.
+-   **Lightweight** - It has a really small [bundle size](#Size-⚡).
 -   **Complementary** - It's designed to be complementary to the browser's native APIs, not to replace them.
 -   **Minimal** - It's designed to be minimal, and only focus on SPAs.
 -   **Simple** - It's designed to be simple, and easy to learn.
