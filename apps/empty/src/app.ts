@@ -1,4 +1,3 @@
-import * as core from "master-ts/core"
-import * as extra from "master-ts/extra"
+import * as $ from "master-ts"
 
-console.log(core, extra)
+console.log($)

@@ -8,16 +8,15 @@
 
 ## Size ⚡
 
-**min.js:** 4.84kb<br/>
-**min.js.gz:** 2.45kb
+**min.js:** 4.97kb<br/>
+**min.js.gz:** 2.5kb
 
 ## Todo Examples
 
 Todo example with a functional component and CSS `@scoped`
 
 ```ts
-import { populate, signal, tags } from "master-ts/core"
-import { css, each, sheet } from "master-ts/extra"
+import { css, each, populate, sheet, signal, tags } from "master-ts"
 
 const { div, textarea, style, button } = tags
 

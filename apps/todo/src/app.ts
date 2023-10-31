@@ -1,5 +1,4 @@
-import { populate, signal, tags } from "master-ts/core"
-import { css, each, sheet } from "master-ts/extra"
+import { css, each, populate, sheet, signal, tags } from "master-ts"
 
 const { div, textarea, style, button } = tags
 

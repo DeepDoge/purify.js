@@ -182,43 +182,44 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
     }
 }
 
+export let effect$ = (node: Lifecycle.Connectable, ...args: Parameters<typeof derive>): void =>
+    derive(...args).follow$(node, () => {})
+
 let deriveCache = weakMap<Function, Signal.Mut<unknown>>()
 export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
     let value = deriveCache.get(fn)
-    if (value) value as Signal.Mut<T>
+    return value
+        ? (value as Signal<T>)
+        : staticDependencies
+        ? signal<T>(fn(), (set) => {
+              let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
+              return () => follows.forEach((follow) => follow.unfollow())
+          })
+        : signal<T>(undefined!, (set) => {
+              let toUnfollow: Set<Signal<unknown>> | undefined
+              let follows = weakMap<Signal<unknown>, Signal.Follow>()
+              let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
+              let scheduled = false
+              let schedule = () =>
+                  scheduled || ((scheduled = true), timeout(() => scheduled && ((scheduled = false), update())))
+              let update = () => {
+                  let toFollow = new Set<Signal<unknown>>()
+                  set(callAndCaptureUsedSignals(fn, toFollow))
+                  toFollow[FOR_EACH]((signal) => {
+                      !follows.has(signal) && follows.set(signal, signal.follow(schedule))
+                      toUnfollow?.delete(signal)
+                  })
+                  unfollow()
+                  toUnfollow = toFollow
+              }
 
-    if (staticDependencies) {
-        return signal<T>(fn(), (set) => {
-            let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
-            return () => follows.forEach((follow) => follow.unfollow())
-        })
-    }
+              update()
 
-    return signal<T>(undefined!, (set) => {
-        let toUnfollow: Set<Signal<unknown>> | undefined
-        let follows = weakMap<Signal<unknown>, Signal.Follow>()
-        let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
-        let scheduled = false
-        let schedule = () =>
-            scheduled || ((scheduled = true), timeout(() => scheduled && ((scheduled = false), update())))
-        let update = () => {
-            let toFollow = new Set<Signal<unknown>>()
-            set(callAndCaptureUsedSignals(fn, toFollow))
-            toFollow[FOR_EACH]((signal) => {
-                !follows.has(signal) && follows.set(signal, signal.follow(schedule))
-                toUnfollow?.delete(signal)
-            })
-            unfollow()
-            toUnfollow = toFollow
-        }
-
-        update()
-
-        return () => {
-            scheduled = false
-            unfollow()
-        }
-    })
+              return () => {
+                  scheduled = false
+                  unfollow()
+              }
+          })
 }
 
 let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {

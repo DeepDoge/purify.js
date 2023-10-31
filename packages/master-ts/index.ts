@@ -1,4 +1,5 @@
 export * from "./awaited"
+export * from "./core"
 export * from "./css"
 export * from "./custom-tags"
 export * from "./defer"
