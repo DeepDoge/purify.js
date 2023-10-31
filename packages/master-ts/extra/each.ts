@@ -19,7 +19,9 @@ export let each = <T>(arr: SignalOrFn<T[]>) => ({
                                         toRemove.delete(key)
                                         const [result, valueSignal, indexSignal] = cache.get(key)!
                                         valueSignal.ref = value
+                                        valueSignal.ping()
                                         indexSignal.ref = index
+                                        indexSignal.ping()
                                         return result
                                     }
                                     const valueSignal = signal(value)

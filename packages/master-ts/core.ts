@@ -365,10 +365,10 @@ export namespace Template {
             : {}) & {
             [K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends
                 keyof HTMLElementEventMap}`
-                ? (event: HTMLElementEventMap[EventName]) => void
+                ? ((event: HTMLElementEventMap[EventName] & { target: T }) => void) | Function
                 : never
         } & {
-            [K in `on:${string}`]?: (event: Event) => void
+            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
         } & (T extends InputElement
             ? {
                   type?: TInputType
@@ -378,15 +378,16 @@ export namespace Template {
 
     export type Builder<T extends Element> = {
         <TInputType extends HTMLInputElement["type"]>(attributes?: Attributes<T, TInputType>, children?: Member[]): T
+        (children?: Member[]): T
     }
 }
 
-export type TagsNS = {
+export type Tags = {
     [K in keyof HTMLElementTagNameMap]: Template.Builder<HTMLElementTagNameMap[K]>
 } & {
     [unknownTag: string]: Template.Builder<HTMLElement>
 }
-export let $ = new Proxy(
+export let tags = new Proxy(
     {},
     {
         get:
@@ -394,7 +395,7 @@ export let $ = new Proxy(
             (...args: Parameters<Template.Builder<HTMLElement>>) =>
                 populate(doc.createElement(tagName), ...args)
     }
-) as TagsNS
+) as Tags
 
 let bindOrSet = <T>(element: Element, value: SignalOrValueOrFn<T>, then: (value: T) => void): void =>
     isSignalOrFn(value) ? signalFrom(value)[FOLLOW$](element, then, FOLLOW_IMMEDIATE_OPTION) : then(value)

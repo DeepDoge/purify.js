@@ -8,183 +8,140 @@
 
 ## Size ⚡
 
-**min.js:** 5.72kb<br/>
-**min.js.gz:** 2.83kb
+**min.js:** 4.84kb<br/>
+**min.js.gz:** 2.45kb
 
 ## Todo Examples
 
-### Todo 1
-
-Todo example using fragments and CSS `@scoped`
+Todo example with a functional component and CSS `@scoped`
 
 ```ts
-import { $, fragment, signal } from "master-ts/core"
-import { css, each } from "master-ts/extra"
+import { populate, signal, tags } from "master-ts/core"
+import { css, each, sheet } from "master-ts/extra"
 
-const { div, label, input, textarea } = $
+const { div, textarea, style, button } = tags
 
-export function Todo1() {
+export function Todo() {
+    const dom = div()
+
+    type TodoItem = { text: string; completed: boolean }
+
     const todos = signal(
-        new Set([
-            { text: signal("Learn about Web Components"), completed: signal(true) },
-            { text: signal("Learn about native JS APIs"), completed: signal(false) },
-            { text: signal("Learn master-ts"), completed: signal(false) },
-            { text: signal("Build an app"), completed: signal(false) }
+        new Set<TodoItem>([
+            { text: "Learn about Web Components", completed: true },
+            { text: "Learn about native JS APIs", completed: false },
+            { text: "Learn master-ts", completed: false },
+            { text: "Build an app", completed: false }
         ])
     )
 
-    return fragment(
+    const newTodoText = signal("Buy Eggs")
+    function addTodo() {
+        todos.ref.add({ text: newTodoText.ref, completed: false })
+        todos.ping()
+        newTodoText.ref = ""
+    }
+
+    function removeTodo(todo: TodoItem) {
+        todos.ref.delete(todo)
+        todos.ping()
+    }
+
+    function toggleTodo(todo: TodoItem) {
+        todo.completed = !todo.completed
+        todos.ping()
+    }
+
+    todos.follow$(dom, (todos) => console.log("Todos changed", todos))
+
+    populate(dom, [
+        div({ class: "add" }, [textarea({ "bind:value": newTodoText }), button({ "on:click": addTodo }, ["Add Todo"])]),
+
         div({ class: "items" }, [
             each(() => Array.from(todos.ref))
                 .key((todo) => todo)
-                .as(
-                    (todo) => () =>
-                        label({ class: "item", "class:completed": todo.ref.completed }, [
-                            input({ type: "checkbox", "bind:value": todo.ref.completed }),
-                            textarea({ type: "text", "bind:value": todo.ref.text })
-                        ])
-                ),
+                .as((todo) =>
+                    div({ class: "item" }, [
+                        div({ class: "toggle", role: "button", "on:click": () => toggleTodo(todo.ref) }, [
+                            div([() => (todo.ref.completed ? "✅" : "🔲")]),
+                            div([() => todo.ref.text])
+                        ]),
+                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"])
+                    ])
+                )
+        ]),
+        style([
             css`
                 @scope {
                     :scope {
+                        display: grid;
+                        gap: 1em;
+                        grid-template-columns: minmax(0, 25em);
+                        justify-content: center;
+                    }
+
+                    .add {
+                        display: grid;
+                        gap: 1em;
+
+                        & textarea {
+                            resize: vertical;
+                            min-height: 6ch;
+                            font: inherit;
+                            padding: 0.5em;
+                        }
+                    }
+
+                    .items {
                         display: grid;
                         gap: 1em;
                     }
 
                     .item {
                         display: grid;
-                        grid-template-columns: auto 1fr;
-                        gap: 1em;
-                    }
+                        grid-template-columns: auto 1fr auto;
+                        gap: 0.5em;
 
-                    textarea {
-                        resize: vertical;
+                        & .toggle {
+                            cursor: pointer;
+                            display: grid;
+                            grid-template-columns: subgrid;
+                            grid-column: span 2;
+                        }
                     }
                 }
-            `.toStyle()
-        ])
-    )
-}
-```
-
-### Todo 2
-
-Todo example using class based custom element with shadow DOM
-
-```ts
-import { $, signal } from "master-ts/core"
-import { css, each } from "master-ts/extra"
-
-const { div, label, input, textarea } = $
-
-export class Todo2 extends HTMLElement {
-    readonly shadowRoot = this.attachShadow({ mode: "open" })
-
-    readonly #todos = signal(
-        new Set([
-            { text: signal("Learn about Web Components"), completed: signal(true) },
-            { text: signal("Learn about native JS APIs"), completed: signal(false) },
-            { text: signal("Learn master-ts"), completed: signal(false) },
-            { text: signal("Build an app"), completed: signal(false) }
-        ])
-    )
-
-    constructor() {
-        super()
-        this.shadowRoot.adoptedStyleSheets.push(Todo2.style)
-        this.shadowRoot.append(
-            div({ class: "items" }, [
-                each(() => Array.from(this.#todos.ref))
-                    .key((todo) => todo)
-                    .as(
-                        (todo) => () =>
-                            label({ class: "item", "class:completed": todo.ref.completed }, [
-                                input({ type: "checkbox", "bind:value": todo.ref.completed }),
-                                textarea({ type: "text", "bind:value": todo.ref.text })
-                            ])
-                    )
-            ])
-        )
-    }
-
-    static style = css`
-        .items {
-            display: grid;
-            gap: 1em;
-        }
-
-        .item {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 1em;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-    `.toSheet()
-}
-customElements.define("x-todo2", Todo2)
-```
-
-### Todo 3
-
-Todo example using functional component with shadow DOM
-
-```ts
-import { $, populate, signal } from "master-ts/core"
-import { css, defineCustomTag, each } from "master-ts/extra"
-
-const { div, label, input, textarea } = $
-
-const todo3Tag = defineCustomTag("x-todo3")
-export function Todo3() {
-    const host = todo3Tag()
-    const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(todo3Style)
-
-    const todos = signal(
-        new Set([
-            { text: signal("Learn about Web Components"), completed: signal(true) },
-            { text: signal("Learn about native JS APIs"), completed: signal(false) },
-            { text: signal("Learn master-ts"), completed: signal(false) },
-            { text: signal("Build an app"), completed: signal(false) }
-        ])
-    )
-
-    populate(dom, [
-        div({ class: "items" }, [
-            each(() => Array.from(todos.ref))
-                .key((todo) => todo)
-                .as(
-                    (todo) => () =>
-                        label({ class: "item", "class:completed": todo.ref.completed }, [
-                            input({ type: "checkbox", "bind:value": todo.ref.completed }),
-                            textarea({ type: "text", "bind:value": todo.ref.text })
-                        ])
-                )
+            `
         ])
     ])
 
-    return host
+    return dom
 }
 
-const todo3Style = css`
-    .items {
-        display: grid;
-        gap: 1em;
-    }
+document.adoptedStyleSheets.push(
+    sheet(css`
+        :root {
+            font-family: sans-serif;
+            font-size: 2rem;
+        }
 
-    .item {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 1em;
-    }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
 
-    textarea {
-        resize: vertical;
-    }
-`.toSheet()
+        textarea,
+        input,
+        button,
+        select,
+        option,
+        optgroup {
+            font: inherit;
+        }
+    `)
+)
+
+document.body.append(Todo())
 ```
 
 ## Installation 🍙
@@ -194,6 +151,8 @@ const todo3Style = css`
 ## Documentation 🍱
 
 Work in progress
+
+**OUTDATED**
 
 [Currently Available Unfinished Documentation](https://ipfs.io/ipfs/QmQCSG75nx3y8CyrTiBkP6d75BGZKAHQ6Ex4JgNNrBsmwL)
 
