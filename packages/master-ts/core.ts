@@ -234,7 +234,7 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
 
 	// TODO: make this not use an array, use the DOM alone
 	let items: Item[] = []
-	let createItem = (value: unknown, insertBefore?: number) => {
+	let createItem = (value: unknown, insertBefore: number = -1) => {
 		let itemStart = createComment(EMPTY_STRING)
 		let itemEnd = createComment(EMPTY_STRING)
 
@@ -244,8 +244,9 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
 			e: itemEnd
 		}
 
-		insertBefore !== void 0
-			? (items[insertBefore]!.s.before(itemStart, toNode(value), itemEnd), items.splice(insertBefore, 0, self))
+		let itemBefore = items[insertBefore]
+		itemBefore
+			? (itemBefore.s.before(itemStart, toNode(value), itemEnd), items.splice(insertBefore, 0, self))
 			: (items.push(self), end.before(itemStart, toNode(value), itemEnd))
 
 		return self
