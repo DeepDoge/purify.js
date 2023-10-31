@@ -13,6 +13,10 @@
 **min.js:** 4.97kb<br/>
 **min.js.gz:** 2.5kb
 
+<p align="center">
+    <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmPm7WTZ92HPCmLkFwdbUd5CEJDTkEWGqYQftMjBPUiX7B" />
+</p>
+
 ## Todo Example
 
 Todo example with a functional component and CSS `@scoped`
