@@ -16,7 +16,7 @@
 Todo example with a functional component and CSS `@scoped`
 
 ```ts
-import { css, each, populate, sheet, signal, tags } from "master-ts"
+import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
 
 const { div, textarea, style, button } = tags
 
@@ -51,7 +51,8 @@ export function Todo() {
         todos.ping()
     }
 
-    todos.follow$(dom, (todos) => console.log("Todos changed", todos))
+    effect$(dom, () => console.log("Effect: Todos changed", todos.ref)) // async
+    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos)) // sync
 
     populate(dom, [
         div({ class: "add" }, [textarea({ "bind:value": newTodoText }), button({ "on:click": addTodo }, ["Add Todo"])]),

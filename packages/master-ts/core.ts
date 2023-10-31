@@ -182,9 +182,6 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
     }
 }
 
-export let effect$ = (node: Lifecycle.Connectable, ...args: Parameters<typeof derive>): void =>
-    derive(...args).follow$(node, () => {})
-
 let deriveCache = weakMap<Function, Signal.Mut<unknown>>()
 export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
     let value = deriveCache.get(fn)
