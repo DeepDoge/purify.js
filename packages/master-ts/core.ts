@@ -75,8 +75,9 @@ if (doc) {
 
     let ATTACH_SHADOW = "attachShadow" as const
     observe(doc)
-    let elementAttachShadow = Element.prototype[ATTACH_SHADOW]
-    Element.prototype[ATTACH_SHADOW] = function (this, ...args) {
+    let elementPrototype = Element.prototype
+    let elementAttachShadow = elementPrototype[ATTACH_SHADOW]
+    elementPrototype[ATTACH_SHADOW] = function (this, ...args) {
         return observe(elementAttachShadow.apply(this, args))
     }
 }

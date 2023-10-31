@@ -1,12 +1,4 @@
-import type { Signal } from "master-ts/core.ts"
-import { $, derive, fragment, onConnected$, populate, signal } from "master-ts/core.ts"
-import { awaited } from "master-ts/extra/awaited.ts"
-import { css } from "master-ts/extra/css.ts"
-import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
-import { defer } from "master-ts/extra/defer.ts"
-import { each } from "master-ts/extra/each.ts"
-import { html } from "master-ts/extra/html.ts"
-import { INSTANCEOF, TYPEOF, match } from "master-ts/extra/match.ts"
+import { populate, signal, tags, type Signal } from "master-ts/core.ts"
 import { Utils } from "master-ts/utils"
 
 function code<T extends Utils.Fn>(block: T): () => ReturnType<T> {
@@ -33,7 +25,7 @@ Let's first get an idea of how a code that uses **master-ts** looks like:
 */
 
 export const example = code(() => {
-    const { div } = $
+    const { div } = tags
 
     function Hello() {
         const host = div()

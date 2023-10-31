@@ -1,6 +1,6 @@
-import { css } from "master-ts/extra/css.ts"
+import { css, sheet } from "master-ts"
 
-export const commonSheet = css`
+export const commonSheet = sheet(css`
     *,
     *::before,
     *::after {
@@ -10,10 +10,10 @@ export const commonSheet = css`
     img {
         max-width: 100%;
     }
-`.toSheet()
+`)
 
 document.adoptedStyleSheets.push(
-    css`
+    sheet(css`
         :root {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.5;
@@ -31,5 +31,5 @@ document.adoptedStyleSheets.push(
             --body: #1c1b22;
             background-color: var(--body);
         }
-    `.toSheet()
+    `)
 )

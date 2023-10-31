@@ -1,5 +1,4 @@
-import { $, Signal, signal } from "master-ts/core"
-import { css } from "master-ts/extra/css"
+import { Signal, css, sheet, signal, tags } from "master-ts"
 import { WeakCache } from "./utils/weakCache"
 
 const responseCache = new WeakCache<string, Signal.Mut<string | null>>()
@@ -29,11 +28,11 @@ function invalidateAll(selector: string) {
     Array.from(document.querySelectorAll(selector)).forEach((element) => element.replaceWith(element.cloneNode(true)))
 }
 
-const sheet = css`
+const style = sheet(css`
     :host {
         display: contents;
     }
-`.toSheet()
+`)
 
 customElements.define(
     "mx-view",
@@ -41,8 +40,8 @@ customElements.define(
         constructor() {
             super()
             const dom = this.attachShadow({ mode: "open" })
-            dom.adoptedStyleSheets.push(sheet)
-            dom.append($.slot())
+            dom.adoptedStyleSheets.push(style)
+            dom.append(tags.slot())
 
             const key = this.getAttribute("key")
             if (!key) return
