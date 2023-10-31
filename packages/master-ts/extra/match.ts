@@ -100,14 +100,12 @@ type TypeOfPattern<TPattern> = TPattern extends object
 
 type Narrow<TValue, TPattern> = TValue & Extract<TValue, TypeOfPattern<TPattern>>
 
-function isObject(value: any): value is object {
-	return typeof value === "object" && value !== null
-}
+let isObject = (value: any): value is object => typeof value === "object" && value !== null
 
-function matchPattern<TValue, const TPattern extends PatternOf<TValue>>(
+let matchPattern = <TValue, const TPattern extends PatternOf<TValue>>(
 	value: TValue,
 	pattern: TPattern
-): value is TValue & TPattern {
+): value is TValue & TPattern => {
 	if (!isObject(pattern)) return value === (pattern as never)
 
 	if (TYPEOF in pattern) {
@@ -143,14 +141,13 @@ namespace MatchBuilder {
 		  }
 }
 
-export function match<TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue> {
+export let match = <TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue> => {
 	let cases: {
 		pattern: Utils.DeepOptional<TValue>
 		then: (value: Signal<TValue>) => unknown
 	}[] = []
 	let valueSignal = signalFrom(valueSignalOrFn)
 
-	// Builder type is way too funky, so gotta act like it doesn't exist here
 	let self = {
 		case: (pattern: Utils.DeepOptional<TValue>, then: (value: Signal<TValue>) => unknown) => (
 			cases.push({ pattern, then }), self
@@ -163,11 +160,12 @@ export function match<TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder
 						if (currentIndex >= 0 && matchPattern(value, cases[currentIndex]!.pattern as never)) return
 
 						for (let i = 0; i < cases.length; i++) {
-							if (i === currentIndex) continue
-							const case_ = cases[i]!
-							if (matchPattern(value, case_.pattern as never)) {
-								currentIndex = i
-								return set(case_.then(valueSignal))
+							if (i !== currentIndex) {
+								const case_ = cases[i]!
+								if (matchPattern(value, case_.pattern as never)) {
+									currentIndex = i
+									return set(case_.then(valueSignal))
+								}
 							}
 						}
 						currentIndex = -1
@@ -178,6 +176,5 @@ export function match<TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder
 				).unfollow
 			})
 	}
-	// Yup, this is a hack, type is way to funky to get right
 	return self as never
 }

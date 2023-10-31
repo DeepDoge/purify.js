@@ -36,11 +36,10 @@ function renderItem(item: ParseDocumentation.Item, parentId = "", depth = 0): No
 	switch (item.type) {
 		case "region": {
 			const id = `${parentId}/${item.name.replace(/\s+/g, "-").toLowerCase()}`
-			return section(
-				{ class: "region" },
-				Heading(tagsNS[`h${1 + depth}`]!({}, item.name) as HTMLHeadingElement, id),
-				...item.items.map((item) => renderItem(item, id, depth + 1))
-			)
+			return section({ class: "region" }, [
+				Heading(tagsNS[`h${1 + depth}`]!({}, [item.name]) as HTMLHeadingElement, id),
+				item.items.map((item) => renderItem(item, id, depth + 1))
+			])
 		}
 		case "comment": {
 			const el = markdownTag()

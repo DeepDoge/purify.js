@@ -14,12 +14,14 @@ let weakSet = WeakSet
 let startsWith = <const T extends string>(text: string, start: T): text is `${T}${string}` => text.startsWith(start)
 let timeout = setTimeout
 let createComment = (...args: Parameters<typeof document.createComment>) => doc.createComment(...args)
-let clearBetween = (start: Node, end: Node) => {
+let clearBetween = (start: ChildNode, end: ChildNode, inclusive = false) => {
 	while (start.nextSibling !== end) start.nextSibling![REMOVE]()
+	inclusive && (end[REMOVE](), start[REMOVE]())
 }
-let nextSibling = (node: ChildNode) => node.nextSibling
 let FOR_EACH = "forEach" as const
 let REMOVE = "remove" as const
+let LENGTH = "length" as const
+let EMPTY_STRING = "" as const
 
 export namespace Lifecycle {
 	export type Connectable = Element | CharacterData
@@ -220,74 +222,65 @@ export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknow
 }
 
 let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
-	let start = createComment("")
-	let end = createComment("")
+	let start = createComment(EMPTY_STRING)
+	let end = createComment(EMPTY_STRING)
 	let signalFragment = fragment(start, end)
 
-	// TODO: Make all of these smaller
-	type Item = { v: unknown; s: Comment; e: Comment }
-	let itemNodes = weakMap<ChildNode, Readonly<Item>>()
-	let createItem = (value: unknown, insertBefore: ChildNode): Readonly<Item> => {
-		let itemStart = createComment("")
-		let itemEnd = createComment("")
+	type Item = Readonly<{
+		v: unknown
+		s: Comment
+		e: Comment
+	}>
+
+	// TODO: make this not use an array, use the DOM alone
+	let items: Item[] = []
+	let createItem = (value: unknown, insertBefore?: number) => {
+		let itemStart = createComment(EMPTY_STRING)
+		let itemEnd = createComment(EMPTY_STRING)
 
 		let self: Item = {
 			v: value,
 			s: itemStart,
 			e: itemEnd
 		}
-		itemNodes.set(itemStart, self)
-		insertBefore.before(itemStart, toNode(value), itemEnd)
+
+		insertBefore !== void 0
+			? (items[insertBefore]!.s.before(itemStart, toNode(value), itemEnd), items.splice(insertBefore, 0, self))
+			: (items.push(self), end.before(itemStart, toNode(value), itemEnd))
 
 		return self
 	}
 
-	let removeItem = (item: Item) => {
-		clearBetween(item.s, item.e)
-		item.s[REMOVE]()
-		item.e[REMOVE]()
+	let removeItem = (index: number) => {
+		let item = items[index]!
+		clearBetween(item.s, item.e, true)
+		items.splice(index, 1)
 	}
 
-	// TODO: Someone help me make this shorter and more elegant
-	// TODO: Welp
 	let oldValue: unknown
 	signalFrom(signalOrFn)[FOLLOW$](
 		start,
 		(value: T) => {
-			if (!isArray(oldValue) || !isArray(value)) clearBetween(start, end)
+			if (!isArray(oldValue) || !isArray(value)) clearBetween(start, end), (items[LENGTH] = 0)
 			oldValue = value
-
 			if (!isArray(value)) return end.before(toNode(value))
 
-			let currentNode = nextSibling(start)!
-			nextValue: for (let currentIndex = 0; currentIndex < value.length; currentIndex++) {
+			for (let currentIndex = 0; currentIndex < value[LENGTH]; currentIndex++) {
+				let currentItem = items[currentIndex]
+				let nextItem = items[currentIndex + 1]
 				let currentValue = value[currentIndex]
-				let nextIndex = currentIndex + 1
 
-				while (currentNode !== end) {
-					let currentItem = itemNodes.get(currentNode)
-					if (currentItem) {
-						if (currentValue === currentItem.v) currentNode = nextSibling(currentItem.e)!
-						else {
-							let nextItem = itemNodes.get(nextSibling(currentItem.e)!)
-							if (nextItem && currentValue === nextItem.v) {
-								removeItem(currentItem)
-								currentNode = nextSibling(nextItem.e)!
-							} else {
-								let newItem = createItem(currentValue, currentItem.s)
-								nextIndex >= value.length || value[nextIndex] !== currentItem.v
-									? (removeItem(currentItem), (currentNode = nextSibling(newItem.e)!))
-									: ((currentIndex = nextIndex), (currentNode = nextSibling(currentItem.e)!))
-							}
-						}
-						continue nextValue
-					}
-					currentNode = nextSibling(currentNode)!
-				}
-				createItem(currentValue, end)
+				!currentItem
+					? createItem(currentValue)
+					: currentValue !== currentItem.v &&
+					  (nextItem && currentValue === nextItem.v
+							? removeItem(currentIndex)
+							: currentIndex + 1 < value[LENGTH] && value[currentIndex + 1] === currentItem.v
+							? createItem(currentValue, currentIndex++)
+							: (removeItem(currentIndex), createItem(currentValue, currentIndex)))
 			}
-
-			currentNode !== end && (clearBetween(currentNode, end), currentNode[REMOVE]())
+			clearBetween(items[value[LENGTH] - 1]?.e ?? start, end)
+			items.splice(value[LENGTH])
 		},
 		FOLLOW_IMMEDIATE_OPTION
 	)
@@ -304,7 +297,7 @@ let toNode = (value: unknown): Node => {
 		? value
 		: isSignalOrFn(value)
 		? bindSignalAsFragment(value)
-		: doc.createTextNode(value + "")
+		: doc.createTextNode(value + EMPTY_STRING)
 }
 
 export let fragment = (...children: Template.Member[]): DocumentFragment => {
@@ -422,28 +415,31 @@ export let populate: {
 	<T extends Node>(node: T, children?: Template.Member[]): T
 } = <T extends HTMLElement>(
 	element: T,
-	childrenOrAttributes?: Template.Member[] | Template.Attributes<T>,
-	children = isArray(childrenOrAttributes) && childrenOrAttributes,
-	attributes = !isArray(childrenOrAttributes) && childrenOrAttributes
+	_childrenOrAttributes?: Template.Member[] | Template.Attributes<T>,
+	_children?: Template.Member[],
+	[children, attributes] = isArray(_childrenOrAttributes)
+		? [_childrenOrAttributes]
+		: [_children, _childrenOrAttributes]
 ): T => (
 	attributes &&
 		Object.keys(attributes)[FOR_EACH]((key) =>
 			key === (("bind:" + VALUE) as `bind:${typeof VALUE}`)
 				? isSignal(attributes[key])
 					? bindSignalAsValue(element as never, attributes[key] as never)
-					: element.setAttribute(VALUE, attributes[key] + "")
+					: element.setAttribute(VALUE, attributes[key] + EMPTY_STRING)
 				: startsWith(key, "style:")
 				? bindOrSet(
 						element,
 						attributes[key],
-						(value) => element.style?.setProperty(key.slice(6), value === null ? value : value + "")
+						(value) =>
+							element.style?.setProperty(key.slice(6), value === null ? value : value + EMPTY_STRING)
 				  )
 				: startsWith(key, "class:")
 				? bindOrSet(element, attributes[key], (value) => element.classList.toggle(key.slice(6), !!value))
 				: startsWith(key, "on:")
 				? element.addEventListener(key.slice(3), attributes[key] as EventListener)
 				: bindOrSet(element, attributes[key], (value) =>
-						value === null ? element.removeAttribute(key) : element.setAttribute(key, value + "")
+						value === null ? element.removeAttribute(key) : element.setAttribute(key, value + EMPTY_STRING)
 				  )
 		),
 	children && element.append(toNode(children)),

@@ -6,33 +6,10 @@
 	native APIs. Small yet powerful. Simple yet still useful.
 </p>
 
-## Features ⚡
+## Size ⚡
 
-**min.js:** 5.76kb<br/>
-**min.js.gz:** 2.87kb
-
-### Core
-
-**min.js:** 3.23kb<br/>
-**min.js.gz:** 1.73kb
-
--   Signals with `signal` and `derive` - all of reactivity is possible thanks to signals
--   Templating with `TagsNS` - makes it easier to build dom elements within TS, with support for signals
--   `populate` - Easily populate dom elements with children, attributes and directives such as `style:*`, `class:*`, `on:*` and `bind:value`, with support for signals
--   `onConnected$` - Get a callback when ever a Node (Element, Comment, Text, ...) gets connected/disconnected to/from dom.
-
-### Extras
-
-**min.js:** 2.53kb<br/>
-**min.js.gz:** 1.14kb
-
--   Templating tags `html` and `css` - write HTML and CSS within TS
--   `defer` - Deferring signals
--   `each` - Map a array signal while memoizing results with a key for minimum DOM change
--   `awaited` - Await a promise using signals
--   `match` - Pattern matching for both signals and values
--   `keyedCache` - Memoizing anything else you want using keys
--   `defineCustomTag` - Shortcut to define empty custom elements easily
+**min.js:** 5.72kb<br/>
+**min.js.gz:** 2.83kb
 
 ## Installation 🍙
 

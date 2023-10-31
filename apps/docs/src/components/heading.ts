@@ -9,7 +9,7 @@ const hash = signal(location.hash, (set) => {
 })
 
 export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
-	populate(host, [], {
+	populate(host, {
 		class: "heading",
 		id,
 		"class:active": () => hash.ref === `#${id}`

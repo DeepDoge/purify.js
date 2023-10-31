@@ -2,7 +2,14 @@ import { Template, populate, tagsNS } from "master-ts/core.ts"
 
 let counter = 0n
 let uniqueId = () => Math.random().toString(36).slice(2) + (counter++).toString(36)
-document.createNodeIterator
+
+/**
+ * Let's you use html templates using tagged template literals.
+ *
+ * Utilizes the `tagsNS` and `populate` from `master-ts/core`.
+ *
+ * For better type safety, it's recommended that you use the `tagsNS` from `master-ts/core` instead of this.
+ **/
 export let html = (strings: TemplateStringsArray, ...values: HtmlTemplate.Value[]) => {
 	let placeholders: string[] = new Array(values.length)
 	let rawHtml = strings
