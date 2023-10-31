@@ -1,4 +1,4 @@
-import { Signal, signal, tagsNS } from "master-ts/core"
+import { $, Signal, signal } from "master-ts/core"
 import { css } from "master-ts/extra/css"
 import { WeakCache } from "./utils/weakCache"
 
@@ -42,7 +42,7 @@ customElements.define(
 			super()
 			const dom = this.attachShadow({ mode: "open" })
 			dom.adoptedStyleSheets.push(style)
-			dom.append(tagsNS.slot())
+			dom.append($.slot())
 
 			const key = this.getAttribute("key")
 			if (!key) return

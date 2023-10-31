@@ -386,7 +386,7 @@ export type TagsNS = {
 } & {
 	[unknownTag: string]: Template.Builder<HTMLElement>
 }
-export let tagsNS = new Proxy(
+export let $ = new Proxy(
 	{},
 	{
 		get:

@@ -1,5 +1,5 @@
 import { marked } from "marked"
-import { fragment, populate, tagsNS } from "master-ts/core.ts"
+import { $, fragment, populate } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
 import { html } from "master-ts/extra/html.ts"
@@ -11,7 +11,7 @@ import { parseDocumentation, type ParseDocumentation } from "./libs/parser.ts" a
 import { inlineRaw } from "./macros/read.ts" assert { type: "macro" }
 import { commonStyle } from "./styles.ts"
 
-const { section } = tagsNS
+const { section } = $
 
 const docsTag = defineCustomTag("x-docs")
 export function Docs() {
@@ -37,7 +37,7 @@ function renderItem(item: ParseDocumentation.Item, parentId = "", depth = 0): No
 		case "region": {
 			const id = `${parentId}/${item.name.replace(/\s+/g, "-").toLowerCase()}`
 			return section({ class: "region" }, [
-				Heading(tagsNS[`h${1 + depth}`]!({}, [item.name]) as HTMLHeadingElement, id),
+				Heading($[`h${1 + depth}`]!({}, [item.name]) as HTMLHeadingElement, id),
 				item.items.map((item) => renderItem(item, id, depth + 1))
 			])
 		}

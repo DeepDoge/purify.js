@@ -1,5 +1,5 @@
 import type { Signal } from "master-ts/core.ts"
-import { derive, fragment, onConnected$, populate, signal, tagsNS } from "master-ts/core.ts"
+import { $, derive, fragment, onConnected$, populate, signal } from "master-ts/core.ts"
 import { awaited } from "master-ts/extra/awaited.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
@@ -33,7 +33,7 @@ Let's first get an idea of how a code that uses **master-ts** looks like:
 */
 
 export const example = code(() => {
-	const { div } = tagsNS
+	const { div } = $
 
 	function Hello() {
 		const host = div()
@@ -425,12 +425,12 @@ export const onConnected$Example = code(() => {
 /*
 In **master-ts** there is two ways to create HTML templates:
 - Using the `html` template literal tag.
-- And using the `tagsNS` `Proxy` namespace. Which is a part of the core of **master-ts**.
+- And using the `$` `Proxy` namespace. Which is a part of the core of **master-ts**.
 
 Let's see an example of both:
 */
 export const htmlTemplateExample = code(() => {
-	const { div, button } = tagsNS
+	const { div, button } = $
 
 	const foo = signal(0)
 	const bar = signal(0)
@@ -469,8 +469,8 @@ export const htmlTemplateExample = code(() => {
 
 /*
 As you can see both examples are the same. But there is a few things to note:
-- `html` template literal tag always returns an `Array` of `Node`s. While `tagsNS` `Proxy` namespace returns the `Node` itself.
-- `tagsNS` has better TypeScript support. Which means you get better type checking and auto-completion.
+- `html` template literal tag always returns an `Array` of `Node`s. While `$` `Proxy` namespace returns the `Node` itself.
+- `$` has better TypeScript support. Which means you get better type checking and auto-completion.
 */
 
 //#region Why does `html` Template Literal Tag returns an Array and not a DocumentFragment?
