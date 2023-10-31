@@ -11,7 +11,7 @@
 **min.js:** 4.97kb<br/>
 **min.js.gz:** 2.5kb
 
-## Todo Examples
+## Todo Example
 
 Todo example with a functional component and CSS `@scoped`
 
