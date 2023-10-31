@@ -3,7 +3,7 @@ import { tags, Template } from "master-ts/core.ts"
 export namespace CustomTag {
     export type TagName = `${string}${string}-${string}${string}`
 }
-export let defineCustomTag: {
+export let customTag: {
     (tag: CustomTag.TagName): Template.Builder<HTMLElement>
     <T extends keyof HTMLElementTagNameMap>(
         tag: CustomTag.TagName,
