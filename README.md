@@ -194,7 +194,7 @@ It's a complementent to native vanilla browser APIs.
 
 ## Philosophy 🍜
 
--   **Lightweight** - It has a really small [bundle size](#Size-⚡).
+-   **Lightweight** - It has a really small [bundle size](#size-).
 -   **Complementary** - It's designed to be complementary to the browser's native APIs, not to replace them.
 -   **Minimal** - It's designed to be minimal, and only focus on SPAs.
 -   **Simple** - It's designed to be simple, and easy to learn.
