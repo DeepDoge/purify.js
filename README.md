@@ -224,11 +224,3 @@ It's a complementent to native vanilla browser APIs.
 ### Q5: What About Built-in Features? 🍩
 
 **A5:** **master-ts** intentionally focuses on being minimal. It doesn't include built-in features like routing to allow you to choose your preferred solutions. It provides reactivity and templates as its core features. And already covers wide variety of reactive features while staying fit and small.
-
-## Vite Plugin 🍤
-
-Vite plugin doesn't support the latest version of master-ts atm.
-
-~~MasterTS is a UI building library. So you may wonder, why does a library have a "Vite" plugin? The truth is, you don't actually need this plugin for MasterTS to work. The plugin simply bakes your MasterTS code, including HTML templates, at build time to improve runtime performance.~~
-
-~~So it's recommended that you use [MasterTS Vite Plugin](https://github.com/DeepDoge/master-ts-vite-plugin)~~
