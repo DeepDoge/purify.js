@@ -1,22 +1,22 @@
 {
-	"compilerOptions": {
-		"module": "ESNext",
-		"target": "ESNext",
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
 
-		"moduleResolution": "Bundler",
-		"allowImportingTsExtensions": true,
-		"noEmit": true,
-		"moduleDetection": "force",
+        "moduleResolution": "Bundler",
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "moduleDetection": "force",
 
-		"allowJs": true,
-		"esModuleInterop": true,
+        "allowJs": true,
+        "esModuleInterop": true,
 
-		"skipLibCheck": true,
-		"strict": true,
-		"useUnknownInCatchVariables": true,
-		"noUncheckedIndexedAccess": true,
-		"noPropertyAccessFromIndexSignature": true,
-		"exactOptionalPropertyTypes": true
-	},
-	"include": ["."]
+        "skipLibCheck": true,
+        "strict": true,
+        "useUnknownInCatchVariables": true,
+        "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "exactOptionalPropertyTypes": true
+    },
+    "include": ["."]
 }

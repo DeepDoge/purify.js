@@ -1,43 +1,43 @@
 import { populate, signal } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { html } from "master-ts/extra/html.ts"
-import { commonStyle } from "../styles.ts"
+import { commonSheet } from "../styles.ts"
 
 const hash = signal(location.hash, (set) => {
-	const interval = setInterval(() => set(location.hash), 100)
-	return () => clearInterval(interval)
+    const interval = setInterval(() => set(location.hash), 100)
+    return () => clearInterval(interval)
 })
 
 export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
-	populate(host, {
-		class: "heading",
-		id,
-		"class:active": () => hash.ref === `#${id}`
-	})
-	const dom = host.attachShadow({ mode: "open" })
-	dom.adoptedStyleSheets.push(commonStyle, style)
+    populate(host, {
+        class: "heading",
+        id,
+        "class:active": () => hash.ref === `#${id}`
+    })
+    const dom = host.attachShadow({ mode: "open" })
+    dom.adoptedStyleSheets.push(commonSheet, sheet)
 
-	hash.follow$(
-		host,
-		(hash) => {
-			if (hash === `#${id}`) host.scrollIntoView({ block: "center", inline: "nearest" })
-		},
-		{ mode: "immediate" }
-	)
+    hash.follow$(
+        host,
+        (hash) => {
+            if (hash === `#${id}`) host.scrollIntoView({ block: "center", inline: "nearest" })
+        },
+        { mode: "immediate" }
+    )
 
-	populate(dom, html`<a href=${`#${id}`}>#</a> <slot />`)
+    populate(dom, html`<a href=${`#${id}`}>#</a> <slot />`)
 
-	return host
+    return host
 }
 
-const style = css`
-	a {
-		color: inherit;
-		opacity: 0.5;
-		text-decoration: none;
-	}
+const sheet = css`
+    a {
+        color: inherit;
+        opacity: 0.5;
+        text-decoration: none;
+    }
 
-	a:hover {
-		text-decoration: underline;
-	}
-`
+    a:hover {
+        text-decoration: underline;
+    }
+`.toSheet()

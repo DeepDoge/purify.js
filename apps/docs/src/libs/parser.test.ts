@@ -3,8 +3,8 @@ import type { ParseDocumentation } from "./parser.ts"
 import { parseDocumentation } from "./parser.ts"
 
 test("parseDocumentation", () => {
-	return
-	const src = `
+    return
+    const src = `
 //#region Hello
 
 abc
@@ -36,41 +36,41 @@ export function hello() {
 
 `
 
-	const expected: ParseDocumentation.Item[] = [
-		{
-			type: "region",
-			name: "Hello",
-			items: [
-				{
-					type: "comment",
-					content: "Hello"
-				},
-				{
-					type: "region",
-					name: "World",
-					items: [
-						{
-							type: "comment",
-							content: "World"
-						},
-						{
-							type: "comment",
-							content: "World2"
-						}
-					]
-				},
-				{
-					type: "code",
-					content: "\n\tif (true) {\n\t\thello()\n\t}\n"
-				},
-				{
-					type: "demo",
-					name: "hello",
-					content: 'function hello() {\n\tconsole.log("Hello")\n}'
-				}
-			]
-		}
-	]
+    const expected: ParseDocumentation.Item[] = [
+        {
+            type: "region",
+            name: "Hello",
+            items: [
+                {
+                    type: "comment",
+                    content: "Hello"
+                },
+                {
+                    type: "region",
+                    name: "World",
+                    items: [
+                        {
+                            type: "comment",
+                            content: "World"
+                        },
+                        {
+                            type: "comment",
+                            content: "World2"
+                        }
+                    ]
+                },
+                {
+                    type: "code",
+                    content: "\n\tif (true) {\n\t\thello()\n\t}\n"
+                },
+                {
+                    type: "demo",
+                    name: "hello",
+                    content: 'function hello() {\n\tconsole.log("Hello")\n}'
+                }
+            ]
+        }
+    ]
 
-	expect(parseDocumentation(src)).toStrictEqual(expected)
+    expect(parseDocumentation(src)).toStrictEqual(expected)
 })

@@ -1,15 +1,191 @@
 <p align="center">
-	<img width="240px" height="auto" src="https://ipfs.io/ipfs/QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e" />
+    <img width="240px" height="auto" src="https://ipfs.io/ipfs/QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e" />
 </p>
 <p align="center">
-	A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's
-	native APIs. Small yet powerful. Simple yet still useful.
+    A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's
+    native APIs. Small yet powerful. Simple yet still useful.
 </p>
 
 ## Size ⚡
 
 **min.js:** 5.72kb<br/>
 **min.js.gz:** 2.83kb
+
+## Todo Examples
+
+### Todo 1
+
+Todo example using fragments and CSS `@scoped`
+
+```ts
+import { $, fragment, signal } from "master-ts/core"
+import { css, each } from "master-ts/extra"
+
+const { div, label, input, textarea } = $
+
+export function Todo1() {
+    const todos = signal(
+        new Set([
+            { text: signal("Learn about Web Components"), completed: signal(true) },
+            { text: signal("Learn about native JS APIs"), completed: signal(false) },
+            { text: signal("Learn master-ts"), completed: signal(false) },
+            { text: signal("Build an app"), completed: signal(false) }
+        ])
+    )
+
+    return fragment(
+        div({ class: "items" }, [
+            each(() => Array.from(todos.ref))
+                .key((todo) => todo)
+                .as(
+                    (todo) => () =>
+                        label({ class: "item", "class:completed": todo.ref.completed }, [
+                            input({ type: "checkbox", "bind:value": todo.ref.completed }),
+                            textarea({ type: "text", "bind:value": todo.ref.text })
+                        ])
+                ),
+            css`
+                @scope {
+                    :scope {
+                        display: grid;
+                        gap: 1em;
+                    }
+
+                    .item {
+                        display: grid;
+                        grid-template-columns: auto 1fr;
+                        gap: 1em;
+                    }
+
+                    textarea {
+                        resize: vertical;
+                    }
+                }
+            `.toStyle()
+        ])
+    )
+}
+```
+
+### Todo 2
+
+Todo example using class based custom element with shadow DOM
+
+```ts
+import { $, signal } from "master-ts/core"
+import { css, each } from "master-ts/extra"
+
+const { div, label, input, textarea } = $
+
+export class Todo2 extends HTMLElement {
+    readonly shadowRoot = this.attachShadow({ mode: "open" })
+
+    readonly #todos = signal(
+        new Set([
+            { text: signal("Learn about Web Components"), completed: signal(true) },
+            { text: signal("Learn about native JS APIs"), completed: signal(false) },
+            { text: signal("Learn master-ts"), completed: signal(false) },
+            { text: signal("Build an app"), completed: signal(false) }
+        ])
+    )
+
+    constructor() {
+        super()
+        this.shadowRoot.adoptedStyleSheets.push(Todo2.style)
+        this.shadowRoot.append(
+            div({ class: "items" }, [
+                each(() => Array.from(this.#todos.ref))
+                    .key((todo) => todo)
+                    .as(
+                        (todo) => () =>
+                            label({ class: "item", "class:completed": todo.ref.completed }, [
+                                input({ type: "checkbox", "bind:value": todo.ref.completed }),
+                                textarea({ type: "text", "bind:value": todo.ref.text })
+                            ])
+                    )
+            ])
+        )
+    }
+
+    static style = css`
+        .items {
+            display: grid;
+            gap: 1em;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+    `.toSheet()
+}
+customElements.define("x-todo2", Todo2)
+```
+
+### Todo 3
+
+Todo example using functional component with shadow DOM
+
+```ts
+import { $, populate, signal } from "master-ts/core"
+import { css, defineCustomTag, each } from "master-ts/extra"
+
+const { div, label, input, textarea } = $
+
+const todo3Tag = defineCustomTag("x-todo3")
+export function Todo3() {
+    const host = todo3Tag()
+    const dom = host.attachShadow({ mode: "open" })
+    dom.adoptedStyleSheets.push(todo3Style)
+
+    const todos = signal(
+        new Set([
+            { text: signal("Learn about Web Components"), completed: signal(true) },
+            { text: signal("Learn about native JS APIs"), completed: signal(false) },
+            { text: signal("Learn master-ts"), completed: signal(false) },
+            { text: signal("Build an app"), completed: signal(false) }
+        ])
+    )
+
+    populate(dom, [
+        div({ class: "items" }, [
+            each(() => Array.from(todos.ref))
+                .key((todo) => todo)
+                .as(
+                    (todo) => () =>
+                        label({ class: "item", "class:completed": todo.ref.completed }, [
+                            input({ type: "checkbox", "bind:value": todo.ref.completed }),
+                            textarea({ type: "text", "bind:value": todo.ref.text })
+                        ])
+                )
+        ])
+    ])
+
+    return host
+}
+
+const todo3Style = css`
+    .items {
+        display: grid;
+        gap: 1em;
+    }
+
+    .item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1em;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+`.toSheet()
+```
 
 ## Installation 🍙
 

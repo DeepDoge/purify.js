@@ -2,9 +2,9 @@ import { mkdir, rm } from "fs/promises"
 import { Config } from "./config"
 
 const output = await Bun.build({
-	entrypoints: [Config.srcApp],
-	minify: true,
-	target: "browser"
+    entrypoints: [Config.srcApp],
+    minify: true,
+    target: "browser"
 }).then((output) => output.outputs[0]?.text())
 
 if (!output) throw new Error("No output")

@@ -1,7 +1,7 @@
 {
-	"type": "module",
-	"name": "@app/empty",
-	"devDependencies": {
-		"minify-all-cli": "^1.0.13"
-	}
+    "type": "module",
+    "name": "@app/empty",
+    "devDependencies": {
+        "minify-all-cli": "^1.0.13"
+    }
 }

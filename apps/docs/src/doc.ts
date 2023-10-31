@@ -10,7 +10,7 @@ import { INSTANCEOF, TYPEOF, match } from "master-ts/extra/match.ts"
 import { Utils } from "master-ts/utils"
 
 function code<T extends Utils.Fn>(block: T): () => ReturnType<T> {
-	return () => block()
+    return () => block()
 }
 
 //#region Install
@@ -33,84 +33,84 @@ Let's first get an idea of how a code that uses **master-ts** looks like:
 */
 
 export const example = code(() => {
-	const { div } = $
+    const { div } = $
 
-	function Hello() {
-		const host = div()
-		const dom = host.attachShadow({ mode: "open" })
-		dom.adoptedStyleSheets.push(helloStyle)
+    function Hello() {
+        const host = div()
+        const dom = host.attachShadow({ mode: "open" })
+        dom.adoptedStyleSheets.push(helloSheet)
 
-		const world = signal("World")
+        const world = signal("World")
 
-		const counter = signal(0)
+        const counter = signal(0)
 
-		populate(
-			dom,
-			html`
-				<div class="hello">
-					<div>Hello</div>
-					<form on:submit=${(e) => (e.preventDefault(), alert(`Hello ${world.ref}`))}>
-						<input type="text" bind:value=${world} />
-						<button>Hello ${world}</button>
-					</form>
-				</div>
-				<div class="counts">
-					<div>Counter</div>
-					<x ${Counter(counter)} class="counter"></x>
-					<div>Double: ${() => counter.ref * 2}</div>
-				</div>
-			`
-		)
+        populate(
+            dom,
+            html`
+                <div class="hello">
+                    <div>Hello</div>
+                    <form on:submit=${(e) => (e.preventDefault(), alert(`Hello ${world.ref}`))}>
+                        <input type="text" bind:value=${world} />
+                        <button>Hello ${world}</button>
+                    </form>
+                </div>
+                <div class="counts">
+                    <div>Counter</div>
+                    <x ${Counter(counter)} class="counter"></x>
+                    <div>Double: ${() => counter.ref * 2}</div>
+                </div>
+            `
+        )
 
-		return host
-	}
+        return host
+    }
 
-	const helloStyle = css`
-		:host {
-			display: grid;
-			grid-auto-flow: row;
-			gap: 1em;
-		}
+    const helloSheet = css`
+        :host {
+            display: grid;
+            grid-auto-flow: row;
+            gap: 1em;
+        }
 
-		.counter {
-			border: solid 1px orangered;
-		}
-	`
+        .counter {
+            border: solid 1px orangered;
+        }
+    `.toSheet()
 
-	const counterTag = defineCustomTag("x-counter")
-	function Counter(count = signal(0)) {
-		const host = counterTag()
-		const dom = host.attachShadow({ mode: "open" })
-		dom.adoptedStyleSheets.push(counterStyle)
+    const counterTag = defineCustomTag("x-counter")
+    function Counter(count = signal(0)) {
+        const host = counterTag()
+        const dom = host.attachShadow({ mode: "open" })
+        dom.adoptedStyleSheets.push(counterSheet)
 
-		populate(
-			dom,
-			html`
-				<button on:click=${() => count.ref++}>+</button>
-				${count}
-				<button on:click=${() => count.ref--}>-</button>
-			`
-		)
+        populate(
+            dom,
+            html`
+                <button on:click=${() => count.ref++}>+</button>
+                ${count}
+                <button on:click=${() => count.ref--}>-</button>
+            `
+        )
 
-		return host
-	}
+        return host
+    }
 
-	const counterStyle = css`
-		:host {
-			display: inline-grid;
-			grid-auto-flow: column;
-			gap: 1em;
-			align-items: center;
-		}
+    const counterSheet = css`
+        :host {
+            display: inline-grid;
+            grid-auto-flow: column;
+            gap: 1em;
+            align-items: center;
+        }
 
-		button {
-			width: 4ch;
-			aspect-ratio: 1;
-		}
-	`
+        button {
+            width: 4ch;
+            aspect-ratio: 1;
+        }
+    `.toSheet()
 
-	// end
-	return Hello()
+    // end
+    return Hello()
 })
 
 //#region Signal Basics
@@ -123,32 +123,32 @@ So it's a way to follow the changes of a value.
 
 /* Let's start with a basic example: */
 export const basicSignalExample = code(() => {
-	// Here we define a signal with the initial value of 0
-	const foo = signal(0)
+    // Here we define a signal with the initial value of 0
+    const foo = signal(0)
 
-	// You can access the value of a signal using the `ref` property
-	// which is a getter/setter
-	foo.ref = 10 // We set the value of `foo` to 10
+    // You can access the value of a signal using the `ref` property
+    // which is a getter/setter
+    foo.ref = 10 // We set the value of `foo` to 10
 
-	// Signals also have a method called `ping()`
-	// which notifies its followers regardless if the value has changed or not
-	foo.ping()
+    // Signals also have a method called `ping()`
+    // which notifies its followers regardless if the value has changed or not
+    foo.ping()
 
-	// Then we follow the signal
-	// And alert the value of the signal every time it changes
-	foo.follow((value) => alert(value))
+    // Then we follow the signal
+    // And alert the value of the signal every time it changes
+    foo.follow((value) => alert(value))
 
-	// end
+    // end
 
-	return html`
-		<div>So here as you can see ${"`foo`"} starts from <strong>10</strong></div>
-		<hr />
-		<div>Foo: ${foo}</div>
-		<button on:click=${() => foo.ref++}>Increment ${"`foo`"}</button>
-		<button on:click=${() => foo.ref--}>Decrement ${"`foo`"}</button>
-		<hr />
-		<button on:click=${() => foo.ping()}>Ping ${"`foo`"}</button>
-	`
+    return html`
+        <div>So here as you can see ${"`foo`"} starts from <strong>10</strong></div>
+        <hr />
+        <div>Foo: ${foo}</div>
+        <button on:click=${() => foo.ref++}>Increment ${"`foo`"}</button>
+        <button on:click=${() => foo.ref--}>Decrement ${"`foo`"}</button>
+        <hr />
+        <button on:click=${() => foo.ping()}>Ping ${"`foo`"}</button>
+    `
 })
 
 //#region Creating Signals
@@ -156,9 +156,9 @@ export const basicSignalExample = code(() => {
 Every signal requires an initial value:
 */
 code(() => {
-	// Here we define a signal with the initial value of "foo"
-	const foo = signal("foo")
-	// end
+    // Here we define a signal with the initial value of "foo"
+    const foo = signal("foo")
+    // end
 })
 /* 
 Signals also have an optional second argument called `pong`.
@@ -167,33 +167,33 @@ Which is a function that will be called when the signal has at least one followe
 Let's see an example:
 */
 code(() => {
-	const foo = signal("i have no followers", (set) => {
-		// This function will be called when a signal has at least one follower
-		console.log("foo has at least one follower")
+    const foo = signal("i have no followers", (set) => {
+        // This function will be called when a signal has at least one follower
+        console.log("foo has at least one follower")
 
-		// Using the setter function `set()`, you can set the value of the signal
-		set("i have followers now")
+        // Using the setter function `set()`, you can set the value of the signal
+        set("i have followers now")
 
-		// And you can also return a cleanup function
-		// that will be called when a signal has no followers
-		return () => {
-			set("i have no followers")
-			console.log("foo has no followers")
-		}
-	})
-	// end
+        // And you can also return a cleanup function
+        // that will be called when a signal has no followers
+        return () => {
+            set("i have no followers")
+            console.log("foo has no followers")
+        }
+    })
+    // end
 })
 /* 
 The `pong` argument enables you to do things like this:
 */
 export const pongTimerExample = code(() => {
-	const time = signal(Date.now(), (set) => {
-		const interval = setInterval(() => set(Date.now()), 111)
-		return () => clearInterval(interval)
-	})
-	// end
+    const time = signal(Date.now(), (set) => {
+        const interval = setInterval(() => set(Date.now()), 111)
+        return () => clearInterval(interval)
+    })
+    // end
 
-	return fragment(time)
+    return fragment(time)
 })
 //#endregion
 
@@ -202,10 +202,10 @@ export const pongTimerExample = code(() => {
 Signals have a getter/setter property called `ref` that you can use to get/set the value of a signal:
 */
 code(() => {
-	const foo = signal("foo")
-	foo.ref += "bar"
-	console.log(foo.ref) // "foobar"
-	// end
+    const foo = signal("foo")
+    foo.ref += "bar"
+    console.log(foo.ref) // "foobar"
+    // end
 })
 //#endregion
 
@@ -214,16 +214,16 @@ code(() => {
 Most primitive way to follow a signal is using the `follow()` function:
 */
 code(() => {
-	const foo = signal("foo")
-	foo.follow((value) => console.log(value))
-	// end
+    const foo = signal("foo")
+    foo.follow((value) => console.log(value))
+    // end
 })
 /* You have to unfollow a signal manually when you don't need it anymore: */
 code(() => {
-	const foo = signal("foo")
-	const follower = foo.follow((value) => console.log(value))
-	follower.unfollow()
-	// end
+    const foo = signal("foo")
+    const follower = foo.follow((value) => console.log(value))
+    follower.unfollow()
+    // end
 })
 /* 
 Follow also has an optional second argument called `options`:
@@ -234,11 +234,11 @@ Which let's you set pick the mode of following:
 - `normal`: This is the default mode. The follower will be notifed for the later changes of the signal
 */
 code(() => {
-	const foo = signal("foo")
-	foo.follow((value) => console.log(value), { mode: "immediate" })
-	foo.follow((value) => console.log(value), { mode: "once" })
-	foo.follow((value) => console.log(value), { mode: "normal" })
-	// end
+    const foo = signal("foo")
+    foo.follow((value) => console.log(value), { mode: "immediate" })
+    foo.follow((value) => console.log(value), { mode: "once" })
+    foo.follow((value) => console.log(value), { mode: "normal" })
+    // end
 })
 
 //#region Binding following to a Node
@@ -251,25 +251,25 @@ This way you don't have to unfollow a signal manually.
 */
 
 export const follow$Example = code(() => {
-	const node = document.createTextNode("Hello World")
+    const node = document.createTextNode("Hello World")
 
-	const foo = signal("foo", () => {
-		alert("foo has at least one follower")
-		return () => alert("foo has no followers")
-	})
+    const foo = signal("foo", () => {
+        alert("foo has at least one follower")
+        return () => alert("foo has no followers")
+    })
 
-	// This will follow the signal when the node is connected to the DOM
-	// And unfollow the signal when the node is disconnected from the DOM
-	foo.follow$(node, (value) => console.log(value))
+    // This will follow the signal when the node is connected to the DOM
+    // And unfollow the signal when the node is disconnected from the DOM
+    foo.follow$(node, (value) => console.log(value))
 
-	// end
-	const toggle = signal(false)
-	return html`
-		<div>${() => (toggle.ref ? node : null)}</div>
-		<button on:click=${() => (toggle.ref = !toggle.ref)}>
-			${() => (toggle.ref ? "Remove" : "Append")} ${"`node`"}
-		</button>
-	`
+    // end
+    const toggle = signal(false)
+    return html`
+        <div>${() => (toggle.ref ? node : null)}</div>
+        <button on:click=${() => (toggle.ref = !toggle.ref)}>
+            ${() => (toggle.ref ? "Remove" : "Append")} ${"`node`"}
+        </button>
+    `
 })
 //#endregion
 //#endregion
@@ -287,33 +287,33 @@ This means first dynamic dependency will be added after the derived signal gets 
 */
 
 export const derivedSignalExample = code(() => {
-	const count = signal(0)
+    const count = signal(0)
 
-	// `count` is added as a dependency to `double` dynamically
-	// because it's used inside the function by getting its value using `count.ref`
-	const double = derive(() => count.ref * 2)
+    // `count` is added as a dependency to `double` dynamically
+    // because it's used inside the function by getting its value using `count.ref`
+    const double = derive(() => count.ref * 2)
 
-	// end
+    // end
 
-	return html`
-		<div>Count: ${count}</div>
-		<div>Double: ${double}</div>
-		<button on:click=${() => count.ref++}>Increment ${"`count`"}</button>
-		<button on:click=${() => count.ref--}>Decrement ${"`count`"}</button>
-	`
+    return html`
+        <div>Count: ${count}</div>
+        <div>Double: ${double}</div>
+        <button on:click=${() => count.ref++}>Increment ${"`count`"}</button>
+        <button on:click=${() => count.ref--}>Decrement ${"`count`"}</button>
+    `
 })
 
 /* 
 You can also provide static dependencies to the derived signal as second argument:
 */
 code(() => {
-	const count = signal(0)
+    const count = signal(0)
 
-	// Here we provide `count` as a static dependency to `double`
-	// Once you provide a static dependency to a derived signal
-	// it won't add new dependencies dynamically .
-	const double = derive(() => count.ref * 2, [count])
-	// end
+    // Here we provide `count` as a static dependency to `double`
+    // Once you provide a static dependency to a derived signal
+    // it won't add new dependencies dynamically .
+    const double = derive(() => count.ref * 2, [count])
+    // end
 })
 
 /* 
@@ -337,17 +337,17 @@ This happens internally using a `WeakMap` that maps the function to the derived 
 Proof:
 */
 export const derivedSignalMemoizationExample = code(() => {
-	const count = signal(0)
-	const doubleFn = () => count.ref * 2
+    const count = signal(0)
+    const doubleFn = () => count.ref * 2
 
-	const double1 = derive(doubleFn)
-	const double2 = derive(doubleFn)
+    const double1 = derive(doubleFn)
+    const double2 = derive(doubleFn)
 
-	const runAlert = () => alert(`double1 === double2: ${double1 === double2}`) // true
+    const runAlert = () => alert(`double1 === double2: ${double1 === double2}`) // true
 
-	// end
+    // end
 
-	return html` <button on:click=${runAlert}>Run Alert</button> `
+    return html` <button on:click=${runAlert}>Run Alert</button> `
 })
 
 //#endregion
@@ -365,18 +365,18 @@ But it's probably not what you think.
 Let's see an example:
 */
 code(() => {
-	const count: Signal<number> = signal(0)
-	// @ts-expect-error
-	count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
-	// end
+    const count: Signal<number> = signal(0)
+    // @ts-expect-error
+    count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
+    // end
 })
 /* As an easier way you can also do this: */
 code(() => {
-	// `asImmutable()` returns the same signal with the read-only type
-	const count = signal(0).asImmutable()
-	// @ts-expect-error
-	count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
-	// end
+    // `asImmutable()` returns the same signal with the read-only type
+    const count = signal(0).asImmutable()
+    // @ts-expect-error
+    count.ref = 10 // Error: Cannot assign to 'ref' because it is a read-only property.
+    // end
 })
 //#endregion
 
@@ -397,22 +397,22 @@ The cleanup function will be called when the `Node` is disconnected from the DOM
 Let's see an example:
 */
 export const onConnected$Example = code(() => {
-	const node = document.createTextNode("Hello World")
+    const node = document.createTextNode("Hello World")
 
-	onConnected$(node, () => {
-		alert("node is connected to the DOM")
-		return () => alert("node is disconnected from the DOM")
-	})
+    onConnected$(node, () => {
+        alert("node is connected to the DOM")
+        return () => alert("node is disconnected from the DOM")
+    })
 
-	// end
+    // end
 
-	const toggle = signal(false)
-	return html`
-		<button on:click=${() => (toggle.ref = !toggle.ref)}>
-			${() => (toggle.ref ? "Remove" : "Append")} ${"`node`"}
-		</button>
-		<div>${() => (toggle.ref ? node : null)}</div>
-	`
+    const toggle = signal(false)
+    return html`
+        <button on:click=${() => (toggle.ref = !toggle.ref)}>
+            ${() => (toggle.ref ? "Remove" : "Append")} ${"`node`"}
+        </button>
+        <div>${() => (toggle.ref ? node : null)}</div>
+    `
 })
 //#endregion
 
@@ -430,41 +430,41 @@ In **master-ts** there is two ways to create HTML templates:
 Let's see an example of both:
 */
 export const htmlTemplateExample = code(() => {
-	const { div, button } = $
+    const { div, button } = $
 
-	const foo = signal(0)
-	const bar = signal(0)
+    const foo = signal(0)
+    const bar = signal(0)
 
-	const example1 = div({ class: "hello" }, [
-		div({}, ["Foo:", foo]),
-		div({}, ["Bar:", bar]),
-		div({ class: "actions" }, [
-			button({ "on:click": () => foo.ref++ }, ["Increment Foo"]),
-			" ",
-			button({ "on:click": () => bar.ref++ }, ["Increment Bar"])
-		])
-	])
+    const example1 = div({ class: "hello" }, [
+        div({}, ["Foo:", foo]),
+        div({}, ["Bar:", bar]),
+        div({ class: "actions" }, [
+            button({ "on:click": () => foo.ref++ }, ["Increment Foo"]),
+            " ",
+            button({ "on:click": () => bar.ref++ }, ["Increment Bar"])
+        ])
+    ])
 
-	const example2 = html`
-		<div class="hello">
-			<div>Foo: ${foo}</div>
-			<div>Bar: ${bar}</div>
-			<div class="actions">
-				<button on:click=${() => foo.ref++}>Increment Foo</button>
-				<button on:click=${() => bar.ref++}>Increment Bar</button>
-			</div>
-		</div>
-	`
+    const example2 = html`
+        <div class="hello">
+            <div>Foo: ${foo}</div>
+            <div>Bar: ${bar}</div>
+            <div class="actions">
+                <button on:click=${() => foo.ref++}>Increment Foo</button>
+                <button on:click=${() => bar.ref++}>Increment Bar</button>
+            </div>
+        </div>
+    `
 
-	return html`
-		<div>Example 1:</div>
-		${example1}
-		<hr />
-		<div>Example 2:</div>
-		${example2}
-	`
+    return html`
+        <div>Example 1:</div>
+        ${example1}
+        <hr />
+        <div>Example 2:</div>
+        ${example2}
+    `
 
-	// end
+    // end
 })
 
 /*
@@ -502,18 +502,18 @@ This is useful when you want to update a signal after a user has stopped typing 
 You can create a deffered signal using the `defer()` function:
 */
 export const deferredSignalExample = code(() => {
-	const text = signal("Change me!")
-	const defferedTextDefault = defer(text) // default timeout is 250ms
-	const defferedTextOneSecond = defer(text, 1000)
+    const text = signal("Change me!")
+    const defferedTextDefault = defer(text) // default timeout is 250ms
+    const defferedTextOneSecond = defer(text, 1000)
 
-	// end
+    // end
 
-	return html`
-		<input type="text" bind:value=${text} />
-		<div><b>Text:</b> ${text}</div>
-		<div><b>Deffered Text (Default):</b> ${defferedTextDefault}</div>
-		<div><b>Deffered Text (1s):</b> ${defferedTextOneSecond}</div>
-	`
+    return html`
+        <input type="text" bind:value=${text} />
+        <div><b>Text:</b> ${text}</div>
+        <div><b>Deffered Text (Default):</b> ${defferedTextDefault}</div>
+        <div><b>Deffered Text (1s):</b> ${defferedTextOneSecond}</div>
+    `
 })
 //#endregion
 
@@ -524,23 +524,23 @@ Awaited signals are derived from `Promise`s. They are signals that are updated w
 You can create an awaited signal using the `awaited()` function:
 */
 export const awaitedSignalExample = code(() => {
-	const text = signal("change me!")
+    const text = signal("change me!")
 
-	async function upperCase(text: string) {
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		return text.toUpperCase()
-	}
+    async function upperCase(text: string) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return text.toUpperCase()
+    }
 
-	// You can mix derived signals with awaited signals
-	const awaitedPromise = derive(() => awaited(upperCase(text.ref)), [text])
+    // You can mix derived signals with awaited signals
+    const awaitedPromise = derive(() => awaited(upperCase(text.ref)), [text])
 
-	// end
+    // end
 
-	return html`
-		<input type="text" bind:value=${text} />
-		<div><b>Text:</b> ${text}</div>
-		<div><b>Awaited Promise:</b> ${awaitedPromise}</div>
-	`
+    return html`
+        <input type="text" bind:value=${text} />
+        <div><b>Text:</b> ${text}</div>
+        <div><b>Awaited Promise:</b> ${awaitedPromise}</div>
+    `
 })
 /* 
 By default initial value of an awaited signal is `null`.
@@ -548,22 +548,22 @@ By default initial value of an awaited signal is `null`.
 You can also provide a second argument to the `awaited()` function which will be used as the initial value of the awaited signal:
 */
 export const awaitedSignalInitialValueExample = code(() => {
-	const text = signal("change me!")
+    const text = signal("change me!")
 
-	async function upperCase(text: string) {
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		return text.toUpperCase()
-	}
+    async function upperCase(text: string) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return text.toUpperCase()
+    }
 
-	const awaitedPromise = derive(() => awaited(upperCase(text.ref), "loading..."), [text])
+    const awaitedPromise = derive(() => awaited(upperCase(text.ref), "loading..."), [text])
 
-	// end
+    // end
 
-	return html`
-		<input type="text" bind:value=${text} />
-		<div><b>Text:</b> ${text}</div>
-		<div><b>Awaited Promise:</b> ${awaitedPromise}</div>
-	`
+    return html`
+        <input type="text" bind:value=${text} />
+        <div><b>Text:</b> ${text}</div>
+        <div><b>Awaited Promise:</b> ${awaitedPromise}</div>
+    `
 })
 //#endregion
 
@@ -572,49 +572,49 @@ export const awaitedSignalInitialValueExample = code(() => {
 Each signals are derived from `Signal<Array>`s. They are signals that maps and memoizes the values of an array each time the array changes.
 */
 function randomId() {
-	return Math.random().toString(36).slice(2)
+    return Math.random().toString(36).slice(2)
 }
 export const eachSignalExample = code(() => {
-	function createItem(text: string) {
-		return {
-			id: randomId(),
-			text
-		}
-	}
+    function createItem(text: string) {
+        return {
+            id: randomId(),
+            text
+        }
+    }
 
-	const items = signal([
-		createItem("foo"),
-		createItem("bar"),
-		createItem("baz"),
-		createItem("qux"),
-		createItem("quux"),
-		createItem("corge"),
-		createItem("grault"),
-		createItem("garply"),
-		createItem("waldo"),
-		createItem("fred")
-	])
+    const items = signal([
+        createItem("foo"),
+        createItem("bar"),
+        createItem("baz"),
+        createItem("qux"),
+        createItem("quux"),
+        createItem("corge"),
+        createItem("grault"),
+        createItem("garply"),
+        createItem("waldo"),
+        createItem("fred")
+    ])
 
-	function randomlyMoveItem() {
-		const index = Math.floor(Math.random() * items.ref.length)
-		const item = items.ref[index]!
-		items.ref.splice(index, 1)
-		items.ref.splice(Math.floor(Math.random() * items.ref.length), 0, item)
-		items.ping()
-	}
+    function randomlyMoveItem() {
+        const index = Math.floor(Math.random() * items.ref.length)
+        const item = items.ref[index]!
+        items.ref.splice(index, 1)
+        items.ref.splice(Math.floor(Math.random() * items.ref.length), 0, item)
+        items.ping()
+    }
 
-	const itemsWithRandomText = each(items)
-		.key((item, index) => item.id)
-		.as((item, index) => html` <div>${() => item.ref.text} - ${index} ${randomId()}</div> `)
+    const itemsWithRandomText = each(items)
+        .key((item, index) => item.id)
+        .as((item, index) => html` <div>${() => item.ref.text} - ${index} ${randomId()}</div> `)
 
-	return html`
-		<div>
-			<button on:click=${randomlyMoveItem}>Randomly Move Item</button>
-		</div>
-		<div>${itemsWithRandomText}</div>
-	`
+    return html`
+        <div>
+            <button on:click=${randomlyMoveItem}>Randomly Move Item</button>
+        </div>
+        <div>${itemsWithRandomText}</div>
+    `
 
-	// end
+    // end
 })
 /* 
 Ok, let's understand what's going on up there.
@@ -655,61 +655,61 @@ It only changing the value when the case changes. And has full TypeScript suppor
 Easier to understand with an example:
 */
 export const matchSignalExample = code(() => {
-	type Foo = { type: "foo"; value: number }
-	type Bar = { type: "bar"; value: string }
-	type FooBar = Foo | Bar
+    type Foo = { type: "foo"; value: number }
+    type Bar = { type: "bar"; value: string }
+    type FooBar = Foo | Bar
 
-	const fooBar = signal<FooBar>({ type: "foo", value: 0 })
+    const fooBar = signal<FooBar>({ type: "foo", value: 0 })
 
-	function randomString() {
-		return Math.random().toString(36).slice(2)
-	}
-	function randomInt() {
-		return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-	}
+    function randomString() {
+        return Math.random().toString(36).slice(2)
+    }
+    function randomInt() {
+        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+    }
 
-	function changeValue() {
-		fooBar.ref.value = fooBar.ref.type === "foo" ? randomInt() : randomString()
-		fooBar.ping()
-	}
+    function changeValue() {
+        fooBar.ref.value = fooBar.ref.type === "foo" ? randomInt() : randomString()
+        fooBar.ping()
+    }
 
-	function switchType() {
-		fooBar.ref =
-			fooBar.ref.type === "foo"
-				? {
-						type: "bar",
-						value: randomString()
-				  }
-				: {
-						type: "foo",
-						value: randomInt()
-				  }
-	}
+    function switchType() {
+        fooBar.ref =
+            fooBar.ref.type === "foo"
+                ? {
+                      type: "bar",
+                      value: randomString()
+                  }
+                : {
+                      type: "foo",
+                      value: randomInt()
+                  }
+    }
 
-	// Let's create some counters to check which template is being rendered
-	let fooCounter = 0
-	let barCounter = 0
+    // Let's create some counters to check which template is being rendered
+    let fooCounter = 0
+    let barCounter = 0
 
-	return html`
-		<div>
-			<button on:click=${switchType}>Switch Type</button>
-			<button on:click=${changeValue}>Change Value</button>
-		</div>
-		<div>
-			${match(fooBar)
-				.case(
-					{ type: "foo" },
-					(foo) => html`<div>Foo: ${() => foo.ref.value} - Rendered ${++fooCounter} times</div>`
-				)
-				.case(
-					{ type: "bar" },
-					(bar) => html`<div>Bar: ${() => bar.ref.value} - Rendered ${++barCounter} times</div>`
-				)
-				.default()}
-		</div>
-	`
+    return html`
+        <div>
+            <button on:click=${switchType}>Switch Type</button>
+            <button on:click=${changeValue}>Change Value</button>
+        </div>
+        <div>
+            ${match(fooBar)
+                .case(
+                    { type: "foo" },
+                    (foo) => html`<div>Foo: ${() => foo.ref.value} - Rendered ${++fooCounter} times</div>`
+                )
+                .case(
+                    { type: "bar" },
+                    (bar) => html`<div>Bar: ${() => bar.ref.value} - Rendered ${++barCounter} times</div>`
+                )
+                .default()}
+        </div>
+    `
 
-	// end
+    // end
 })
 
 /* 
@@ -735,48 +735,48 @@ Now we understand how `match()` works. Let's see more examples:
 We don't have to match object patterns, we can also match primitive values:
 */
 export const matchSignalExample2 = code(() => {
-	const foo = signal<string | null>("foo")
+    const foo = signal<string | null>("foo")
 
-	return html`
-		<div>
-			${match(foo)
-				.case(null, () => html`<div>Foo is null</div>`)
-				.default((value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)}
-		</div>
-	`
-	// end
+    return html`
+        <div>
+            ${match(foo)
+                .case(null, () => html`<div>Foo is null</div>`)
+                .default((value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)}
+        </div>
+    `
+    // end
 })
 
 /*
 We can also match `typeof` a signal:
 */
 export const matchSignalExample3 = code(() => {
-	const foo = signal<string | null>("foo")
+    const foo = signal<string | null>("foo")
 
-	return html`
-		<div>
-			${match(foo)
-				.case({ [TYPEOF]: "string" }, (value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)
-				.default(() => html`<div>Foo is null</div>`)}
-		</div>
-	`
-	// end
+    return html`
+        <div>
+            ${match(foo)
+                .case({ [TYPEOF]: "string" }, (value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)
+                .default(() => html`<div>Foo is null</div>`)}
+        </div>
+    `
+    // end
 })
 
 /*
 Same for `instanceof`:
 */
 export const matchSignalExample4 = code(() => {
-	const foo = signal<Date | null>(new Date())
+    const foo = signal<Date | null>(new Date())
 
-	return html`
-		<div>
-			${match(foo)
-				.case({ [INSTANCEOF]: Date }, (value) => html`<div>${() => value.ref.toDateString()}</div>`)
-				.default(() => html`<div>Foo is null</div>`)}
-		</div>
-	`
-	// end
+    return html`
+        <div>
+            ${match(foo)
+                .case({ [INSTANCEOF]: Date }, (value) => html`<div>${() => value.ref.toDateString()}</div>`)
+                .default(() => html`<div>Foo is null</div>`)}
+        </div>
+    `
+    // end
 })
 
 /*
