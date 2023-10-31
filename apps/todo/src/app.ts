@@ -37,7 +37,10 @@ export function Todo() {
     todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos)) // sync
 
     populate(dom, [
-        div({ class: "add" }, [textarea({ "bind:value": newTodoText }), button({ "on:click": addTodo }, ["Add Todo"])]),
+        div({ class: "add" }, [
+            textarea({ "bind:value": newTodoText }), //
+            button({ "on:click": addTodo }, ["Add Todo"])
+        ]),
 
         div({ class: "items" }, [
             each(() => Array.from(todos.ref))
