@@ -20,8 +20,18 @@ style({
     "@scope": {
         ":scope": {
             display: "block",
-            width: "100",
+            width: "100%",
             "accent-color": "var(--accent-color)"
+        },
+        ".items": {
+            display: "grid",
+            "grid-template-columns": "repeat(auto-fill, minmax(250px, 1fr))",
+            gap: "1rem",
+
+            "& .item": {
+                display: "grid",
+                "grid-template-columns": "1fr"
+            }
         }
     }
 })
