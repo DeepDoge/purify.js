@@ -7,7 +7,7 @@ export let sheet = (css: string) => {
     return sheet
 }
 
-export let style = (style: Style): string => {
+export let style = <const T extends Style>(style: T): string => {
     type Value = { [key: string]: string | Value }
     let toString = (value: Value): string =>
         Object.entries(value)
