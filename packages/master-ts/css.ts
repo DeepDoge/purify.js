@@ -7,7 +7,7 @@ export let sheet = (css: string) => {
     return sheet
 }
 
-export let style = <const T extends Style>(style: T): string => {
+export let style = (style: Style): string => {
     type Value = { [key: string]: string | Value }
     let toString = (value: Value): string =>
         Object.entries(value)
@@ -36,23 +36,31 @@ style({
     }
 })
 
-export type Style = Style.Rule | Style.Selectors
+export type Style = Style.AtRule | Style.Rule
 export namespace Style {
-    export type Rule = {
-        [key: `@${string}`]: Selectors
-    }
+    export type AtRule =
+        | {
+              [K in `@${"media" | "scope" | "supports" | "page" | "font-face" | "keyframes" | "counter-style"}`]: Rule
+          }
+        | {
+              [key: `@${string}${string}`]: Rule
+          }
 
-    export type Selectors = {
-        [key: `${"#" | "." | ":" | Utils.AsciiLetter}${string}${string}`]: Selectors.Member
-    }
-    export namespace Selectors {
-        export type Member = Declarations | Nested
+    export type Rule =
+        | {
+              [K in ":scope" | ":root" | ":host" | "body" | "head" | "*" | "html"]: Declaration
+          }
+        | {
+              [key: `${"#" | "." | ":" | "*" | Utils.AsciiLetter}${string}${string}`]: Rule.Member
+          }
+    export namespace Rule {
         export type Nested = {
             [key: `&${string}`]: Member
         }
+        export type Member = Declaration | Nested
     }
 
-    export type Declarations =
+    export type Declaration =
         | ({
               [K in keyof CSSStyleDeclaration as K extends string
                   ? CSSStyleDeclaration[K] extends string | number
