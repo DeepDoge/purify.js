@@ -1,4 +1,30 @@
 export namespace Utils {
+    export type AsciiLetter =
+        | "a"
+        | "b"
+        | "c"
+        | "d"
+        | "e"
+        | "f"
+        | "g"
+        | "h"
+        | "i"
+        | "j"
+        | "l"
+        | "m"
+        | "n"
+        | "o"
+        | "p"
+        | "q"
+        | "r"
+        | "s"
+        | "u"
+        | "v"
+        | "w"
+        | "x"
+        | "y"
+        | "z"
+
     export type Kebab<T extends string, A extends string = ""> = T extends `${infer F}${infer R}`
         ? Kebab<R, `${A}${F extends Lowercase<F> ? "" : "-"}${Lowercase<F>}`>
         : A
