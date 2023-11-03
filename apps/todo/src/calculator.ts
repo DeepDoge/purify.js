@@ -1,4 +1,4 @@
-import { css, sheet, signal, tags } from "master-ts"
+import { css, signal, tags } from "master-ts"
 
 const { div, input, button, style } = tags
 
@@ -13,8 +13,8 @@ export function Calculator() {
         return !isNaN(Number(value))
     }
 
-    return div({ class: "calculator" }, [
-        input({ class: "input", type: "text", "bind:value": value }),
+    return div([
+        input({ type: "text", "bind:value": value }),
         div({ class: "result" }, [() => (isNumber(result()) ? result() : "")]),
 
         div({ class: "buttons" }, [
@@ -37,6 +37,7 @@ export function Calculator() {
             button({ "on:click": () => (value.ref += "("), "style:grid-area": "open" }, ["("]),
             button({ "on:click": () => (value.ref += ")"), "style:grid-area": "close" }, [")"])
         ]),
+
         style([
             css`
                 @scope {
@@ -51,15 +52,29 @@ export function Calculator() {
                         font-size: 2rem;
                     }
 
-                    .input {
+                    input,
+                    button {
                         all: unset;
                         display: grid;
-                        text-align: right;
                         font: inherit;
+                    }
+
+                    input {
+                        text-align: right;
                         background-color: hsl(210, 100%, 50%);
                         color: white;
                         padding: 0.25em 0.5em;
                         border-radius: 0.25em;
+                    }
+
+                    button {
+                        place-items: center;
+                        background-color: hsl(210, 100%, 50%);
+                        color: white;
+                        border-radius: 0.25em;
+                        &:hover {
+                            background-color: hsl(210, 100%, 40%);
+                        }
                     }
 
                     .result {
@@ -84,33 +99,9 @@ export function Calculator() {
                             "four   five    six     multiply"
                             "one    two     three   subtract"
                             "zero   zero    decimal add";
-
-                        & button {
-                            all: unset;
-                            display: grid;
-                            place-items: center;
-                            background-color: hsl(210, 100%, 50%);
-                            color: white;
-                            border-radius: 0.25em;
-                            &:hover {
-                                background-color: hsl(210, 100%, 40%);
-                            }
-                        }
                     }
                 }
             `
         ])
     ])
 }
-
-document.adoptedStyleSheets.push(
-    sheet(css`
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-    `)
-)
-
-document.body.append(Calculator())
