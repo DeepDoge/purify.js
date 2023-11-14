@@ -1,5 +1,3 @@
-import { Utils } from "./utils"
-
 export let css = (strings: TemplateStringsArray, ...values: {}[]) => String.raw(strings, ...values)
 export let sheet = (css: string) => {
     let sheet = new CSSStyleSheet()
@@ -7,7 +5,7 @@ export let sheet = (css: string) => {
     return sheet
 }
 
-export let style = (style: Style): string => {
+/* export let style = (style: Style): string => {
     type Value = { [key: string]: string | Value }
     let toString = (value: Value): string =>
         Object.entries(value)
@@ -15,26 +13,6 @@ export let style = (style: Style): string => {
             .join("")
     return toString(style)
 }
-
-style({
-    "@scope": {
-        ":scope": {
-            display: "block",
-            width: "100%",
-            "accent-color": "var(--accent-color)"
-        },
-        ".items": {
-            display: "grid",
-            "grid-template-columns": "repeat(auto-fill, minmax(250px, 1fr))",
-            gap: "1rem",
-
-            "& .item": {
-                display: "grid",
-                "grid-template-columns": "1fr"
-            }
-        }
-    }
-})
 
 export type Style = Style.AtRule | Style.Rule
 export namespace Style {
@@ -68,7 +46,7 @@ export namespace Style {
                       : never
                   : never]?: string
           } & Partial<{
-              display: /* precomposed values */
+              display: // precomposed values
               | "block"
                   | "inline"
                   | "inline-block"
@@ -77,12 +55,12 @@ export namespace Style {
                   | "grid"
                   | "inline-grid"
                   | "flow-root"
-                  /* box generation */
+                  // box generation
                   | "none"
                   | "contents"
-                  /* multi-keyword syntax */
+                  // multi-keyword syntax
                   | `${"block" | "inline"} ${"flow" | "flow-root" | "table" | "flex" | "grid"}`
-                  /* other values */
+                  // other values
                   | "table"
                   | "table-row"
                   | "table-cell"
@@ -124,3 +102,4 @@ export namespace Style {
               | "%"}`
         | "auto"
 }
+ */
