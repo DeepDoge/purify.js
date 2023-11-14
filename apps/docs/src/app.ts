@@ -1,42 +1,36 @@
 import "./styles.ts"
 
-import { populate } from "master-ts/core.ts"
-import { css } from "master-ts/extra/css.ts"
-import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
-import { html } from "master-ts/extra/html.ts"
+import { css, customTag, sheet } from "master-ts"
+import { populate, tags } from "master-ts/core.ts"
 import { Docs } from "./content.ts"
 import { IPFS } from "./libs/ipfs.ts"
-import { commonSheet } from "./styles.ts"
+import { commonStyleSheet } from "./styles.ts"
 
-const appTag = defineCustomTag("x-app")
+const { header, div, h1, p, main, img } = tags
+
+const appTag = customTag("x-app")
 function App() {
     const host = appTag()
     const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(commonSheet, sheet)
+    dom.adoptedStyleSheets.push(commonStyleSheet, styleSheet)
 
-    populate(
-        dom,
-        html`
-            <header>
-                <div class="logo">
-                    <img alt="master-ts logo" src=${IPFS.resolve("QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e")} />
-                </div>
-                <h1 style:position="absolute" style:scale="0">master-ts</h1>
-                <p>
-                    A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's
-                    native APIs. Small yet powerful. Simple yet still useful.
-                </p>
-            </header>
-            <main>
-                <x ${Docs()} class="docs"></x>
-            </main>
-        `
-    )
+    populate(dom, [
+        header([
+            div({ class: "logo" }, [
+                img({ alt: "master-ts logo", src: IPFS.resolve("QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e") })
+            ]),
+            h1({ "style:position": "absolute", "style:scale": "0" }, ["master-ts"]),
+            p([
+                "A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's native APIs. Small yet powerful. Simple yet still useful."
+            ])
+        ]),
+        main([div({ class: "docs" }, [Docs()])])
+    ])
 
     return host
 }
 
-const sheet = css`
+const styleSheet = sheet(css`
     :host {
         display: grid;
         grid-auto-flow: row;
@@ -75,6 +69,6 @@ const sheet = css`
             z-index: -1;
         }
     }
-`.toSheet()
+`)
 
 document.body.append(App())

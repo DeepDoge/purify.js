@@ -5,7 +5,7 @@ import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
 import { html } from "master-ts/extra/html.ts"
 import { inlineRaw } from "../macros/read.ts" assert { type: "macro" }
-import { commonSheet } from "../styles.ts"
+import { commonStyleSheet } from "../styles.ts"
 
 const { Prism } = window
 
@@ -17,7 +17,7 @@ const codeblockTag = defineCustomTag("x-codeblock")
 export function Codeblock(code: string) {
     const host = codeblockTag()
     const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(commonSheet, prismThemeSheet, sheet)
+    dom.adoptedStyleSheets.push(commonStyleSheet, prismThemeSheet, sheet)
 
     populate(
         dom,

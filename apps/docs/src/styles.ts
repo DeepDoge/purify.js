@@ -1,6 +1,6 @@
 import { css, sheet } from "master-ts"
 
-export const commonSheet = sheet(css`
+export const commonStyleSheet = sheet(css`
     *,
     *::before,
     *::after {

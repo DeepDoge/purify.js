@@ -1,23 +1,20 @@
 import { marked } from "marked"
-import { $, fragment, populate } from "master-ts/core.ts"
-import { css } from "master-ts/extra/css.ts"
-import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
-import { html } from "master-ts/extra/html.ts"
+import { customTag, populate, tags } from "master-ts"
 import { Codeblock } from "./components/codeblock.ts"
 import { DemoWrapper } from "./components/demo.ts"
 import { Heading } from "./components/heading.ts"
 import * as docNS from "./doc.ts"
 import { parseDocumentation, type ParseDocumentation } from "./libs/parser.ts" assert { type: "macro" }
 import { inlineRaw } from "./macros/read.ts" assert { type: "macro" }
-import { commonSheet } from "./styles.ts"
+import { commonStyleSheet } from "./styles.ts"
 
-const { section } = $
+const { section } = tags
 
-const docsTag = defineCustomTag("x-docs")
+const docsTag = customTag("x-docs")
 export function Docs() {
     const host = docsTag()
     const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(commonSheet, sheet)
+    dom.adoptedStyleSheets.push(commonStyleSheet, sheet)
 
     populate(
         dom,

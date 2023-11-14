@@ -2,13 +2,13 @@ import { populate } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
 import { html } from "master-ts/extra/html.ts"
-import { commonSheet } from "../styles.ts"
+import { commonStyleSheet } from "../styles.ts"
 
 const demoTag = defineCustomTag("x-demo")
 export function DemoWrapper() {
     const host = demoTag()
     const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(commonSheet, sheet)
+    dom.adoptedStyleSheets.push(commonStyleSheet, sheet)
 
     populate(
         dom,

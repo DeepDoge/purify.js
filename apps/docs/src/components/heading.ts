@@ -1,7 +1,7 @@
 import { populate, signal } from "master-ts/core.ts"
 import { css } from "master-ts/extra/css.ts"
 import { html } from "master-ts/extra/html.ts"
-import { commonSheet } from "../styles.ts"
+import { commonStyleSheet } from "../styles.ts"
 
 const hash = signal(location.hash, (set) => {
     const interval = setInterval(() => set(location.hash), 100)
@@ -15,7 +15,7 @@ export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
         "class:active": () => hash.ref === `#${id}`
     })
     const dom = host.attachShadow({ mode: "open" })
-    dom.adoptedStyleSheets.push(commonSheet, sheet)
+    dom.adoptedStyleSheets.push(commonStyleSheet, sheet)
 
     hash.follow$(
         host,
