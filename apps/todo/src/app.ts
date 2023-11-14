@@ -1,4 +1,5 @@
 import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
+import { Issue } from "./issue"
 
 const { div, textarea, style, button } = tags
 
@@ -33,10 +34,12 @@ export function Todo() {
         todos.ping()
     }
 
-    effect$(dom, () => console.log("Effect: Todos changed", todos.ref)) // async
-    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos)) // sync
+    effect$(dom, () => console.log("Effect: Todos changed", todos.ref))
+    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
 
     populate(dom, [
+        Issue(),
+
         div({ class: "add" }, [
             textarea({ "bind:value": newTodoText }), //
             button({ "on:click": addTodo }, ["Add Todo"])
