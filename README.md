@@ -10,7 +10,7 @@
 
 **master-ts** has a really small bundle size. Yet it still has everything you need to build a SPA.
 
-**min.js:** 4.97kb<br/>
+**min.js:** 4.99kb<br/>
 **min.js.gz:** 2.5kb
 
 <p align="center">
@@ -57,8 +57,8 @@ export function Todo() {
         todos.ping()
     }
 
-    effect$(dom, () => console.log("Effect: Todos changed", todos.ref)) // async
-    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos)) // sync
+    effect$(dom, () => console.log("Effect: Todos changed", todos.ref))
+    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
 
     populate(dom, [
         div({ class: "add" }, [

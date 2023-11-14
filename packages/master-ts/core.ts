@@ -42,18 +42,19 @@ export let onConnected$ = <T extends Lifecycle.Connectable>(node: T, listener: L
 
 if (doc) {
     let connected = new weakSet<Node>()
-    let callFnOnTree = (node: Node, tupleIndex: 0 | 1): void => {
-        if (!!tupleIndex == !connected.has(node)) return
-        lifecycleListeners.get(node)?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.())
-        Array.from((node as Element).shadowRoot?.childNodes ?? [])[FOR_EACH]((childNode) =>
-            callFnOnTree(childNode, tupleIndex)
-        )
-        Array.from(node.childNodes)[FOR_EACH]((childNode) => callFnOnTree(childNode, tupleIndex))
-
-        // c[i?"delete":"add"](n)
-        // i?c.delete(n):c.add(n)
-        tupleIndex ? connected.delete(node) : connected.add(node)
-    }
+    /**
+     * @param tupleIndex 0 = connected, 1 = disconnected
+     */
+    let callFnOnTree = (node: Node, tupleIndex: 0 | 1): Node => (
+        (tupleIndex as unknown as boolean) == !connected.has(node) ||
+            (lifecycleListeners.get(node)?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.()),
+            Array.from((node as Element).shadowRoot?.childNodes ?? [])[FOR_EACH]((childNode) =>
+                callFnOnTree(childNode, tupleIndex)
+            ),
+            Array.from(node.childNodes)[FOR_EACH]((childNode) => callFnOnTree(childNode, tupleIndex)),
+            tupleIndex ? connected.delete(node) : connected.add(node)),
+        node
+    )
 
     let mutationObserver = new MutationObserver((mutations) =>
         mutations[FOR_EACH](
@@ -73,12 +74,21 @@ if (doc) {
         root
     )
 
-    let ATTACH_SHADOW = "attachShadow" as const
     observe(doc)
-    let elementPrototype = Element.prototype
+    /* 
+        OGAA BOOGA ME LIKE ROCK 🪨
+    */
+    let ATTACH_SHADOW = "attachShadow" as const
+    let PROTOTYPE = "prototype" as const
+    let elementPrototype = Element[PROTOTYPE]
     let elementAttachShadow = elementPrototype[ATTACH_SHADOW]
+    let characterDataPrototype = CharacterData[PROTOTYPE]
+    let characterDataRemove = characterDataPrototype[REMOVE]
     elementPrototype[ATTACH_SHADOW] = function (this, ...args) {
         return observe(elementAttachShadow.apply(this, args))
+    }
+    characterDataPrototype[REMOVE] = elementPrototype[REMOVE] = function (this) {
+        return characterDataRemove.call(callFnOnTree(this, 1))
     }
 }
 
@@ -197,14 +207,11 @@ export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknow
               let toUnfollow: Set<Signal<unknown>> | undefined
               let follows = weakMap<Signal<unknown>, Signal.Follow>()
               let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
-              let scheduled = false
-              let schedule = () =>
-                  scheduled || ((scheduled = true), timeout(() => scheduled && ((scheduled = false), update())))
               let update = () => {
                   let toFollow = new Set<Signal<unknown>>()
                   set(callAndCaptureUsedSignals(fn, toFollow))
                   toFollow[FOR_EACH]((signal) => {
-                      !follows.has(signal) && follows.set(signal, signal.follow(schedule))
+                      !follows.has(signal) && follows.set(signal, signal.follow(update))
                       toUnfollow?.delete(signal)
                   })
                   unfollow()
@@ -213,10 +220,7 @@ export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknow
 
               update()
 
-              return () => {
-                  scheduled = false
-                  unfollow()
-              }
+              return unfollow
           })
 }
 
