@@ -195,33 +195,36 @@ let callAndCaptureUsedSignals = <T, TArgs extends unknown[]>(
 
 let deriveCache = weakMap<Function, Signal.Mut<unknown>>()
 export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknown>[]): Signal<T> => {
-    let value = deriveCache.get(fn)
-    return value
-        ? (value as Signal<T>)
-        : staticDependencies
+    let value = deriveCache.get(fn) as Signal.Mut<T> | undefined
+    return staticDependencies
         ? signal<T>(fn(), (set) => {
               let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
               return () => follows.forEach((follow) => follow.unfollow())
           })
-        : signal<T>(undefined!, (set) => {
-              let toUnfollow: Set<Signal<unknown>> | undefined
-              let follows = weakMap<Signal<unknown>, Signal.Follow>()
-              let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
-              let update = () => {
-                  let toFollow = new Set<Signal<unknown>>()
-                  set(callAndCaptureUsedSignals(fn, toFollow))
-                  toFollow[FOR_EACH]((signal) => {
-                      !follows.has(signal) && follows.set(signal, signal.follow(update))
-                      toUnfollow?.delete(signal)
-                  })
-                  unfollow()
-                  toUnfollow = toFollow
-              }
+        : value ||
+              (deriveCache.set(
+                  fn,
+                  (value = signal<T>(undefined!, (set) => {
+                      let toUnfollow: Set<Signal<unknown>> | undefined
+                      let follows = weakMap<Signal<unknown>, Signal.Follow>()
+                      let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
+                      let update = () => {
+                          let toFollow = new Set<Signal<unknown>>()
+                          set(callAndCaptureUsedSignals(fn, toFollow))
+                          toFollow[FOR_EACH]((signal) => {
+                              !follows.has(signal) && follows.set(signal, signal.follow(update))
+                              toUnfollow?.delete(signal)
+                          })
+                          unfollow()
+                          toUnfollow = toFollow
+                      }
 
-              update()
+                      update()
 
-              return unfollow
-          })
+                      return unfollow
+                  }))
+              ),
+              value)
 }
 
 let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
