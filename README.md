@@ -36,10 +36,10 @@
 -   **DOM templating:**
 -   -   `tags`: Build templates easily using the `tags`, `Proxy`.
 -   -   `customTag()`: Create a simple custom tag with custom element API.
--   -   `populate()`: While not creating them with `tags` populate any DOM `Node` or `Element` with attributes, children, bindings, events, and more...
 -   -   Render signal of any value (`Element`, `Node`, `Text`) and their `Array`(s) into the DOM.
 -   -   Bind signals to attributes, input values, and more...
 -   -   Add event listeners to elements.
+-   -   `populate()`: Populate already created DOM `Node`(s) or `Element`(s) with attributes, children, bindings, events, and more...
 -   -   Careful and efficient DOM updates with the minimal DOM changes, even when a signal of an `Array` changes.
 -   **More:**
 -   -   With `follow$()` and `effect$()`, bind your signal listener a DOM `Node`, to avoid manual cleanup.
