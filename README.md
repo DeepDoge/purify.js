@@ -22,7 +22,7 @@
 -   **Signals, signal derivations, effects:**
 -   -   `signal()`: Create a signal.
 -   -   `derive()`: Create a derived signal from a function, and optionally a list of static dependencies. Also uses a `WeakMap` to memoize the function's result. So you get the same signal instance for the same function when no static dependencies are provided.
--   Signals only update when have a listener.
+-   Signals only update when they have a listener.
 -   **Built-in signals:**
 -   -   `match()`: Pattern match on a signal to another value.
 -   -   `each()`: Map a signal with a key.
@@ -34,7 +34,7 @@
 -   -   `signalFrom()`: Gets a `Signal` or `Function`. If it's a `Function`, it converts it into a derived `Signal`. And if it's a `Signal`, it returns it.
 -   -   and many more...
 -   **DOM templating:**
--   -   `tags`: Build templates easily with.
+-   -   `tags`: Build templates easily using the `tags`, `Proxy`.
 -   -   `customTag()`: Create a simple custom tag with custom element API.
 -   -   `populate()`: While not creating them with `tags` populate any DOM `Node` or `Element` with attributes, children, bindings, events, and more...
 -   -   Render signal of any value (`Element`, `Node`, `Text`) and their `Array`(s) into the DOM.
