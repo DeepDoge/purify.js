@@ -17,6 +17,37 @@
     <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmPm7WTZ92HPCmLkFwdbUd5CEJDTkEWGqYQftMjBPUiX7B" />
 </p>
 
+#### All of this gives you:
+
+-   **Signals, signal derivations, effects:**
+-   -   `signal()`: Create a signal.
+-   -   `derive()`: Create a derived signal from a function, and optionally a list of static dependencies. Also uses a `WeakMap` to memoize the function's result. So you get the same signal instance for the same function when no static dependencies are provided.
+-   Signals only update when have a listener.
+-   **Built-in signals:**
+-   -   `match()`: Pattern match on a signal to another value.
+-   -   `each()`: Map a signal with a key.
+-   -   `defer()`: Defer a signal update.
+-   -   `awaited()`: Return a placeholder value while awating a promise or signal of a promise.
+-   -   and more...
+-   **Built-in signal utilities:**
+-   -   `isSignal()`: Check if a value is a signal.
+-   -   `signalFrom()`: Gets a `Signal` or `Function`. If it's a `Function`, it converts it into a derived `Signal`. And if it's a `Signal`, it returns it.
+-   -   and many more...
+-   **DOM templating:**
+-   -   `tags`: Build templates easily with.
+-   -   `customTag()`: Create a simple custom tag with custom element API.
+-   -   `populate()`: While not creating them with `tags` populate any DOM `Node` or `Element` with attributes, children, bindings, events, and more...
+-   -   Render signal of any value (`Element`, `Node`, `Text`) and their `Array`(s) into the DOM.
+-   -   Bind signals to attributes, input values, and more...
+-   -   Add event listeners to elements.
+-   -   Careful and efficient DOM updates with the minimal DOM changes, even when a signal of an `Array` changes.
+-   **More:**
+-   -   With `follow$()` and `effect$()`, bind your signal listener a DOM `Node`, to avoid manual cleanup.
+-   -   CSS template literals to write CSS strings with IDE highlighting.
+-   -   With `sheet()` convert any CSS string into a `CSSStyleSheet` that can be used with `adoptedStyleSheet`(s).
+
+...and many more.
+
 ## Todo Example
 
 Todo example with a functional component and CSS `@scoped`
