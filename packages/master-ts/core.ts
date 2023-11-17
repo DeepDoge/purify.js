@@ -341,6 +341,7 @@ export namespace Template {
         | string
         | number
         | boolean
+        | bigint
         | null
         | Node
         | Member[]

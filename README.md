@@ -36,7 +36,7 @@
 -   **DOM templating:**
 -   -   `tags`: Build templates easily using the `tags`, `Proxy`.
 -   -   `customTag()`: Create a simple custom tag with custom element API.
--   -   Render signal of any value (`Element`, `Node`, `Text`) and their `Array`(s) into the DOM.
+-   -   Render any `Element`, `Node`, primative value and their `Array`(s) and `Signal`(s) into the DOM.
 -   -   Bind signals to attributes, input values, and more...
 -   -   Add event listeners to elements.
 -   -   `populate()`: Populate already created DOM `Node`(s) or `Element`(s) with attributes, children, bindings, events, and more...
