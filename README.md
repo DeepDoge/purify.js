@@ -43,6 +43,7 @@
 -   -   Careful and efficient DOM updates with the minimal DOM changes, even when a signal of an `Array` changes.
 -   **More:**
 -   -   With `follow$()` and `effect$()`, bind your signal listener a DOM `Node`, to avoid manual cleanup.
+-   -   With `onConnected$()` lListen lifecycle of any DOM `Node` including comments, text nodes, and more...
 -   -   CSS template literals to write CSS strings with IDE highlighting.
 -   -   With `sheet()` convert any CSS string into a `CSSStyleSheet` that can be used with `adoptedStyleSheet`(s).
 
