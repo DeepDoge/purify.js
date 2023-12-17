@@ -63,15 +63,12 @@ Work in progress
 
 ## Motivation 🍣
 
-These days, frameworks are getting more and more complex. They are getting more and more opinionated, some are getting their own languages.
-And most importantly, they are trying to do everything at once SSR, SSG, SPA, HMR, etc.
-
-Meanwhile, native browser APIs are getting better and better, and **master-ts** is designed to be complementary to native browser APIs, not to replace them.
+Nnative browser APIs are getting better and better, and **master-ts** is designed to be complementary to native browser APIs, not to replace them.
 
 By only focusing on SPAs, **master-ts** is able work better with the browser's native APIs.
 This also makes it easier to learn, and easier to use with other libraries and frameworks. If you know browser's native vanilla APIs and HTML, you already know **master-ts**
 
-**master-ts** doesn't tell you how to build a component, how to mount a component, or what is a component. Because these things are not meant to be this complicated or opinionated. Define a function, create an `Element` or `Node`, throw it into the DOM any way you want, and you are done. Put a `signal` in it, and it will be reactive. Remove it from the DOM, append it back, again multiple times, and it will still work.
+**master-ts** doesn't tell you how to build a component, how to mount a component, or what is a component. And most importantly, it doesn't break when you use browsers native APIs on your DOM because it works with them.
 
 It gives you the freedom to build your app however you want:
 
