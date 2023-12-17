@@ -63,7 +63,7 @@ Work in progress
 
 ## Motivation 🍣
 
-Nnative browser APIs are getting better and better, and **master-ts** is designed to be complementary to native browser APIs, not to replace them.
+Nntive browser APIs has been getting better, and **master-ts** is designed to be complementary to native browser APIs, not to replace them.
 
 By only focusing on SPAs, **master-ts** is able work better with the browser's native APIs.
 This also makes it easier to learn, and easier to use with other libraries and frameworks. If you know browser's native vanilla APIs and HTML, you already know **master-ts**
