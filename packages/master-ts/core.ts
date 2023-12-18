@@ -82,12 +82,16 @@ if (doc) {
     let PROTOTYPE = "prototype" as const
     let elementPrototype = Element[PROTOTYPE]
     let elementAttachShadow = elementPrototype[ATTACH_SHADOW]
+    let elementRemove = elementPrototype[REMOVE]
     let characterDataPrototype = CharacterData[PROTOTYPE]
     let characterDataRemove = characterDataPrototype[REMOVE]
     elementPrototype[ATTACH_SHADOW] = function (this, ...args) {
         return observe(elementAttachShadow.apply(this, args))
     }
-    characterDataPrototype[REMOVE] = elementPrototype[REMOVE] = function (this) {
+    elementPrototype[REMOVE] = function (this) {
+        return elementRemove.call(callFnOnTree(this, 1))
+    }
+    characterDataPrototype[REMOVE] = function (this) {
         return characterDataRemove.call(callFnOnTree(this, 1))
     }
 }
