@@ -1,4 +1,5 @@
 import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
+import { Hello } from "./hello"
 import { Issue } from "./issue"
 
 const { div, textarea, style, button } = tags
@@ -39,6 +40,8 @@ export function Todo() {
 
     populate(dom, [
         Issue(),
+
+        Hello(),
 
         div({ class: "add" }, [
             textarea({ "bind:value": newTodoText }), //

@@ -11,6 +11,9 @@
         "allowJs": true,
         "esModuleInterop": true,
 
+        "jsx": "react-jsx",
+        "jsxImportSource": "master-ts",
+
         "skipLibCheck": true,
         "strict": true,
         "useUnknownInCatchVariables": true,

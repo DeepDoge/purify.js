@@ -396,7 +396,7 @@ export namespace Template {
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: Template.Builder<HTMLElementTagNameMap[K]>
 } & {
-    [unknownTag: string]: Template.Builder<HTMLElement>
+    [unknownTag: string]: Template.Builder<Element>
 }
 export let tags = new Proxy(
     {},

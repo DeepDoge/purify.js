@@ -1,4 +1,4 @@
-import path from "path"
+import path from "node:path"
 import { Config } from "./config"
 
 const devDir = `/tmp/${Math.random().toString(36).slice(2)}_bun_dev`

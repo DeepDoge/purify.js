@@ -11,9 +11,8 @@
         "docs:build": "bun run ./apps/docs/scripts/build.ts",
         "docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
         "todo:dev": "bun run ./apps/todo/scripts/dev.ts",
+        "todo:build": "bun run ./apps/todo/scripts/build.ts",
         "empty:build": "bun run ./apps/empty/scripts/build.ts && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/min -x && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/gzip -g -x",
-        "html:start": "bun run ./apps/html-experiment/src/server.ts",
-        "html:typecheck": "bunx --bun tsc -p ./apps/html-experiment --noEmit",
         "master-ts:typecheck": "bunx --bun tsc -p ./packages/master-ts --noEmit",
         "tests": "bun master-ts:typecheck && bun docs:typecheck && bun html:typecheck && bun test"
     },

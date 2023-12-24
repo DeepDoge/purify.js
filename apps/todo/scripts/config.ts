@@ -5,4 +5,5 @@ export namespace Config {
     export const srcDir = path.join(root, "src")
     export const srcHtml = path.join(srcDir, "index.html")
     export const srcApp = path.join(srcDir, "app.ts")
+    export const outDir = path.join(root, "dist")
 }
