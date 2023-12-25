@@ -1,28 +1,38 @@
 import { fragment, populate, type Template } from "."
 
+// It looks like JSX is not simple and cool as I thought it was.
+// It could have been better but its very limited and really looks like a spaghetti on the TypeScript side.
+// Looks like type system for it designed by someone who has no idea about TypeScript.
+
+// Anyway, we support it now, but typing still sucks with them, its still recommended that you use `tags` Proxy.
+// But this might still be usefull.
+
 export namespace JSX {
     export type IntrinsicElements = {
-        [K in keyof HTMLElementTagNameMap]: Template.Attributes<HTMLElementTagNameMap[K]>
+        [K in keyof HTMLElementTagNameMap]: Template.Attributes<HTMLElementTagNameMap[K]> & { children?: never }
+    } & {
+        [unknownTag: string]: Template.Attributes<Element> & { children: never }
     }
+    export type Element = HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
 }
 
 type ChildrenProp = { children?: Template.Member[] | Template.Member }
-type Factory = { (props: Template.Attributes<Element> & ChildrenProp): unknown }
-// type FactoryProps<T extends Factory> = ChildrenProp & { $: Parameters<T> } // TypeScript doesn't care about this :/
+type Props<T extends HTMLElement> = Template.Attributes<T> & ChildrenProp
+type Factory<TProps extends ChildrenProp = ChildrenProp, TReturn = unknown> = { (props: TProps): TReturn }
 
-export function jsx<K extends keyof HTMLElementTagNameMap, TInputType extends HTMLInputElement["type"]>(
-    name: K,
-    props: Template.Attributes<HTMLElementTagNameMap[K], TInputType> & ChildrenProp
-): HTMLElementTagNameMap[K]
-export function jsx(name: string, props: Template.Attributes<HTMLElement> & ChildrenProp): Element
-// export function jsx<T extends Factory>(factory: T, props: FactoryProps<T>): ReturnType<Factory> // TypeScript doesn't care about this :/
-export function jsx(nameOrFactory: string | Factory, props: Template.Attributes<Element> & ChildrenProp): unknown {
-    if (typeof nameOrFactory === "function") return nameOrFactory(props)
+// TS doesn't care about the types here
+export function jsx<T extends Factory>(
+    ...args: [name: string, props: Props<HTMLElement>] | [factory: T, props: Parameters<T>[0]]
+): unknown {
+    if (typeof args[0] === "function") {
+        const [factory, props] = args as Extract<typeof args, [Function, ...any]>
+        return factory(props)
+    }
 
-    const element = document.createElement(nameOrFactory)
-    const content = props.children
-    delete props.children
-    populate(element, props, content ? (Array.isArray(content) ? content : [content]) : [])
+    const [name, props] = args as Extract<typeof args, [string, ...any]>
+    const { children, ...attr } = props
+    const element = document.createElement(name)
+    populate(element, attr, children ? (Array.isArray(children) ? children : [children]) : [])
     return element
 }
 export const jsxDEV = jsx
