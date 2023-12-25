@@ -17,16 +17,16 @@ export type INSTANCEOF = typeof INSTANCEOF
 type CanExhaust<TExhauster> = [TExhauster] extends [never]
     ? false
     : [
-          Utils.NotEquals<TExhauster, boolean>,
-          Utils.NotEquals<TExhauster, number>,
-          Utils.NotEquals<TExhauster, bigint>,
-          Utils.NotEquals<TExhauster, string>,
-          Utils.NotEquals<TExhauster, symbol>
-      ][number] extends true
-    ? TExhauster extends Utils.ReferanceType
-        ? false
-        : true
-    : false
+            Utils.NotEquals<TExhauster, boolean>,
+            Utils.NotEquals<TExhauster, number>,
+            Utils.NotEquals<TExhauster, bigint>,
+            Utils.NotEquals<TExhauster, string>,
+            Utils.NotEquals<TExhauster, symbol>
+        ][number] extends true
+      ? TExhauster extends Utils.ReferanceType
+          ? false
+          : true
+      : false
 
 // Some inline type tests
 false satisfies CanExhaust<never>
@@ -60,26 +60,26 @@ type ExhaustWithPattern<TType, TPattern> = TPattern extends Utils.PrimitiveType
                             ? Exclude<TType, T>
                             : never
                         : K extends TYPEOF
-                        ? TPattern[K] extends Utils.TypeString
-                            ? Exclude<TType, Utils.TypeStringToType<TPattern[K]>>
-                            : never
-                        : never
+                          ? TPattern[K] extends Utils.TypeString
+                              ? Exclude<TType, Utils.TypeStringToType<TPattern[K]>>
+                              : never
+                          : never
                 }[keyof TPattern]
               : keyof TPattern extends keyof TType
-              ? TType & { [K in keyof TPattern]: ExhaustWithPattern<TType[K], TPattern[K]> }
-              : never
+                ? TType & { [K in keyof TPattern]: ExhaustWithPattern<TType[K], TPattern[K]> }
+                : never
       >
 
 type PatternOf<TValue> =
     | (TValue extends Utils.PrimitiveType
           ? TValue
           : TValue extends object
-          ?
-                | { [K in keyof TValue]?: PatternOf<TValue[K]> }
-                | {
-                      [INSTANCEOF]: { new (...args: any[]): TValue }
-                  }
-          : TValue)
+            ?
+                  | { [K in keyof TValue]?: PatternOf<TValue[K]> }
+                  | {
+                        [INSTANCEOF]: { new (...args: any[]): TValue }
+                    }
+            : TValue)
     | {
           [TYPEOF]: Utils.TypeToTypeString<TValue>
       }
@@ -90,12 +90,12 @@ type TypeOfPattern<TPattern> = TPattern extends object
             ? T
             : never
         : TYPEOF extends keyof TPattern
-        ? TPattern[TYPEOF] extends Utils.TypeString
-            ? Utils.TypeStringToType<TPattern[TYPEOF]>
-            : never
-        : {
-              [K in keyof TPattern]: TypeOfPattern<TPattern[K]>
-          }
+          ? TPattern[TYPEOF] extends Utils.TypeString
+              ? Utils.TypeStringToType<TPattern[TYPEOF]>
+              : never
+          : {
+                [K in keyof TPattern]: TypeOfPattern<TPattern[K]>
+            }
     : TPattern
 
 type Narrow<TValue, TPattern> = TValue & Extract<TValue, TypeOfPattern<TPattern>>
@@ -105,25 +105,19 @@ let isObject = (value: any): value is object => typeof value === "object" && val
 let matchPattern = <TValue, const TPattern extends PatternOf<TValue>>(
     value: TValue,
     pattern: TPattern
-): value is TValue & TPattern => {
-    if (!isObject(pattern)) return value === (pattern as never)
-
-    if (TYPEOF in pattern) {
-        if (pattern[TYPEOF] !== typeof value) return false
-    } else if (INSTANCEOF in pattern) {
-        if (typeof pattern[INSTANCEOF] !== "function") return false
-        if (!(value instanceof pattern[INSTANCEOF])) return false
-    } else {
-        for (const key of Object.keys(pattern) as (keyof TPattern)[]) {
-            const patternValue = pattern[key]
-
-            if (!isObject(value)) return false
-            if (!(key in value)) return false
-            if (!matchPattern(value[key as keyof TValue], patternValue as never)) return false
-        }
-    }
-    return true
-}
+): value is TValue & TPattern =>
+    !isObject(pattern)
+        ? (value as never) === (pattern as never)
+        : TYPEOF in pattern
+          ? pattern[TYPEOF] === typeof value
+          : INSTANCEOF in pattern
+            ? value instanceof (pattern as any)[INSTANCEOF]
+            : !(Object.keys(pattern) as (keyof TPattern)[]).some(
+                  (key) =>
+                      !isObject(value) ||
+                      !(key in value) ||
+                      !matchPattern(value[key as keyof TValue], pattern[key] as never)
+              )
 
 type MatchBuilder<TValue, TReturns = never> = {
     case<const TPattern extends PatternOf<TValue>, TResult>(
@@ -141,40 +135,40 @@ namespace MatchBuilder {
           }
 }
 
-export let match = <TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue> => {
-    let cases: {
+export let match: { <TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue> } = <TValue>(
+    valueSignalOrFn: SignalOrFn<TValue>,
+    cases: {
         pattern: Utils.DeepOptional<TValue>
         then: (value: Signal<TValue>) => unknown
-    }[] = []
-    let valueSignal = signalFrom(valueSignalOrFn)
-
-    let self = {
+    }[] = [],
+    valueSignal = signalFrom(valueSignalOrFn)
+): MatchBuilder<TValue> =>
+    ({
         case: (pattern: Utils.DeepOptional<TValue>, then: (value: Signal<TValue>) => unknown) => (
             cases.push({ pattern, then }), self
         ),
         default: (fallback?: (value: Signal<TValue>) => unknown) =>
-            signal<unknown>(undefined, (set) => {
-                let currentIndex = -1
-                return valueSignal.follow(
-                    (value) => {
-                        if (currentIndex >= 0 && matchPattern(value, cases[currentIndex]!.pattern as never)) return
+            signal<unknown>(
+                undefined,
+                (set, currentIndex = -1) =>
+                    valueSignal.follow(
+                        (value) => {
+                            if (currentIndex >= 0 && matchPattern(value, cases[currentIndex]!.pattern as never)) return
 
-                        for (let i = 0; i < cases.length; i++) {
-                            if (i !== currentIndex) {
-                                const case_ = cases[i]!
-                                if (matchPattern(value, case_.pattern as never)) {
-                                    currentIndex = i
-                                    return set(case_.then(valueSignal))
+                            for (let i = 0; i < cases.length; i++) {
+                                if (i !== currentIndex) {
+                                    let case_ = cases[i]!
+                                    if (matchPattern(value, case_.pattern as never)) {
+                                        currentIndex = i
+                                        return set(case_.then(valueSignal))
+                                    }
                                 }
                             }
-                        }
-                        currentIndex = -1
+                            currentIndex = -1
 
-                        return set(fallback?.(valueSignal))
-                    },
-                    { mode: "immediate" }
-                ).unfollow
-            })
-    }
-    return self as never
-}
+                            return set(fallback?.(valueSignal))
+                        },
+                        { mode: "immediate" }
+                    ).unfollow
+            )
+    }) as never

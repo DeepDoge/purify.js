@@ -18,5 +18,5 @@ export function Issue() {
                     .as((item) => item)
             )
             .default(() => "nothing")
-    ]
+    ] as const
 }

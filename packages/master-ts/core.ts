@@ -6,7 +6,7 @@
 
 /* 
     While typing be aware of difference between Node, Element HTMLElement, SVGElement MathMLElement and etc.
-    `tags` will only work with HTMLElement(s), while all other functions support Element. 
+    `tags` will only work with HTMLElement(s), while all other functions support Element.
 */
 
 import type { Utils } from "./utils"
@@ -316,32 +316,13 @@ let toNode = (value: unknown): Node => {
               : doc.createTextNode(value + EMPTY_STRING)
 }
 
-export let fragment = (...children: Template.Member[]): DocumentFragment => {
+export let fragment = <const TChildren extends readonly Template.Member[]>(
+    ...children: TChildren
+): DocumentFragment => {
     let result = doc.createDocumentFragment()
     result.append(...children.map(toNode))
     return result
 }
-
-type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-let CHECKED = "checked" as const
-let VALUE = "value" as const
-let VALUE_AS_NUMBER = (VALUE + "AsNumber") as `${typeof VALUE}AsNumber`
-let VALUE_AS_DATE = (VALUE + "AsDate") as `${typeof VALUE}AsDate`
-let inputValueKeyMap = {
-    radio: CHECKED,
-    checkbox: CHECKED,
-    range: VALUE_AS_NUMBER,
-    number: VALUE_AS_NUMBER,
-    date: VALUE_AS_DATE,
-    "datetime-local": VALUE_AS_DATE,
-    month: VALUE_AS_DATE,
-    time: VALUE_AS_DATE,
-    week: VALUE_AS_DATE
-} as const
-let getInputValueKey = <Type extends keyof typeof inputValueKeyMap | (string & {})>(type: Type) =>
-    (inputValueKeyMap[type as keyof typeof inputValueKeyMap] ?? VALUE) as Type extends keyof typeof inputValueKeyMap
-        ? (typeof inputValueKeyMap)[Type]
-        : typeof VALUE
 
 export namespace Template {
     export type Member =
@@ -351,6 +332,7 @@ export namespace Template {
         | bigint
         | null
         | Node
+        | readonly Member[]
         | (() => Member)
         | (Signal<unknown> & { ref: Member })
 
@@ -363,7 +345,7 @@ export namespace Template {
             : Attributes.Global<T>
     export namespace Attributes {
         export type Global<T extends Element> = {
-            [key: string]: unknown
+            [unknownAttribute: string]: unknown
         } & {
             id?: string
             class?: string
@@ -391,6 +373,30 @@ export namespace Template {
             [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
         }
 
+        export namespace HTML {
+            export type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+            export type InputValueKey<T extends string = keyof InputTypeToValueKeyMap> =
+                T extends keyof InputTypeToValueKeyMap ? InputTypeToValueKeyMap[T] : "value"
+            export type InputTypeToValueKeyMap = {
+                radio: "checked"
+                checkbox: "checked"
+                range: "valueAsNumber"
+                number: "valueAsNumber"
+                date: "valueAsDate"
+                "datetime-local": "valueAsDate"
+                month: "valueAsDate"
+                time: "valueAsDate"
+                week: "valueAsDate"
+                file: "files"
+                text: "value"
+                color: "value"
+                email: "value"
+                password: "value"
+                search: "value"
+                tel: "value"
+                url: "value"
+            }
+        }
         export type HTML<T extends HTMLElement> = Global<T> & {
             title?: string
         } & {
@@ -400,16 +406,21 @@ export namespace Template {
                 : never
         } & {
             [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-        } & (T extends InputElement
-                ?
-                      | { type: string; "bind:value"?: Signal.Mut<HTMLInputElement["value"]> }
-                      | {
-                            [K in keyof typeof inputValueKeyMap]: {
-                                type: K
-                                "bind:value"?: Signal.Mut<HTMLInputElement[(typeof inputValueKeyMap)[K]]>
-                            }
-                        }[keyof typeof inputValueKeyMap]
-                : {})
+        } & (T extends HTMLInputElement
+                ? {
+                      [K in keyof HTML.InputTypeToValueKeyMap]: {
+                          type: K
+                      } & {
+                          [K2 in `bind:${HTML.InputValueKey<K> | "value"}`]?: K2 extends `bind:${infer ValueKey}`
+                              ? ValueKey extends keyof T
+                                  ? Signal.Mut<T[ValueKey]>
+                                  : never
+                              : never
+                      }
+                  }[keyof HTML.InputTypeToValueKeyMap]
+                : T extends HTML.InputElement
+                  ? { type?: string; "bind:value"?: Signal.Mut<T["value"]> }
+                  : {})
 
         export type SVG<T extends SVGElement> = Global<T> & {
             fill?: string
@@ -432,8 +443,8 @@ export namespace Template {
     }
 
     export type Builder<T extends Element> = {
-        (attributes?: Attributes<T>, children?: Member[]): T
-        (children?: Member[]): T
+        <const TChildren extends readonly Member[]>(attributes?: Attributes<T>, children?: TChildren): T
+        <const TChildren extends readonly Member[]>(children?: TChildren): T
     }
 }
 
@@ -455,24 +466,25 @@ export let tags = new Proxy(
 let bindOrSet = <T>(node: Element | CharacterData, value: SignalOrValueOrFn<T>, then: (value: T) => void): void =>
     isSignalOrFn(value) ? signalFrom(value)[FOLLOW$](node, then, FOLLOW_IMMEDIATE_OPTION) : then(value)
 
-let bindSignalAsValue = <T extends InputElement>(
+let bindSignalAsValue = <
+    T extends Template.Attributes.HTML.InputElement,
+    TKey extends Extract<keyof T, Template.Attributes.HTML.InputValueKey>
+>(
     element: T,
-    signal: Signal.Mut<HTMLInputElement[ReturnType<typeof getInputValueKey<T["type"]>>]>
+    key: TKey,
+    signal: Signal.Mut<T[TKey]>
 ) => (
-    element.addEventListener(
-        "input",
-        (event: Event) => (signal.ref = (event.target as T)[getInputValueKey(element.type)])
-    ), // All new browsers will remove the listeners automatically. So no need to waste code removing it manually here.
-    signal[FOLLOW$](element, (value) => (element[getInputValueKey(element.type)] = value), FOLLOW_IMMEDIATE_OPTION)
+    element.addEventListener("input", (event: Event) => (signal.ref = (event.target as T)[key])), // All new browsers will remove the listeners automatically. So no need to waste code removing it manually here.
+    signal[FOLLOW$](element, (value) => (element[key] = value), FOLLOW_IMMEDIATE_OPTION)
 )
 
 export let populate: {
-    <T extends Element & ElementCSSInlineStyle>(
+    <T extends Element & ElementCSSInlineStyle, const TChildren extends readonly Template.Member[]>(
         element: T,
         attributes?: Template.Attributes<T>,
-        children?: Template.Member[]
+        children?: TChildren
     ): T
-    <T extends Node>(node: T, children?: Template.Member[]): T
+    <T extends Node, const TChildren extends readonly Template.Member[]>(node: T, children?: TChildren): T
 } = (...args: any) => (isArray(args[1]) ? (populate_Node as any)(...args) : (populate_Element as any)(...args))
 let populate_Node = <T extends Node>(node: T, children?: Template.Member[]) => (
     children && node.appendChild(toNode(children)), node
@@ -485,7 +497,7 @@ let populate_Element = <T extends Element & ElementCSSInlineStyle>(
     attributes &&
         Object.keys(attributes)[FOR_EACH]((key) =>
             startsWith(key, "bind:")
-                ? bindSignalAsValue(element as never, attributes[key] as never)
+                ? bindSignalAsValue(element as never, key.slice(4) as never, attributes[key] as never)
                 : startsWith(key, "style:")
                   ? bindOrSet(
                         element,

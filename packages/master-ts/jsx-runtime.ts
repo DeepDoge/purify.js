@@ -9,9 +9,9 @@ import { fragment, populate, type Template } from "."
 
 export namespace JSX {
     export type IntrinsicElements = {
-        [K in keyof HTMLElementTagNameMap]: Template.Attributes<HTMLElementTagNameMap[K]> & { children?: never }
+        [K in keyof HTMLElementTagNameMap]: Template.Attributes<HTMLElementTagNameMap[K]>
     } & {
-        [unknownTag: string]: Template.Attributes<Element> & { children: never }
+        [unknownTag: string]: Template.Attributes<Element>
     }
     export type Element = HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
 }
@@ -32,7 +32,7 @@ export function jsx<T extends Factory>(
     const [name, props] = args as Extract<typeof args, [string, ...any]>
     const { children, ...attr } = props
     const element = document.createElement(name)
-    populate(element, attr, children ? (Array.isArray(children) ? children : [children]) : [])
+    populate(element, attr as never, children ? (Array.isArray(children) ? children : [children]) : [])
     return element
 }
 export const jsxDEV = jsx
