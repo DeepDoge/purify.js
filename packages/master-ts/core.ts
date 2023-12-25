@@ -336,6 +336,14 @@ export namespace Template {
         | (() => Member)
         | (Signal<unknown> & { ref: Member })
 
+    /* 
+        TODO:  
+        Re:think this, probably rename it to Props, so Props can be a union of Directives and Attributes
+        Make it easier to maintain
+        Also don't allow invalid directives such as bind:foo, this should give an error
+        It shouldnt fallback to attributes.
+        Also we should auto complete directives that are not literal strings, using "" 
+    */
     export type Attributes<T extends Element> = T extends HTMLElement
         ? Attributes.HTML<T>
         : T extends SVGElement
