@@ -8,6 +8,8 @@ export function Hello() {
 
     const n = signal("")
 
+    const abc = <div></div>
+
     dom.append(
         <>
             <div class="hello" on:click={() => alert("hello")}>

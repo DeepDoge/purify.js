@@ -1,5 +1,4 @@
 import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
-import { Hello } from "./hello"
 import { Issue } from "./issue"
 
 const { div, textarea, style, button } = tags
@@ -14,8 +13,8 @@ export function Todo() {
             { text: "Learn about Web Components", completed: true },
             { text: "Learn about native JS APIs", completed: false },
             { text: "Learn master-ts", completed: false },
-            { text: "Build an app", completed: false }
-        ])
+            { text: "Build an app", completed: false },
+        ]),
     )
 
     const newTodoText = signal("Buy Eggs")
@@ -41,11 +40,9 @@ export function Todo() {
     populate(dom, {}, [
         Issue(),
 
-        Hello(),
-
         div({ class: "add" }, [
             textarea({ "bind:value": newTodoText }), //
-            button({ "on:click": addTodo }, ["Add Todo"])
+            button({ "on:click": addTodo }, ["Add Todo"]),
         ]),
 
         div({ class: "items" }, [
@@ -53,13 +50,20 @@ export function Todo() {
                 .key((todo) => todo)
                 .as((todo) =>
                     div({ class: "item" }, [
-                        div({ class: "toggle", role: "button", "on:click": () => toggleTodo(todo.ref) }, [
-                            div([() => (todo.ref.completed ? "✅" : "🔲")]),
-                            div([() => todo.ref.text])
-                        ]),
-                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"])
-                    ])
-                )
+                        div(
+                            {
+                                class: "toggle",
+                                role: "button",
+                                "on:click": () => toggleTodo(todo.ref),
+                            },
+                            [
+                                div([() => (todo.ref.completed ? "✅" : "🔲")]),
+                                div([() => todo.ref.text]),
+                            ],
+                        ),
+                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"]),
+                    ]),
+                ),
         ]),
 
         style([
@@ -102,8 +106,8 @@ export function Todo() {
                         }
                     }
                 }
-            `
-        ])
+            `,
+        ]),
     ])
 
     return dom
@@ -130,7 +134,7 @@ document.adoptedStyleSheets.push(
         optgroup {
             font: inherit;
         }
-    `)
+    `),
 )
 
 document.body.append(Todo())
