@@ -53,7 +53,7 @@ if (doc) {
      */
     let callFnOnTree = (node: Node, tupleIndex: 0 | 1): Node => (
         (tupleIndex as unknown as boolean) == !connected.has(node) ||
-        (lifecycleListeners.get(node)?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.()),
+            (lifecycleListeners.get(node)?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.()),
             Array.from((node as Element).shadowRoot?.childNodes ?? [])[FOR_EACH]((childNode) =>
                 callFnOnTree(childNode, tupleIndex)
             ),
@@ -208,33 +208,33 @@ export let derive = <T>(fn: () => T, staticDependencies?: readonly Signal<unknow
     let value = deriveCache.get(fn) as Signal.Mut<T> | undefined
     return staticDependencies
         ? signal<T>(fn(), (set) => {
-            let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
-            return () => follows.forEach((follow) => follow.unfollow())
-        })
+              let follows = staticDependencies.map((dependency) => dependency.follow(() => set(fn())))
+              return () => follows.forEach((follow) => follow.unfollow())
+          })
         : value ||
-        (deriveCache.set(
-            fn,
-            (value = signal<T>(undefined!, (set) => {
-                let toUnfollow: Set<Signal<unknown>> | undefined
-                let follows = weakMap<Signal<unknown>, Signal.Follow>()
-                let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
-                let update = () => {
-                    let toFollow = new Set<Signal<unknown>>()
-                    set(callAndCaptureUsedSignals(fn, toFollow))
-                    toFollow[FOR_EACH]((signal) => {
-                        !follows.has(signal) && follows.set(signal, signal.follow(update))
-                        toUnfollow?.delete(signal)
-                    })
-                    unfollow()
-                    toUnfollow = toFollow
-                }
+              (deriveCache.set(
+                  fn,
+                  (value = signal<T>(undefined!, (set) => {
+                      let toUnfollow: Set<Signal<unknown>> | undefined
+                      let follows = weakMap<Signal<unknown>, Signal.Follow>()
+                      let unfollow = () => toUnfollow?.[FOR_EACH]((signal) => follows.get(signal)!.unfollow())
+                      let update = () => {
+                          let toFollow = new Set<Signal<unknown>>()
+                          set(callAndCaptureUsedSignals(fn, toFollow))
+                          toFollow[FOR_EACH]((signal) => {
+                              !follows.has(signal) && follows.set(signal, signal.follow(update))
+                              toUnfollow?.delete(signal)
+                          })
+                          unfollow()
+                          toUnfollow = toFollow
+                      }
 
-                update()
+                      update()
 
-                return unfollow
-            }))
-        ),
-            value)
+                      return unfollow
+                  }))
+              ),
+              value)
 }
 
 let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
@@ -290,9 +290,9 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
                 !currentItem
                     ? createItem(currentValue)
                     : currentValue !== currentItem.v &&
-                    (nextItem && currentValue === nextItem.v
-                        ? removeItem(currentIndex)
-                        : currentIndex + 1 < value[LENGTH] && value[currentIndex + 1] === currentItem.v
+                      (nextItem && currentValue === nextItem.v
+                          ? removeItem(currentIndex)
+                          : currentIndex + 1 < value[LENGTH] && value[currentIndex + 1] === currentItem.v
                             ? createItem(currentValue, currentIndex++)
                             : (removeItem(currentIndex), createItem(currentValue, currentIndex)))
             }
@@ -309,12 +309,12 @@ let toNode = (value: unknown): Node => {
     return value === null
         ? fragment()
         : isArray(value)
-            ? fragment(...value.map(toNode))
-            : value instanceof Node
-                ? value
-                : isSignalOrFn(value)
-                    ? bindSignalAsFragment(value)
-                    : doc!.createTextNode(value + EMPTY_STRING)
+          ? fragment(...value.map(toNode))
+          : value instanceof Node
+            ? value
+            : isSignalOrFn(value)
+              ? bindSignalAsFragment(value)
+              : doc!.createTextNode(value + EMPTY_STRING)
 }
 
 export let fragment = <const TChildren extends readonly Template.Member[]>(
@@ -348,10 +348,10 @@ export namespace Template {
     export type Attributes<T extends Element> = T extends HTMLElement
         ? Attributes.HTML<T>
         : T extends SVGElement
-        ? Attributes.SVG<T>
-        : T extends MathMLElement
-        ? Attributes.MathML<T>
-        : Attributes.Global<T>
+          ? Attributes.SVG<T>
+          : T extends MathMLElement
+            ? Attributes.MathML<T>
+            : Attributes.Global<T>
     export namespace Attributes {
         export type Global<T extends Element> = {
             [unknownAttribute: string]: unknown
@@ -361,26 +361,26 @@ export namespace Template {
             style?: string
             tabindex?: string
         } & {
-                [K in Utils.Kebab<keyof ARIAMixin>]?: K extends Utils.Kebab<infer AriaKey extends keyof ARIAMixin>
+            [K in Utils.Kebab<keyof ARIAMixin>]?: K extends Utils.Kebab<infer AriaKey extends keyof ARIAMixin>
                 ? ARIAMixin[AriaKey]
                 : never
-            } & {
-                [K in `class:${string}`]?: SignalOrValueOrFn<boolean>
-            } & {
-                [K in `style:${Exclude<
-                    Utils.Kebab<Extract<keyof CSSStyleDeclaration, string>>,
-                    `webkit-${string}`
-                >}`]?: K extends `style:${Utils.Kebab<Extract<infer StyleKey extends keyof CSSStyleDeclaration, string>>}`
+        } & {
+            [K in `class:${string}`]?: SignalOrValueOrFn<boolean>
+        } & {
+            [K in `style:${Exclude<
+                Utils.Kebab<Extract<keyof CSSStyleDeclaration, string>>,
+                `webkit-${string}`
+            >}`]?: K extends `style:${Utils.Kebab<Extract<infer StyleKey extends keyof CSSStyleDeclaration, string>>}`
                 ? SignalOrValueOrFn<CSSStyleDeclaration[StyleKey]>
                 : never
-            } & {
-                [K in `on:${keyof GlobalEventHandlersEventMap}`]?: K extends `on:${infer EventName extends
+        } & {
+            [K in `on:${keyof GlobalEventHandlersEventMap}`]?: K extends `on:${infer EventName extends
                 keyof GlobalEventHandlersEventMap}`
                 ? ((event: GlobalEventHandlersEventMap[EventName] & { target: T }) => void) | Function
                 : never
-            } & {
-                [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-            }
+        } & {
+            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
+        }
 
         export namespace HTML {
             export type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -409,46 +409,46 @@ export namespace Template {
         export type HTML<T extends HTMLElement> = Global<T> & {
             title?: string
         } & {
-                [K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends
+            [K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends
                 keyof HTMLElementEventMap}`
                 ? ((event: HTMLElementEventMap[EventName] & { target: T }) => void) | Function
                 : never
-            } & {
-                [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-            } & (T extends HTMLInputElement
+        } & {
+            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
+        } & (T extends HTMLInputElement
                 ? {
-                    [K in keyof HTML.InputTypeToValueKeyMap]: {
-                        type: K
-                    } & {
-                        [K2 in `bind:${HTML.InputValueKey<K> | "value"}`]?: K2 extends `bind:${infer ValueKey}`
-                        ? ValueKey extends keyof T
-                        ? Signal.Mut<T[ValueKey]>
-                        : never
-                        : never
-                    }
-                }[keyof HTML.InputTypeToValueKeyMap]
+                      [K in keyof HTML.InputTypeToValueKeyMap]: {
+                          type: K
+                      } & {
+                          [K2 in `bind:${HTML.InputValueKey<K> | "value"}`]?: K2 extends `bind:${infer ValueKey}`
+                              ? ValueKey extends keyof T
+                                  ? Signal.Mut<T[ValueKey]>
+                                  : never
+                              : never
+                      }
+                  }[keyof HTML.InputTypeToValueKeyMap]
                 : T extends HTML.InputElement
-                ? { type?: string; "bind:value"?: Signal.Mut<T["value"]> }
-                : {})
+                  ? { type?: string; "bind:value"?: Signal.Mut<T["value"]> }
+                  : {})
 
         export type SVG<T extends SVGElement> = Global<T> & {
             fill?: string
         } & {
-                [K in `on:${keyof SVGElementEventMap}`]?: K extends `on:${infer EventName extends keyof SVGElementEventMap}`
+            [K in `on:${keyof SVGElementEventMap}`]?: K extends `on:${infer EventName extends keyof SVGElementEventMap}`
                 ? ((event: SVGElementEventMap[EventName] & { target: T }) => void) | Function
                 : never
-            } & {
-                [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-            }
+        } & {
+            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
+        }
 
         export type MathML<T extends MathMLElement> = Global<T> & {} & {
             [K in `on:${keyof MathMLElementEventMap}`]?: K extends `on:${infer EventName extends
-            keyof MathMLElementEventMap}`
-            ? ((event: MathMLElementEventMap[EventName] & { target: T }) => void) | Function
-            : never
+                keyof MathMLElementEventMap}`
+                ? ((event: MathMLElementEventMap[EventName] & { target: T }) => void) | Function
+                : never
         } & {
-                [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-            }
+            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
+        }
     }
 
     export type Builder<T extends Element> = {
@@ -467,8 +467,8 @@ export let tags = new Proxy(
     {
         get:
             (_, tagName: string) =>
-                (...args: Parameters<Template.Builder<HTMLElement>>) =>
-                    populate(doc!.createElement(tagName), ...args)
+            (...args: Parameters<Template.Builder<HTMLElement>>) =>
+                populate(doc!.createElement(tagName), ...args)
     }
 ) as Tags
 
@@ -488,41 +488,41 @@ let bindSignalAsValue = <
 )
 
 export let populate: {
-    <T extends Element & ElementCSSInlineStyle, const TChildren extends readonly Template.Member[]>(
+    <T extends Node, const TChildren extends readonly Template.Member[]>(node: T, children?: TChildren): T
+    <T extends Element, const TChildren extends readonly Template.Member[]>(
         element: T,
         attributes?: Template.Attributes<T>,
         children?: TChildren
     ): T
-    <T extends Node, const TChildren extends readonly Template.Member[]>(node: T, children?: TChildren): T
 } = (...args: any) => (isArray(args[1]) ? (populate_Node as any)(...args) : (populate_Element as any)(...args))
 let populate_Node = <T extends Node>(node: T, children?: Template.Member[]) => (
     children && node.appendChild(toNode(children)), node
 )
-let populate_Element = <T extends Element & ElementCSSInlineStyle>(
+let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
     element: T,
     attributes?: Template.Attributes<T>,
     children?: Template.Member[]
 ) => (
     attributes &&
-    Object.keys(attributes)[FOR_EACH]((key) =>
-        startsWith(key, "bind:")
-            ? bindSignalAsValue(element as never, key.slice(4) as never, attributes[key] as never)
-            : startsWith(key, "style:")
-                ? bindOrSet(
-                    element,
-                    attributes[key],
-                    (value) =>
-                        element.style?.setProperty(key.slice(6), value === null ? value : value + EMPTY_STRING)
-                )
-                : startsWith(key, "class:")
+        Object.keys(attributes)[FOR_EACH]((key) =>
+            startsWith(key, "bind:")
+                ? bindSignalAsValue(element as never, key.slice(4) as never, attributes[key] as never)
+                : startsWith(key, "style:")
+                  ? bindOrSet(
+                        element,
+                        attributes[key],
+                        (value) =>
+                            element.style?.setProperty(key.slice(6), value === null ? value : value + EMPTY_STRING)
+                    )
+                  : startsWith(key, "class:")
                     ? bindOrSet(element, attributes[key], (value) => element.classList?.toggle(key.slice(6), !!value))
                     : startsWith(key, "on:")
-                        ? element.addEventListener(key.slice(3), attributes[key] as EventListener)
-                        : bindOrSet(element, attributes[key], (value) =>
+                      ? element.addEventListener(key.slice(3), attributes[key] as EventListener)
+                      : bindOrSet(element, attributes[key], (value) =>
                             value === null
                                 ? element.removeAttribute?.(key)
                                 : element.setAttribute?.(key, value + EMPTY_STRING)
                         )
-    ),
+        ),
     populate_Node(element, children)
 )

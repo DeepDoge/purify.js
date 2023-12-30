@@ -20,7 +20,7 @@ export function Hello() {
                 {/* <input type="number" bind:value={n}></input> Doesn't work */}
             </div>
             <div>123</div>
-        </>
+        </>,
     )
 
     return root
