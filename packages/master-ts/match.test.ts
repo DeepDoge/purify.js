@@ -196,15 +196,15 @@ test(describe(), () => {
 /* 
 // TODO: Add array and tuple support 
 test(describe(), () => {
-	const signal = createSignalWritable([1, 2, 3, 4])
-	const result = createSwitch(signal)
-		.match([{ [TYPEOF]: "number" }, 2], (value) => {
-			value.ref satisfies [number, 2]
-			return "number 2" as const
-		})
-		.default((value) => "other" as const)
+    const signal = createSignalWritable([1, 2, 3, 4])
+    const result = createSwitch(signal)
+        .match([{ [TYPEOF]: "number" }, 2], (value) => {
+            value.ref satisfies [number, 2]
+            return "number 2" as const
+        })
+        .default((value) => "other" as const)
 
-	result satisfies SignalReadable<"number 2" | "other">
+    result satisfies SignalReadable<"number 2" | "other">
 
-	strictEqual(result.ref, "number 2", `result.ref is not "number 2", but ${result.ref}`)
+    strictEqual(result.ref, "number 2", `result.ref is not "number 2", but ${result.ref}`)
 }) */
