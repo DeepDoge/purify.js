@@ -17,6 +17,10 @@ let doc = browser ? document : NULL
 let isFunction = (value: any): value is Function => typeof value === "function"
 let isArray = (value: unknown): value is unknown[] => Array.isArray(value)
 let weakMap = <K extends object, V>() => new WeakMap<K, V>()
+let instanceOf = <T extends (abstract new (...args: any) => any)[]>(
+    value: unknown,
+    ...types: T
+): value is InstanceType<T[number]> => types.some((type) => value instanceof type)
 let weakSet = WeakSet
 let startsWith = <const T extends string>(
     text: string,
@@ -350,9 +354,7 @@ let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
         ? fragment()
         : isArray(value)
           ? fragment(...value.map(toNode))
-          : value instanceof Element ||
-              value instanceof DocumentFragment ||
-              value instanceof CharacterData
+          : instanceOf(value, Element, DocumentFragment, CharacterData)
             ? value
             : isSignalOrFn(value)
               ? bindSignalAsFragment(value)
