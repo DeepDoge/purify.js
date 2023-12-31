@@ -345,19 +345,21 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
     return signalFragment
 }
 
-let toNode = (value: unknown): Node => {
+let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
     return value === NULL
         ? fragment()
         : isArray(value)
           ? fragment(...value.map(toNode))
-          : value instanceof Node
+          : value instanceof Element ||
+              value instanceof DocumentFragment ||
+              value instanceof CharacterData
             ? value
             : isSignalOrFn(value)
               ? bindSignalAsFragment(value)
               : doc!.createTextNode(value + EMPTY_STRING)
 }
 
-export let fragment = <const TChildren extends readonly Template.Member<Node>[]>(
+export let fragment = <const TChildren extends readonly Template.Member<ParentNode>[]>(
     ...children: TChildren
 ): DocumentFragment => {
     let result = doc!.createDocumentFragment()
@@ -405,12 +407,12 @@ let bindSignalAsValue = <
 )
 
 export let populate: {
-    <T extends Node>(node: T, ...args: Parameters<Template.Builder<T>>): T
+    <T extends ParentNode>(node: T, ...args: Parameters<Template.Builder<T>>): T
 } = (...args: any) =>
     isArray(args[1])
         ? (populate_Node as any)(...args)
         : (populate_Element as any)(...args)
-let populate_Node = <T extends Node>(node: T, children?: Template.Member<T>[]) => (
+let populate_Node = <T extends ParentNode>(node: T, children?: Template.Member<T>[]) => (
     children && node.appendChild(toNode(children)), node
 )
 let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(

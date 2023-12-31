@@ -23,30 +23,32 @@ import type { Utils } from "./utils"
     */
 
 export namespace Template {
-    type BaseElement<T extends Node> =
+    export type ChildNodeOf<TParentNode extends ParentNode> =
+        | DocumentFragment
         | CharacterData
-        | (T extends SVGElement
+        | (TParentNode extends SVGElement
               ? SVGElement
-              : T extends HTMLElement
+              : TParentNode extends HTMLElement
                 ? Element
-                : T extends MathMLElement
+                : TParentNode extends MathMLElement
                   ? MathMLElement
-                  : Node extends T // Built in typescript dom types are not too correct, about their inheritance, so we need to do this at the end
-                    ? Node
-                    : Element)
+                  : Element)
 
-    export type Member<T extends Node> =
+    export type Member<T extends ParentNode> =
         | string
         | number
         | boolean
         | bigint
         | null
-        | BaseElement<T>
-        | readonly Member<BaseElement<T>>[]
-        | (() => Member<BaseElement<T>>)
-        | Signal<Member<BaseElement<T>>>
+        | ChildNodeOf<T>
+        | readonly Member<Extract<ChildNodeOf<T>, ParentNode>>[]
+        | readonly Exclude<ChildNodeOf<T>, ParentNode>[]
+        | (() => Member<Extract<ChildNodeOf<T>, ParentNode>>)
+        | (() => Exclude<ChildNodeOf<T>, ParentNode>)
+        | Signal<Member<Extract<ChildNodeOf<T>, ParentNode>>>
+        | Signal<Exclude<ChildNodeOf<T>, ParentNode>>
 
-    export type Builder<T extends Node> = T extends Element
+    export type Builder<T extends ParentNode> = T extends Element
         ? {
               <
                   const TProps extends Props<T>,
