@@ -10,8 +10,8 @@
 
 **master-ts** has a really small bundle size. Yet it still has everything you need and more to build a SPA.
 
-**min.js.gz:** 2.38kb<br/>
-**min.js:** 4.7kb
+**min.js.gz:** 2.39kb<br/>
+**min.js:** 4.68kb
 
 <p align="center">
     <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
