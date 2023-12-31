@@ -2,7 +2,7 @@ import type { Template } from "./template"
 
 /* 
     TODO: Simple enough for now but later can be improved
-    JSX itself is kinda limited and bad, like its designed by someone who understand typescript.
+    JSX itself is kinda limited and bad, like its designed by someone who doesn't understand typescript.
     So that's why im only using jsx for rendering raw html atm. no directives or anything.
     Just raw html.
     Or xml, or whatever.
