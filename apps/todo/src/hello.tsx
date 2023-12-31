@@ -8,21 +8,21 @@ export function Hello() {
 
     const n = signal("")
 
-    const abc = <div></div>
-
     dom.append(
-        <>
-            <div class="hello" on:click={() => alert("hello")}>
-                {n}
-                Hello
-                {123}
-                {Time()}
-                {World("World")}
-                {tags.input({ type: "number", "bind:value": n })}
-                {/* <input type="number" bind:value={n}></input> Doesn't work */}
-            </div>
-            <div>123</div>
-        </>,
+        (
+            <>
+                <div class="hello">
+                    {n}
+                    Hello
+                    {123}
+                    {Time()}
+                    {World("World")}
+                    {tags.input({ type: "number", "bind:value": n })}
+                    {/* <input type="number" bind:value={n}></input> Doesn't work */}
+                </div>
+                <div>123</div>
+            </>
+        ).render(),
     )
 
     return root

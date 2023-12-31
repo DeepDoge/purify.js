@@ -47,7 +47,7 @@ export namespace Template {
             ? string extends K
                 ? never
                 : K extends Lowercase<K>
-                  ? T[K] extends string | null
+                  ? T[K] extends string | boolean | number | null
                       ? K
                       : never
                   : never
@@ -75,9 +75,10 @@ export namespace Template {
         // Making type errors invisible.
         // So we have to choose being able to use only data- attributes as other attributes or not get type errors for an invalid directive.
         // Find a way to fix this, without sacrificing anything. If possible.
-        [K in `data-${string}`]?: string | null
+        [K in `data-${string}`]?: string | boolean | number | null
     } & ExtractPossibleAttributes<T> &
-        AriaAttributes
+        AriaAttributes &
+        (T extends { className: string | null } ? { class?: string } : {})
 
     export type Styles<T extends ElementCSSInlineStyle> = Omit<
         {
@@ -158,9 +159,7 @@ export namespace Template {
                       }
                     : {}) &
                 (T extends { className: string | null }
-                    ? {
-                          class?: string | null
-                      } & { [K in `class:`]: never } & {
+                    ? { [K in `class:`]: never } & {
                           [K in `class:${string}`]: SignalOrValueOrFn<boolean | {}>
                       }
                     : {})
