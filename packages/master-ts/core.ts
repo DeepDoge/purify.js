@@ -14,6 +14,8 @@ import type { Template } from "./template"
 
 let NULL: null = null
 let doc = browser ? document : NULL
+let isFunction = (value: any): value is Function => typeof value === "function"
+let isArray = (value: unknown): value is unknown[] => Array.isArray(value)
 let weakMap = <K extends object, V>() => new WeakMap<K, V>()
 let instanceOf = <T extends (abstract new (...args: any) => any)[]>(
     value: unknown,
@@ -35,11 +37,6 @@ let FOR_EACH = "forEach" as const
 let REMOVE = "remove" as const
 let LENGTH = "length" as const
 let EMPTY_STRING = "" as const
-
-let ArrayConstructor = Array
-let FunctionConstructor = Function
-let ElementConstructor = Element
-let CharacterDataConstructor = CharacterData
 
 export namespace Lifecycle {
     export type Connectable = Element | CharacterData
@@ -72,10 +69,10 @@ if (doc) {
             (lifecycleListeners
                 .get(node)
                 ?.[FOR_EACH]((callbacks) => callbacks[tupleIndex]?.()),
-            ArrayConstructor.from((node as Element).shadowRoot?.childNodes ?? [])[
-                FOR_EACH
-            ]((childNode) => callFnOnTree(childNode, tupleIndex)),
-            ArrayConstructor.from(node.childNodes)[FOR_EACH]((childNode) =>
+            Array.from((node as Element).shadowRoot?.childNodes ?? [])[FOR_EACH](
+                (childNode) => callFnOnTree(childNode, tupleIndex),
+            ),
+            Array.from(node.childNodes)[FOR_EACH]((childNode) =>
                 callFnOnTree(childNode, tupleIndex),
             ),
             tupleIndex ? connected.delete(node) : connected.add(node)),
@@ -108,10 +105,10 @@ if (doc) {
     */
     let ATTACH_SHADOW = "attachShadow" as const
     let PROTOTYPE = "prototype" as const
-    let elementPrototype = ElementConstructor[PROTOTYPE]
+    let elementPrototype = Element[PROTOTYPE]
     let elementAttachShadow = elementPrototype[ATTACH_SHADOW]
     let elementRemove = elementPrototype[REMOVE]
-    let characterDataPrototype = CharacterDataConstructor[PROTOTYPE]
+    let characterDataPrototype = CharacterData[PROTOTYPE]
     let characterDataRemove = characterDataPrototype[REMOVE]
     elementPrototype[ATTACH_SHADOW] = function (this, ...args) {
         return observe(elementAttachShadow.apply(this, args))
@@ -174,10 +171,10 @@ let signals = new weakSet<Signal<unknown>>()
 export let isSignal = (value: any): value is Signal<unknown> => signals.has(value)
 
 export let isSignalOrFn = <T>(value: any): value is SignalOrFn<T> =>
-    isSignal(value) || instanceOf(value, FunctionConstructor)
+    isSignal(value) || isFunction(value)
 
 export let signalFrom = <T>(src: SignalOrFn<T>): Signal<T> =>
-    instanceOf(src, FunctionConstructor) ? derive(src) : src
+    isFunction(src) ? derive(src) : src
 
 export let signal: Signal.Builder = (currentValue, updater) => {
     type T = typeof currentValue
@@ -322,13 +319,10 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
     signalFrom(signalOrFn)[FOLLOW$](
         start,
         (value: T) => {
-            if (
-                !instanceOf(oldValue, ArrayConstructor) ||
-                !instanceOf(value, ArrayConstructor)
-            )
+            if (!isArray(oldValue) || !isArray(value))
                 clearBetween(start, end), (items[LENGTH] = 0)
             oldValue = value
-            if (!instanceOf(value, ArrayConstructor)) return end.before(toNode(value))
+            if (!isArray(value)) return end.before(toNode(value))
 
             for (let currentIndex = 0; currentIndex < value[LENGTH]; currentIndex++) {
                 let currentItem = items[currentIndex]
@@ -358,14 +352,9 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
 let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
     return value === NULL
         ? fragment()
-        : instanceOf(value, ArrayConstructor)
+        : isArray(value)
           ? fragment(...value.map(toNode))
-          : instanceOf(
-                  value,
-                  ElementConstructor,
-                  DocumentFragment,
-                  CharacterDataConstructor,
-              )
+          : instanceOf(value, Element, DocumentFragment, CharacterData)
             ? value
             : isSignalOrFn(value)
               ? bindSignalAsFragment(value)
@@ -422,7 +411,7 @@ let bindSignalAsValue = <
 export let populate: {
     <T extends ParentNode>(node: T, ...args: Parameters<Template.Builder<T>>): T
 } = (...args: any) =>
-    instanceOf(args[1], ArrayConstructor)
+    isArray(args[1])
         ? (populate_Node as any)(...args)
         : (populate_Element as any)(...args)
 let populate_Node = <T extends ParentNode>(node: T, children?: Template.Member<T>[]) => (

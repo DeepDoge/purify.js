@@ -41,8 +41,8 @@ export namespace Template {
         | bigint
         | null
         | ChildNodeOf<T>
-        | ReadonlyArray<Member<Extract<ChildNodeOf<T>, ParentNode>>>
-        | ReadonlyArray<Exclude<ChildNodeOf<T>, ParentNode>>
+        | readonly Member<Extract<ChildNodeOf<T>, ParentNode>>[]
+        | readonly Exclude<ChildNodeOf<T>, ParentNode>[]
         | (() => Member<Extract<ChildNodeOf<T>, ParentNode>>)
         | (() => Exclude<ChildNodeOf<T>, ParentNode>)
         | Signal<Member<Extract<ChildNodeOf<T>, ParentNode>>>
