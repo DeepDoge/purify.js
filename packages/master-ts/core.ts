@@ -10,9 +10,10 @@
 */
 
 import { browser } from "./environment"
-import type { Utils } from "./utils"
+import type { Template } from "./template"
 
-let doc = browser ? document : null
+let NULL: null = null
+let doc = browser ? document : NULL
 let isFunction = (value: any): value is Function => typeof value === "function"
 let isArray = (value: unknown): value is unknown[] => Array.isArray(value)
 let weakMap = <K extends object, V>() => new WeakMap<K, V>()
@@ -345,7 +346,7 @@ let bindSignalAsFragment = <T>(signalOrFn: SignalOrFn<T>): DocumentFragment => {
 }
 
 let toNode = (value: unknown): Node => {
-    return value === null
+    return value === NULL
         ? fragment()
         : isArray(value)
           ? fragment(...value.map(toNode))
@@ -362,177 +363,6 @@ export let fragment = <const TChildren extends readonly Template.Member[]>(
     let result = doc!.createDocumentFragment()
     result.append(...children.map(toNode))
     return result
-}
-
-export namespace Template {
-    export type Member =
-        | string
-        | number
-        | boolean
-        | bigint
-        | null
-        | Node
-        | readonly Member[]
-        | (() => Member)
-        | (Signal<unknown> & { ref: Member })
-
-    /* 
-        TODO:  
-        Re:think this, probably rename it to Props, so Props can be a union of Directives and Attributes
-        Make it easier to maintain
-        Also don't allow invalid directives such as bind:foo, this should give an error
-        It shouldnt fallback to attributes.
-        Also we should auto complete directives that are not literal strings, using "" 
-
-        Later might change the whole idea, and make everything towards making html strings and parsing it later.
-        Or similar.
-
-        Also we only truely support HTML XML only, we should Elements in general.
-        Also if we can separate parsing and genereting the xml string, it might be better. maybe.
-        especially if we wanna add ssr later with a meta framework.
-
-        in short everything can change later, but for now this is good enough for now for making the eternis app.
-
-        later we can do the changes and migrate the eternis to it.
-        if all works well, we will release 0.1.0
-    */
-    export type Attributes<T extends Element> = T extends HTMLElement
-        ? Attributes.HTML<T>
-        : T extends SVGElement
-          ? Attributes.SVG<T>
-          : T extends MathMLElement
-            ? Attributes.MathML<T>
-            : Attributes.Global<T>
-    export namespace Attributes {
-        export type Global<T extends Element> = {
-            [unknownAttribute: string]: unknown
-        } & {
-            id?: string
-            class?: string
-            style?: string
-            tabindex?: string
-        } & {
-            [K in Utils.Kebab<keyof ARIAMixin>]?: K extends Utils.Kebab<
-                infer AriaKey extends keyof ARIAMixin
-            >
-                ? ARIAMixin[AriaKey]
-                : never
-        } & {
-            [K in `class:${string}`]?: SignalOrValueOrFn<boolean>
-        } & {
-            [K in `style:${Exclude<
-                Utils.Kebab<Extract<keyof CSSStyleDeclaration, string>>,
-                `webkit-${string}`
-            >}`]?: K extends `style:${Utils.Kebab<
-                Extract<infer StyleKey extends keyof CSSStyleDeclaration, string>
-            >}`
-                ? SignalOrValueOrFn<CSSStyleDeclaration[StyleKey]>
-                : never
-        } & {
-            [K in `on:${keyof GlobalEventHandlersEventMap}`]?: K extends `on:${infer EventName extends
-                keyof GlobalEventHandlersEventMap}`
-                ?
-                      | ((
-                            event: GlobalEventHandlersEventMap[EventName] & { target: T },
-                        ) => void)
-                      | Function
-                : never
-        } & {
-            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-        }
-
-        export namespace HTML {
-            export type InputElement =
-                | HTMLInputElement
-                | HTMLSelectElement
-                | HTMLTextAreaElement
-            export type InputValueKey<T extends string = keyof InputTypeToValueKeyMap> =
-                T extends keyof InputTypeToValueKeyMap
-                    ? InputTypeToValueKeyMap[T]
-                    : "value"
-            export type InputTypeToValueKeyMap = {
-                radio: "checked"
-                checkbox: "checked"
-                range: "valueAsNumber"
-                number: "valueAsNumber"
-                date: "valueAsDate"
-                "datetime-local": "valueAsDate"
-                month: "valueAsDate"
-                time: "valueAsDate"
-                week: "valueAsDate"
-                file: "files"
-                text: "value"
-                color: "value"
-                email: "value"
-                password: "value"
-                search: "value"
-                tel: "value"
-                url: "value"
-            }
-        }
-        export type HTML<T extends HTMLElement> = Global<T> & {
-            title?: string
-        } & {
-            [K in `on:${keyof HTMLElementEventMap}`]?: K extends `on:${infer EventName extends
-                keyof HTMLElementEventMap}`
-                ?
-                      | ((event: HTMLElementEventMap[EventName] & { target: T }) => void)
-                      | Function
-                : never
-        } & {
-            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-        } & (T extends HTMLInputElement
-                ? {
-                      [K in keyof HTML.InputTypeToValueKeyMap]: {
-                          type: K
-                      } & {
-                          [K2 in `bind:${
-                              | HTML.InputValueKey<K>
-                              | "value"}`]?: K2 extends `bind:${infer ValueKey}`
-                              ? ValueKey extends keyof T
-                                  ? Signal.Mut<T[ValueKey]>
-                                  : never
-                              : never
-                      }
-                  }[keyof HTML.InputTypeToValueKeyMap]
-                : T extends HTML.InputElement
-                  ? { type?: string; "bind:value"?: Signal.Mut<T["value"]> }
-                  : {})
-
-        export type SVG<T extends SVGElement> = Global<T> & {
-            fill?: string
-        } & {
-            [K in `on:${keyof SVGElementEventMap}`]?: K extends `on:${infer EventName extends
-                keyof SVGElementEventMap}`
-                ?
-                      | ((event: SVGElementEventMap[EventName] & { target: T }) => void)
-                      | Function
-                : never
-        } & {
-            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-        }
-
-        export type MathML<T extends MathMLElement> = Global<T> & {} & {
-            [K in `on:${keyof MathMLElementEventMap}`]?: K extends `on:${infer EventName extends
-                keyof MathMLElementEventMap}`
-                ?
-                      | ((
-                            event: MathMLElementEventMap[EventName] & { target: T },
-                        ) => void)
-                      | Function
-                : never
-        } & {
-            [K in `on:${string}`]?: ((event: Event & { target: T }) => void) | Function
-        }
-    }
-
-    export type Builder<T extends Element> = {
-        <const TChildren extends readonly Member[]>(
-            attributes?: Attributes<T>,
-            children?: TChildren,
-        ): T
-        <const TChildren extends readonly Member[]>(children?: TChildren): T
-    }
 }
 
 export type Tags = {
@@ -560,8 +390,8 @@ let bindOrSet = <T>(
         : then(value)
 
 let bindSignalAsValue = <
-    T extends Template.Attributes.HTML.InputElement,
-    TKey extends Extract<keyof T, Template.Attributes.HTML.InputValueKey>,
+    T extends HTMLElement & { type?: string | null; value: string | null },
+    TKey extends Extract<keyof T, Template.ValueKey<T["type"]>>,
 >(
     element: T,
     key: TKey,
@@ -593,40 +423,40 @@ let populate_Node = <T extends Node>(node: T, children?: Template.Member[]) => (
 )
 let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
     element: T,
-    attributes?: Template.Attributes<T>,
+    props?: Template.Props<T>,
     children?: Template.Member[],
 ) => (
-    attributes &&
-        Object.keys(attributes)[FOR_EACH]((key) =>
+    props &&
+        Object.keys(props)[FOR_EACH]((key) =>
             startsWith(key, "bind:")
                 ? bindSignalAsValue(
                       element as never,
                       key.slice(4) as never,
-                      attributes[key] as never,
+                      props[key as never] as never,
                   )
                 : startsWith(key, "style:")
                   ? bindOrSet(
                         element,
-                        attributes[key],
+                        props[key as never]!,
                         (value) =>
                             element.style?.setProperty(
                                 key.slice(6),
-                                value === null ? value : value + EMPTY_STRING,
+                                value === NULL ? value : value + EMPTY_STRING,
                             ),
                     )
                   : startsWith(key, "class:")
                     ? bindOrSet(
                           element,
-                          attributes[key],
+                          props[key],
                           (value) => element.classList?.toggle(key.slice(6), !!value),
                       )
                     : startsWith(key, "on:")
                       ? element.addEventListener(
                             key.slice(3),
-                            attributes[key] as EventListener,
+                            props[key] as EventListener,
                         )
-                      : bindOrSet(element, attributes[key], (value) =>
-                            value === null
+                      : bindOrSet(element, props[key as never], (value) =>
+                            value === NULL
                                 ? element.removeAttribute?.(key)
                                 : element.setAttribute?.(key, value + EMPTY_STRING),
                         ),

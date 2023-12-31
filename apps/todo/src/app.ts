@@ -61,7 +61,13 @@ export function Todo() {
                                 div([() => todo.ref.text]),
                             ],
                         ),
-                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"]),
+                        button(
+                            {
+                                "on:click": (e) => removeTodo(todo.ref),
+                                "on:abc": (e) => e,
+                            },
+                            ["Remove"],
+                        ),
                     ]),
                 ),
         ]),
