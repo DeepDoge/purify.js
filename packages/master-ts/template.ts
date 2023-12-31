@@ -14,9 +14,9 @@ import type { Utils } from "./utils"
 
         Also we only truely support HTML XML only, we should Elements in general.
         Also if we can separate parsing and genereting the xml string, it might be better. maybe.
-        especially if we wanna add ssr later with a meta framework.
+        especially if we wanna add ssr later with a meta framework with hydration or something similar to resumability.
 
-        in short everything can change later, but for now this is good enough for now for making the eternis app.
+        in short everything can change later, but for now this is good enough for now for making the eternis app. which will be on IPFS so has to be SPA.
 
         later we can do the changes and migrate the eternis to it.
         if all works well, we will release 0.1.0
