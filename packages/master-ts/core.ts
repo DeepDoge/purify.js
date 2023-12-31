@@ -357,7 +357,7 @@ let toNode = (value: unknown): Node => {
               : doc!.createTextNode(value + EMPTY_STRING)
 }
 
-export let fragment = <const TChildren extends readonly Template.Member[]>(
+export let fragment = <const TChildren extends readonly Template.Member<Node>[]>(
     ...children: TChildren
 ): DocumentFragment => {
     let result = doc!.createDocumentFragment()
@@ -405,26 +405,18 @@ let bindSignalAsValue = <
 )
 
 export let populate: {
-    <T extends Node, const TChildren extends readonly Template.Member[]>(
-        node: T,
-        children?: TChildren,
-    ): T
-    <T extends Element, const TChildren extends readonly Template.Member[]>(
-        element: T,
-        attributes?: Template.Attributes<T>,
-        children?: TChildren,
-    ): T
+    <T extends Node>(node: T, ...args: Parameters<Template.Builder<T>>): T
 } = (...args: any) =>
     isArray(args[1])
         ? (populate_Node as any)(...args)
         : (populate_Element as any)(...args)
-let populate_Node = <T extends Node>(node: T, children?: Template.Member[]) => (
+let populate_Node = <T extends Node>(node: T, children?: Template.Member<T>[]) => (
     children && node.appendChild(toNode(children)), node
 )
 let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
     element: T,
     props?: Template.Props<T>,
-    children?: Template.Member[],
+    children?: Template.Member<T>[],
 ) => (
     props &&
         Object.keys(props)[FOR_EACH]((key) =>
@@ -445,10 +437,8 @@ let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
                             ),
                     )
                   : startsWith(key, "class:")
-                    ? bindOrSet(
-                          element,
-                          props[key],
-                          (value) => element.classList?.toggle(key.slice(6), !!value),
+                    ? bindOrSet(element, props[key], (value) =>
+                          element.classList.toggle(key.slice(6), !!value),
                       )
                     : startsWith(key, "on:")
                       ? element.addEventListener(
@@ -457,8 +447,8 @@ let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
                         )
                       : bindOrSet(element, props[key as never], (value) =>
                             value === NULL
-                                ? element.removeAttribute?.(key)
-                                : element.setAttribute?.(key, value + EMPTY_STRING),
+                                ? element.removeAttribute(key)
+                                : element.setAttribute(key, value + EMPTY_STRING),
                         ),
         ),
     populate_Node(element, children)

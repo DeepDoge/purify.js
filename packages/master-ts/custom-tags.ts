@@ -1,4 +1,5 @@
-import { tags, Template } from "master-ts/core.ts"
+import { tags } from "./core"
+import type { Template } from "./template"
 
 export namespace CustomTag {
     export type TagName = `${string}${string}-${string}${string}`
@@ -8,8 +9,9 @@ export let customTag: {
     <T extends keyof HTMLElementTagNameMap>(
         tag: CustomTag.TagName,
         extendsTag: T,
-        extendsElement: { new (): HTMLElementTagNameMap[T] }
+        extendsElement: { new (): HTMLElementTagNameMap[T] },
     ): Template.Builder<HTMLElementTagNameMap[T]>
 } = (tag: CustomTag.TagName, extendsTag = "div", extendsElement = HTMLElement) => (
-    customElements.define(tag, class extends extendsElement {}, { extends: extendsTag }), tags[tag]!
+    customElements.define(tag, class extends extendsElement {}, { extends: extendsTag }),
+    tags[tag]!
 )

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
-import type { Signal } from "master-ts/core.ts"
-import { signal } from "master-ts/core.ts"
+import type { Signal } from "./core"
+import { signal } from "./core"
 import { INSTANCEOF, TYPEOF, match } from "./match"
 import { Utils } from "./utils"
 

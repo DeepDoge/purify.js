@@ -52,6 +52,10 @@ export namespace Utils {
             : never
         : never
 
+    export type OmitNonLiteral<T extends { [key: PropertyKey]: any }> = {
+        [K in keyof T as PropertyKey extends K ? never : K]: T[K]
+    }
+
     declare const ERROR: unique symbol
     type ERROR = typeof ERROR
     export type ErrorType<Message extends string> = { [ERROR]: Message }

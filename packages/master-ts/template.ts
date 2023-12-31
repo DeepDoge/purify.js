@@ -1,4 +1,4 @@
-import { type Signal, type SignalOrValueOrFn } from "."
+import type { Signal, SignalOrValueOrFn } from "./core"
 import type { Utils } from "./utils"
 
 /* 
@@ -23,24 +23,54 @@ import type { Utils } from "./utils"
     */
 
 export namespace Template {
-    export type Member =
+    type BaseElement<T extends Node> =
+        | CharacterData
+        | (T extends SVGElement
+              ? SVGElement
+              : T extends HTMLElement
+                ? Element
+                : T extends MathMLElement
+                  ? MathMLElement
+                  : Node extends T // Built in typescript dom types are not too correct, about their inheritance, so we need to do this at the end
+                    ? Node
+                    : Element)
+
+    export type Member<T extends Node> =
         | string
         | number
         | boolean
         | bigint
         | null
-        | Node
-        | readonly Member[]
-        | (() => Member)
-        | Signal<Member>
+        | BaseElement<T>
+        | readonly Member<BaseElement<T>>[]
+        | (() => Member<BaseElement<T>>)
+        | Signal<Member<BaseElement<T>>>
 
-    export type Builder<T extends Element> = {
-        <const TChildren extends readonly Member[]>(
-            props?: Props<T>,
-            children?: TChildren,
-        ): T
-        <const TChildren extends readonly Member[]>(children?: TChildren): T
-    }
+    export type Builder<T extends Node> = T extends Element
+        ? {
+              <
+                  const TProps extends Props<T>,
+                  const TChildren extends readonly Member<T>[],
+              >(
+                  ...args:
+                      | [props?: VerifyPropsGeneric<T, TProps>, children?: TChildren]
+                      | [children?: TChildren]
+              ): T
+          }
+        : {
+              <const TChildren extends readonly Member<T>[]>(children?: TChildren): T
+          }
+
+    export type VerifyPropsGeneric<E extends Element, T extends Props<E>> = T &
+        (Exclude<
+            Extract<keyof Utils.OmitNonLiteral<T>, `${string}:${string}`>,
+            keyof Utils.OmitNonLiteral<Directives<E>>
+        > extends never
+            ? {}
+            : `Error: Invalid directive, ${Exclude<
+                  Extract<keyof Utils.OmitNonLiteral<T>, `${string}:${string}`>,
+                  keyof Utils.OmitNonLiteral<Directives<E>>
+              >}`)
 
     type ExtractPossibleAttributes<T extends Element> = Utils.WritablePart<{
         [K in keyof T as K extends string
@@ -55,7 +85,7 @@ export namespace Template {
     }>
 
     export type AriaAttributes = {
-        [K in `aria-`]?: never
+        [K in `aria-`]?: string | null
     } & {
         [K in `aria-${string}`]?: string | null
     } & {
@@ -67,15 +97,7 @@ export namespace Template {
     }
 
     export type Attributes<T extends Element> = {
-        [K in `data-`]?: never
-    } & {
-        // TODO: Only allowing "data-" is best i can do for now, but this is not good.
-        // We should allow any string, but we can't because then invalid directives will fallback to it.
-        // And we can't event force that fallback to be a string, because then it overrides everything.
-        // Making type errors invisible.
-        // So we have to choose being able to use only data- attributes as other attributes or not get type errors for an invalid directive.
-        // Find a way to fix this, without sacrificing anything. If possible.
-        [K in `data-${string}`]?: string | boolean | number | null
+        [K in `data-` | string]?: unknown
     } & ExtractPossibleAttributes<T> &
         AriaAttributes &
         (T extends { className: string | null } ? { class?: string } : {})

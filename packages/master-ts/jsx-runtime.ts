@@ -2,7 +2,9 @@ import type { Template } from "./template"
 
 /* 
     TODO: Simple enough for now but later can be improved
-    JSX itself is kinda limited and bad, like its designed by someone who doesn't understand typescript.
+    JSX itself is kinda limited and bad, like its designed by someone who doesn't understand typescript,
+        or there is something im missing. EDIT: Nope, it's just bad. Every library/framework (react, solid, etc.) does it like this.
+    JSX is not typesafe, and it's not possible to make it typesafe. Who designed this??
     So that's why im only using jsx for rendering raw html atm. no directives or anything.
     Just raw html.
     Or xml, or whatever.
@@ -18,7 +20,7 @@ export namespace JSX {
     }
     export type Element = {
         readonly xml: string
-        render(): TagNameMap[keyof TagNameMap]
+        render(): TagNameMap[keyof TagNameMap] | DocumentFragment
         [Symbol.toPrimitive](): string
     }
 }
@@ -78,5 +80,5 @@ export function Fragment({ children }: ChildrenProp) {
         [Symbol.toPrimitive]() {
             return xml
         },
-    } satisfies Omit<JSX.Element, "render"> & { render(): DocumentFragment }
+    } satisfies JSX.Element
 }

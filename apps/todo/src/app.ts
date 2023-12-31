@@ -37,11 +37,11 @@ export function Todo() {
     effect$(dom, () => console.log("Effect: Todos changed", todos.ref))
     todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
 
-    populate(dom, {}, [
+    populate(dom, { class: "" }, [
         Issue(),
 
         div({ class: "add" }, [
-            textarea({ "bind:value": newTodoText }), //
+            textarea({ "bind:value": newTodoText }),
             button({ "on:click": addTodo }, ["Add Todo"]),
         ]),
 

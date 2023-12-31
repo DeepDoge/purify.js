@@ -1,5 +1,5 @@
-import type { Signal, SignalOrFn } from "master-ts/core.ts"
-import { signal, signalFrom } from "master-ts/core.ts"
+import type { Signal, SignalOrFn } from "./core"
+import { signal, signalFrom } from "./core"
 
 export let each = <T>(arr: SignalOrFn<T[]>) => ({
     key: (getKey: (value: T, index: number) => unknown) => ({
@@ -17,7 +17,8 @@ export let each = <T>(arr: SignalOrFn<T[]>) => ({
                                     let key = getKey(value, index)
                                     if (cache.has(key)) {
                                         toRemove.delete(key)
-                                        let [result, valueSignal, indexSignal] = cache.get(key)!
+                                        let [result, valueSignal, indexSignal] =
+                                            cache.get(key)!
                                         valueSignal.ref = value
                                         valueSignal.ping()
                                         indexSignal.ref = index
@@ -29,13 +30,13 @@ export let each = <T>(arr: SignalOrFn<T[]>) => ({
                                     let result = as(valueSignal, indexSignal)
                                     cache.set(key, [result, valueSignal, indexSignal])
                                     return result
-                                })
+                                }),
                             )
                             for (let key of toRemove) cache.delete(key)
                         },
-                        { mode: "immediate" }
-                    ).unfollow
+                        { mode: "immediate" },
+                    ).unfollow,
             )
-        }
-    })
+        },
+    }),
 })

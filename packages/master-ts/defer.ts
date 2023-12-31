@@ -1,5 +1,5 @@
-import type { Signal, SignalOrFn } from "master-ts/core.ts"
-import { signal, signalFrom } from "master-ts/core.ts"
+import type { Signal, SignalOrFn } from "./core"
+import { signal, signalFrom } from "./core"
 
 export let defer = <T>(signalOrFunction: SignalOrFn<T>, timeout_ms = 250): Signal<T> => {
     let sourceSignal = signalFrom(signalOrFunction)
@@ -13,6 +13,6 @@ export let defer = <T>(signalOrFunction: SignalOrFn<T>, timeout_ms = 250): Signa
                 timeout = setTimeout(() => ((timeout = null), set(value)), timeout_ms)
             })),
             follow?.unfollow
-        )
+        ),
     )
 }
