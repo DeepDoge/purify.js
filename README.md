@@ -10,8 +10,8 @@
 
 **master-ts** has a really small bundle size. Yet it still has everything you need and more to build a SPA.
 
-**min.js.gz:** 2.36kb<br/>
-**min.js:** 4.65kb
+**min.js.gz:** 2.38kb<br/>
+**min.js:** 4.7kb
 
 <p align="center">
     <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
@@ -103,8 +103,8 @@ export function Todo() {
             { text: "Learn about Web Components", completed: true },
             { text: "Learn about native JS APIs", completed: false },
             { text: "Learn master-ts", completed: false },
-            { text: "Build an app", completed: false }
-        ])
+            { text: "Build an app", completed: false },
+        ]),
     )
 
     const newTodoText = signal("Buy Eggs")
@@ -128,20 +128,30 @@ export function Todo() {
     todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
 
     populate(dom, [
-        div({ class: "add" }, [textarea({ "bind:value": newTodoText }), button({ "on:click": addTodo }, ["Add Todo"])]),
+        div({ class: "add" }, [
+            textarea({ "bind:value": newTodoText }),
+            button({ "on:click": addTodo }, ["Add Todo"]),
+        ]),
 
         div({ class: "items" }, [
             each(() => Array.from(todos.ref))
                 .key((todo) => todo)
                 .as((todo) =>
                     div({ class: "item" }, [
-                        div({ class: "toggle", role: "button", "on:click": () => toggleTodo(todo.ref) }, [
-                            div([() => (todo.ref.completed ? "✅" : "🔲")]),
-                            div([() => todo.ref.text])
-                        ]),
-                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"])
-                    ])
-                )
+                        div(
+                            {
+                                class: "toggle",
+                                role: "button",
+                                "on:click": () => toggleTodo(todo.ref),
+                            },
+                            [
+                                div([() => (todo.ref.completed ? "✅" : "🔲")]),
+                                div([() => todo.ref.text]),
+                            ],
+                        ),
+                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"]),
+                    ]),
+                ),
         ]),
 
         style([
@@ -184,8 +194,8 @@ export function Todo() {
                         }
                     }
                 }
-            `
-        ])
+            `,
+        ]),
     ])
 
     return dom
@@ -212,7 +222,7 @@ document.adoptedStyleSheets.push(
         optgroup {
             font: inherit;
         }
-    `)
+    `),
 )
 
 document.body.append(Todo())
