@@ -1,9 +1,9 @@
 import "../libs/prism"
 
-import { populate } from "master-ts/core.ts"
-import { css } from "master-ts/extra/css.ts"
-import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
-import { html } from "master-ts/extra/html.ts"
+import { populate } from "cherry-ts/core.ts"
+import { css } from "cherry-ts/extra/css.ts"
+import { defineCustomTag } from "cherry-ts/extra/custom-tags.ts"
+import { html } from "cherry-ts/extra/html.ts"
 import { inlineRaw } from "../macros/read.ts" assert { type: "macro" }
 import { commonStyleSheet } from "../styles.ts"
 
@@ -25,10 +25,14 @@ export function Codeblock(code: string) {
             <div class="code">
                 <pre><code></code></pre>
             </div>
-        `
+        `,
     )
 
-    dom.querySelector("code")!.innerHTML = Prism.highlight(clearCode(code), Prism.languages["js"]!, "typescript")
+    dom.querySelector("code")!.innerHTML = Prism.highlight(
+        clearCode(code),
+        Prism.languages["js"]!,
+        "typescript",
+    )
 
     return host
 }
@@ -81,7 +85,9 @@ function clearCode(code: string) {
     }
 
     // Remove the minimum indent from each line
-    const formattedCode = lines.map((line) => (line.length >= minIndent ? line.slice(minIndent) : line)).join("\n")
+    const formattedCode = lines
+        .map((line) => (line.length >= minIndent ? line.slice(minIndent) : line))
+        .join("\n")
 
     return formattedCode
 }

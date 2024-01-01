@@ -1,4 +1,4 @@
-import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
+import { css, each, effect$, populate, sheet, signal, tags } from "cherry-ts"
 import { Issue } from "./issue"
 
 const { div, textarea, style, button } = tags
@@ -12,7 +12,7 @@ export function Todo() {
         new Set<TodoItem>([
             { text: "Learn about Web Components", completed: true },
             { text: "Learn about native JS APIs", completed: false },
-            { text: "Learn master-ts", completed: false },
+            { text: "Learn cherry-ts", completed: false },
             { text: "Build an app", completed: false },
         ]),
     )

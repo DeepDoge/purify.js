@@ -1,4 +1,4 @@
-import { INSTANCEOF, each, match, signal, tags } from "master-ts"
+import { INSTANCEOF, each, match, signal, tags } from "cherry-ts"
 
 export function Issue() {
     const value = signal(null as string[] | null)
@@ -15,8 +15,8 @@ export function Issue() {
             .case({ [INSTANCEOF]: Array }, (value) =>
                 each(value)
                     .key((value) => value)
-                    .as((item) => item)
+                    .as((item) => item),
             )
-            .default(() => "nothing")
+            .default(() => "nothing"),
     ] as const
 }

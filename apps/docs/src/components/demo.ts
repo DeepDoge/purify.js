@@ -1,7 +1,7 @@
-import { populate } from "master-ts/core.ts"
-import { css } from "master-ts/extra/css.ts"
-import { defineCustomTag } from "master-ts/extra/custom-tags.ts"
-import { html } from "master-ts/extra/html.ts"
+import { populate } from "cherry-ts/core.ts"
+import { css } from "cherry-ts/extra/css.ts"
+import { defineCustomTag } from "cherry-ts/extra/custom-tags.ts"
+import { html } from "cherry-ts/extra/html.ts"
 import { commonStyleSheet } from "../styles.ts"
 
 const demoTag = defineCustomTag("x-demo")
@@ -16,7 +16,7 @@ export function DemoWrapper() {
             <div class="content">
                 <slot></slot>
             </div>
-        `
+        `,
     )
 
     return host

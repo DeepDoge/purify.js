@@ -1,4 +1,4 @@
-import { css, customTag, sheet, signal, tags } from "master-ts"
+import { css, customTag, sheet, signal, tags } from "cherry-ts"
 
 const helloTag = customTag("x-hello")
 export function Hello() {

@@ -1,4 +1,4 @@
-import { css, signal, tags } from "master-ts"
+import { css, signal, tags } from "cherry-ts"
 
 const { div, input, button, style } = tags
 

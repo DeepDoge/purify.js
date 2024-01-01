@@ -1,7 +1,7 @@
 import "./styles.ts"
 
-import { css, customTag, sheet } from "master-ts"
-import { populate, tags } from "master-ts/core.ts"
+import { css, customTag, sheet } from "cherry-ts"
+import { populate, tags } from "cherry-ts/core.ts"
 import { Docs } from "./content.ts"
 import { IPFS } from "./libs/ipfs.ts"
 import { commonStyleSheet } from "./styles.ts"
@@ -17,14 +17,17 @@ function App() {
     populate(dom, [
         header([
             div({ class: "logo" }, [
-                img({ alt: "master-ts logo", src: IPFS.resolve("QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e") })
+                img({
+                    alt: "cherry-ts logo",
+                    src: IPFS.resolve("QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e"),
+                }),
             ]),
-            h1({ "style:position": "absolute", "style:scale": "0" }, ["master-ts"]),
+            h1({ "style:position": "absolute", "style:scale": "0" }, ["cherry-ts"]),
             p([
-                "A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's native APIs. Small yet powerful. Simple yet still useful."
-            ])
+                "A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's native APIs. Small yet powerful. Simple yet still useful.",
+            ]),
         ]),
-        main([div({ class: "docs" }, [Docs()])])
+        main([div({ class: "docs" }, [Docs()])]),
     ])
 
     return host
@@ -62,7 +65,12 @@ const styleSheet = sheet(css`
         &::before {
             content: "";
             position: absolute;
-            background: conic-gradient(from 30deg, var(--primary), var(--secondary), var(--primary));
+            background: conic-gradient(
+                from 30deg,
+                var(--primary),
+                var(--secondary),
+                var(--primary)
+            );
             border-radius: 1000000px;
             filter: blur(100px);
             opacity: 0.25;

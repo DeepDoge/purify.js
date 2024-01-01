@@ -34,16 +34,16 @@ since my current current project im doing with this is on IPFS, im gonna add thi
 
 also have some job projects, so gonna take time to start.
 
-might even call it "master-ts/server" and not "master-ts/kit"
+might even call it "cherry-ts/server" and not "cherry-ts/kit"
 because a web site doesnt have to be http based, so saying kit, makes it sounds like it has to be http
-so for http servers, you use "master-ts/server"
-and for ipfs you can just use "master-ts", might even make something called "master-ts/ipfs" that will give you some util tools and some building step that is best for ipfs.
+so for http servers, you use "cherry-ts/server"
+and for ipfs you can just use "cherry-ts", might even make something called "cherry-ts/ipfs" that will give you some util tools and some building step that is best for ipfs.
 it should produce one index.html file and inline everything in it, as long as you dont do, async imports. having one file is better for ipfs
 because it takes time to find each file.
 
 might have a built-in template for solidity contracts and ethers and wallet connection and stuff.
 
-i might actually call it "master-ts/web3"
+i might actually call it "cherry-ts/web3"
 
 ipfs as front-end, solidity as backend db
 it might also have support for TheGraph maybe for indexing.

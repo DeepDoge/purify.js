@@ -1,3 +1,3 @@
-import * as $ from "master-ts"
+import * as $ from "cherry-ts"
 
 console.log($)

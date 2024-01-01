@@ -1,4 +1,4 @@
-import { css, sheet } from "master-ts"
+import { css, sheet } from "cherry-ts"
 
 export const commonStyleSheet = sheet(css`
     *,
@@ -31,5 +31,5 @@ document.adoptedStyleSheets.push(
             --body: #1c1b22;
             background-color: var(--body);
         }
-    `)
+    `),
 )

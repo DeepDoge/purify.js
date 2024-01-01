@@ -1,5 +1,5 @@
-import { populate, signal, tags, type Signal } from "master-ts/core.ts"
-import { Utils } from "master-ts/utils"
+import { populate, signal, tags, type Signal } from "cherry-ts/core.ts"
+import { Utils } from "cherry-ts/utils"
 
 function code<T extends Utils.Fn>(block: T): () => ReturnType<T> {
     return () => block()
@@ -7,21 +7,21 @@ function code<T extends Utils.Fn>(block: T): () => ReturnType<T> {
 
 //#region Install
 /*
-To install master-ts follow the [Installation Instructions](https://github.com/DeepDoge/master-ts/releases)
+To install cherry-ts follow the [Installation Instructions](https://github.com/DeepDoge/cherry-ts/releases)
 */
 //#endregion
 
 //#region Usage
 
 /* 
-**master-ts** designed to go hand in hand with browser's native APIs.
-**master-ts** provides a set of functions and types to make your life easier when working with DOM.
+**cherry-ts** designed to go hand in hand with browser's native APIs.
+**cherry-ts** provides a set of functions and types to make your life easier when working with DOM.
 
-**master-ts** focuses on two primary areas:
+**cherry-ts** focuses on two primary areas:
 - **Reactivity**: Provides you with signal related functions and types to make your DOM reactive.
 - **Templates**: Provides you with a set of functions and types to make your DOM templating easier.
 
-Let's first get an idea of how a code that uses **master-ts** looks like:
+Let's first get an idea of how a code that uses **cherry-ts** looks like:
 */
 
 export const example = code(() => {
@@ -41,7 +41,11 @@ export const example = code(() => {
             html`
                 <div class="hello">
                     <div>Hello</div>
-                    <form on:submit=${(e) => (e.preventDefault(), alert(`Hello ${world.ref}`))}>
+                    <form
+                        on:submit=${(e) => (
+                            e.preventDefault(), alert(`Hello ${world.ref}`)
+                        )}
+                    >
                         <input type="text" bind:value=${world} />
                         <button>Hello ${world}</button>
                     </form>
@@ -51,7 +55,7 @@ export const example = code(() => {
                     <x ${Counter(counter)} class="counter"></x>
                     <div>Double: ${() => counter.ref * 2}</div>
                 </div>
-            `
+            `,
         )
 
         return host
@@ -81,7 +85,7 @@ export const example = code(() => {
                 <button on:click=${() => count.ref++}>+</button>
                 ${count}
                 <button on:click=${() => count.ref--}>-</button>
-            `
+            `,
         )
 
         return host
@@ -107,7 +111,7 @@ export const example = code(() => {
 
 //#region Signal Basics
 /*
-Signals are the most basic building block of **master-ts** reactivity. 
+Signals are the most basic building block of **cherry-ts** reactivity. 
 
 A Signal is a wrapper around a value that notifies its followers when the value changes.<br/>
 So it's a way to follow the changes of a value.
@@ -346,11 +350,11 @@ export const derivedSignalMemoizationExample = code(() => {
 
 //#region Signal Mutability
 /* 
-**master-ts** both have mutable and immutable signals.
+**cherry-ts** both have mutable and immutable signals.
 
 But it's probably not what you think.
 
-**master-ts** signals are always mutable on runtime, but we have two typescript types for signals:
+**cherry-ts** signals are always mutable on runtime, but we have two typescript types for signals:
 - `Signal<T>`: Which is Immutable
 - `Signal.Mut<T>`: Which is Mutable
 
@@ -376,7 +380,7 @@ code(() => {
 
 //#region Lifecycle
 /*
-**master-ts** provides you with a function called `onConnected$()` to follow the lifecycle of a `Node`.<br/>
+**cherry-ts** provides you with a function called `onConnected$()` to follow the lifecycle of a `Node`.<br/>
 `$` at the end of the function name is a convention to indicate that the function follows the lifecycle of a `Node`.
 You can see the same naming convention used at the 
 [#Binding following to a Node](#/usage/signal-basics/following-signals/binding-following-to-a-node) section.
@@ -410,14 +414,14 @@ export const onConnected$Example = code(() => {
 
 //#region Templates
 /*
- **master-ts** provides you with a set of functions and types to make your DOM templating easier.
+ **cherry-ts** provides you with a set of functions and types to make your DOM templating easier.
  */
 
 //#region HTML Templates
 /*
-In **master-ts** there is two ways to create HTML templates:
+In **cherry-ts** there is two ways to create HTML templates:
 - Using the `html` template literal tag.
-- And using the `$` `Proxy` namespace. Which is a part of the core of **master-ts**.
+- And using the `$` `Proxy` namespace. Which is a part of the core of **cherry-ts**.
 
 Let's see an example of both:
 */
@@ -433,8 +437,8 @@ export const htmlTemplateExample = code(() => {
         div({ class: "actions" }, [
             button({ "on:click": () => foo.ref++ }, ["Increment Foo"]),
             " ",
-            button({ "on:click": () => bar.ref++ }, ["Increment Bar"])
-        ])
+            button({ "on:click": () => bar.ref++ }, ["Increment Bar"]),
+        ]),
     ])
 
     const example2 = html`
@@ -547,7 +551,10 @@ export const awaitedSignalInitialValueExample = code(() => {
         return text.toUpperCase()
     }
 
-    const awaitedPromise = derive(() => awaited(upperCase(text.ref), "loading..."), [text])
+    const awaitedPromise = derive(
+        () => awaited(upperCase(text.ref), "loading..."),
+        [text],
+    )
 
     // end
 
@@ -570,7 +577,7 @@ export const eachSignalExample = code(() => {
     function createItem(text: string) {
         return {
             id: randomId(),
-            text
+            text,
         }
     }
 
@@ -584,7 +591,7 @@ export const eachSignalExample = code(() => {
         createItem("grault"),
         createItem("garply"),
         createItem("waldo"),
-        createItem("fred")
+        createItem("fred"),
     ])
 
     function randomlyMoveItem() {
@@ -597,7 +604,11 @@ export const eachSignalExample = code(() => {
 
     const itemsWithRandomText = each(items)
         .key((item, index) => item.id)
-        .as((item, index) => html` <div>${() => item.ref.text} - ${index} ${randomId()}</div> `)
+        .as(
+            (item, index) => html`
+                <div>${() => item.ref.text} - ${index} ${randomId()}</div>
+            `,
+        )
 
     return html`
         <div>
@@ -627,7 +638,7 @@ Proof of function inside `as()` won't be called again for the same `key` is;
 When you click the `Randomly Move Item` button, `${randomId()}` inside the `as()` function won't change.
 
 If you inspect the DOM of the Example above you will see that when you click the `Randomly Move Item` button,
-minimum number of DOM nodes are changed. This is thanks to how master-ts templates handle signal arrays.
+minimum number of DOM nodes are changed. This is thanks to how cherry-ts templates handle signal arrays.
 As long as you are giving the same items to an array, template is gonna do its best to not change the DOM.
 
 So `each()` itself doesn't do any DOM manipulation. It just maps signal of an array while memoizing the items based on the `key` you provide.
@@ -670,11 +681,11 @@ export const matchSignalExample = code(() => {
             fooBar.ref.type === "foo"
                 ? {
                       type: "bar",
-                      value: randomString()
+                      value: randomString(),
                   }
                 : {
                       type: "foo",
-                      value: randomInt()
+                      value: randomInt(),
                   }
     }
 
@@ -691,11 +702,17 @@ export const matchSignalExample = code(() => {
             ${match(fooBar)
                 .case(
                     { type: "foo" },
-                    (foo) => html`<div>Foo: ${() => foo.ref.value} - Rendered ${++fooCounter} times</div>`
+                    (foo) =>
+                        html`<div>
+                            Foo: ${() => foo.ref.value} - Rendered ${++fooCounter} times
+                        </div>`,
                 )
                 .case(
                     { type: "bar" },
-                    (bar) => html`<div>Bar: ${() => bar.ref.value} - Rendered ${++barCounter} times</div>`
+                    (bar) =>
+                        html`<div>
+                            Bar: ${() => bar.ref.value} - Rendered ${++barCounter} times
+                        </div>`,
                 )
                 .default()}
         </div>
@@ -733,7 +750,10 @@ export const matchSignalExample2 = code(() => {
         <div>
             ${match(foo)
                 .case(null, () => html`<div>Foo is null</div>`)
-                .default((value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)}
+                .default(
+                    (value) =>
+                        html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`,
+                )}
         </div>
     `
     // end
@@ -748,7 +768,11 @@ export const matchSignalExample3 = code(() => {
     return html`
         <div>
             ${match(foo)
-                .case({ [TYPEOF]: "string" }, (value) => html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`)
+                .case(
+                    { [TYPEOF]: "string" },
+                    (value) =>
+                        html`<div>${value} - ${() => value.ref.toUpperCase()}</div>`,
+                )
                 .default(() => html`<div>Foo is null</div>`)}
         </div>
     `
@@ -764,7 +788,10 @@ export const matchSignalExample4 = code(() => {
     return html`
         <div>
             ${match(foo)
-                .case({ [INSTANCEOF]: Date }, (value) => html`<div>${() => value.ref.toDateString()}</div>`)
+                .case(
+                    { [INSTANCEOF]: Date },
+                    (value) => html`<div>${() => value.ref.toDateString()}</div>`,
+                )
                 .default(() => html`<div>Foo is null</div>`)}
         </div>
     `
@@ -774,7 +801,7 @@ export const matchSignalExample4 = code(() => {
 /*
 And all of these are fully type checked by TypeScript. Correctly narrowed, exhausted and everything.
 You can experiment with it and see for yourself. 
-Also, open an issue if you find any weird behavior: [Github Issues](https://github.com/DeepDoge/master-ts/issues)
+Also, open an issue if you find any weird behavior: [Github Issues](https://github.com/DeepDoge/cherry-ts/issues)
 */
 
 //#endregion

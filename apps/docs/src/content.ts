@@ -1,10 +1,13 @@
+import { customTag, populate, tags } from "cherry-ts"
 import { marked } from "marked"
-import { customTag, populate, tags } from "master-ts"
 import { Codeblock } from "./components/codeblock.ts"
 import { DemoWrapper } from "./components/demo.ts"
 import { Heading } from "./components/heading.ts"
 import * as docNS from "./doc.ts"
-import { parseDocumentation, type ParseDocumentation } from "./libs/parser.ts" assert { type: "macro" }
+import {
+    parseDocumentation,
+    type ParseDocumentation,
+} from "./libs/parser.ts" assert { type: "macro" }
 import { inlineRaw } from "./macros/read.ts" assert { type: "macro" }
 import { commonStyleSheet } from "./styles.ts"
 
@@ -20,9 +23,11 @@ export function Docs() {
         dom,
         html`
             <div class="content">
-                ${parseDocumentation(inlineRaw("./apps/docs/src/doc.ts")).map((item) => renderItem(item))}
+                ${parseDocumentation(inlineRaw("./apps/docs/src/doc.ts")).map((item) =>
+                    renderItem(item),
+                )}
             </div>
-        `
+        `,
     )
 
     return host
@@ -35,7 +40,7 @@ function renderItem(item: ParseDocumentation.Item, parentId = "", depth = 0): No
             const id = `${parentId}/${item.name.replace(/\s+/g, "-").toLowerCase()}`
             return section({ class: "region" }, [
                 Heading($[`h${1 + depth}`]!({}, [item.name]) as HTMLHeadingElement, id),
-                item.items.map((item) => renderItem(item, id, depth + 1))
+                item.items.map((item) => renderItem(item, id, depth + 1)),
             ])
         }
         case "comment": {
@@ -53,7 +58,7 @@ function renderItem(item: ParseDocumentation.Item, parentId = "", depth = 0): No
         case "demo": {
             return fragment(
                 Codeblock(item.content),
-                populate(DemoWrapper(), [docNS[item.name as keyof typeof docNS]()])
+                populate(DemoWrapper(), [docNS[item.name as keyof typeof docNS]()]),
             )
         }
         default:

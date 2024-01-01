@@ -1,6 +1,6 @@
-import { populate, signal } from "master-ts/core.ts"
-import { css } from "master-ts/extra/css.ts"
-import { html } from "master-ts/extra/html.ts"
+import { populate, signal } from "cherry-ts/core.ts"
+import { css } from "cherry-ts/extra/css.ts"
+import { html } from "cherry-ts/extra/html.ts"
 import { commonStyleSheet } from "../styles.ts"
 
 const hash = signal(location.hash, (set) => {
@@ -12,7 +12,7 @@ export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
     populate(host, {
         class: "heading",
         id,
-        "class:active": () => hash.ref === `#${id}`
+        "class:active": () => hash.ref === `#${id}`,
     })
     const dom = host.attachShadow({ mode: "open" })
     dom.adoptedStyleSheets.push(commonStyleSheet, sheet)
@@ -20,9 +20,10 @@ export function Heading<T extends HTMLHeadingElement>(host: T, id: string) {
     hash.follow$(
         host,
         (hash) => {
-            if (hash === `#${id}`) host.scrollIntoView({ block: "center", inline: "nearest" })
+            if (hash === `#${id}`)
+                host.scrollIntoView({ block: "center", inline: "nearest" })
         },
-        { mode: "immediate" }
+        { mode: "immediate" },
     )
 
     populate(dom, html`<a href=${`#${id}`}>#</a> <slot />`)

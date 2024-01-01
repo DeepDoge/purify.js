@@ -1,14 +1,15 @@
+# cherry-ts
+
 <p align="center">
-    <img width="240px" height="auto" src="https://ipfs.io/ipfs/QmRZXurxmTZwQC2GPrdNidPJ3PS4SrXSFqkeeoV24DXt4e" />
+    <img width="50px" height="auto" src="https://ipfs.io/ipfs/QmeJYkkWTX27V2wUKbhu1syGqPorcVznTNQhArUGVPDqn7" />
 </p>
 <p align="center">
-    A lightweight TypeScript library designed for creating SPAs, that is complementary to the browser's
-    native APIs. Small yet powerful. Simple yet still useful.
+    A lightweight TypeScript library designed for creating SPAs. Cherry on top of vanilla JS.
 </p>
 
 ## Size ⚡
 
-**master-ts** has a really small bundle size. Yet it still has everything you need and more to build a SPA.
+**cherry-ts** has a really small bundle size. Yet it still has everything you need and more to build a SPA.
 
 **min.js.gz:** 2.39kb<br/>
 **min.js:** 4.68kb
@@ -51,24 +52,20 @@
 
 ## Installation 🍙
 
-[Install Instructions](https://github.com/DeepDoge/master-ts/releases)
+[Install Instructions](https://github.com/DeepDoge/cherry-ts/releases)
 
 ## Documentation 🍱
 
-Work in progress
-
-**OUTDATED**
-
-[Currently Available Unfinished Documentation](https://ipfs.io/ipfs/QmQCSG75nx3y8CyrTiBkP6d75BGZKAHQ6Ex4JgNNrBsmwL)
+Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all the time atm, maintaining the documentation is hard this early.
 
 ## Motivation 🍣
 
-Nntive browser APIs has been getting better, and **master-ts** is designed to be complementary to native browser APIs, not to replace them.
+Native browser APIs has been getting better, and **cherry-ts** is designed to be complementary to native browser APIs, not to replace them.
 
-By only focusing on SPAs, **master-ts** is able work better with the browser's native APIs.
-This also makes it easier to learn, and easier to use with other libraries and frameworks. If you know browser's native vanilla APIs and HTML, you already know **master-ts**
+By only focusing on SPAs, **cherry-ts** is able work better with the browser's native APIs.
+This also makes it easier to learn, and easier to use with other libraries and frameworks. If you know browser's native vanilla APIs and HTML, you already know **cherry-ts**
 
-**master-ts** doesn't tell you how to build a component, how to mount a component, or what is a component. And most importantly, it doesn't break when you use browsers native APIs on your DOM because it works with them.
+**cherry-ts** doesn't tell you how to build a component, how to mount a component, or what is a component. And most importantly, it doesn't break when you use browsers native APIs on your DOM because it works with them.
 
 It gives you the freedom to build your app however you want:
 
@@ -80,16 +77,15 @@ It gives you the freedom to build your app however you want:
 -   Wanna make class based Components? Go ahead.
 -   Wanna make functional Components? Go ahead.
 
-Do whatever you want, in the way you want, and **master-ts** will work with you.<br/>
-Because, **master-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
-It's a complementent to native vanilla browser APIs.
+Do whatever you want, in the way you want, and **cherry-ts** will work with you.<br/>
+Because, **cherry-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
 
 ## Todo Example
 
 Todo example with a functional component and CSS `@scoped`
 
 ```ts
-import { css, each, effect$, populate, sheet, signal, tags } from "master-ts"
+import { css, each, effect$, populate, sheet, signal, tags } from "cherry-ts"
 
 const { div, textarea, style, button } = tags
 
@@ -102,7 +98,7 @@ export function Todo() {
         new Set<TodoItem>([
             { text: "Learn about Web Components", completed: true },
             { text: "Learn about native JS APIs", completed: false },
-            { text: "Learn master-ts", completed: false },
+            { text: "Learn cherry-ts", completed: false },
             { text: "Build an app", completed: false },
         ]),
     )

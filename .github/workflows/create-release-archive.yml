@@ -25,10 +25,10 @@ jobs:
                   mkdir -p release-archives
 
                   # Check if .npmignore exists, and if so, use it to filter files for archiving
-                   if [ -f "packages/master-ts/.npmignore" ]; then
-                    tar -czvf release-archives/package.tgz -C packages --exclude-from=packages/master-ts/.npmignore master-ts
+                   if [ -f "packages/cherry-ts/.npmignore" ]; then
+                    tar -czvf release-archives/package.tgz -C packages --exclude-from=packages/cherry-ts/.npmignore cherry-ts
                    else
-                    tar -czvf release-archives/package.tgz -C packages master-ts
+                    tar -czvf release-archives/package.tgz -C packages cherry-ts
                    fi
 
             - name: Upload Archive to Release
