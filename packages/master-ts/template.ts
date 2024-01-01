@@ -34,25 +34,25 @@ export namespace Template {
                   ? MathMLElement
                   : Element)
 
-    export type Member<T extends ParentNode> =
+    export type MemberOf<T extends ParentNode> =
         | string
         | number
         | boolean
         | bigint
         | null
         | ChildNodeOf<T>
-        | readonly Member<Extract<ChildNodeOf<T>, ParentNode>>[]
+        | readonly MemberOf<Extract<ChildNodeOf<T>, ParentNode>>[]
         | readonly Exclude<ChildNodeOf<T>, ParentNode>[]
-        | (() => Member<Extract<ChildNodeOf<T>, ParentNode>>)
+        | (() => MemberOf<Extract<ChildNodeOf<T>, ParentNode>>)
         | (() => Exclude<ChildNodeOf<T>, ParentNode>)
-        | Signal<Member<Extract<ChildNodeOf<T>, ParentNode>>>
+        | Signal<MemberOf<Extract<ChildNodeOf<T>, ParentNode>>>
         | Signal<Exclude<ChildNodeOf<T>, ParentNode>>
 
     export type Builder<T extends ParentNode> = T extends Element
         ? {
               <
                   const TProps extends Props<T>,
-                  const TChildren extends readonly Member<T>[],
+                  const TChildren extends readonly MemberOf<T>[],
               >(
                   ...args:
                       | [props?: VerifyPropsGeneric<T, TProps>, children?: TChildren]
@@ -60,7 +60,7 @@ export namespace Template {
               ): T
           }
         : {
-              <const TChildren extends readonly Member<T>[]>(children?: TChildren): T
+              <const TChildren extends readonly MemberOf<T>[]>(children?: TChildren): T
           }
 
     export type VerifyPropsGeneric<E extends Element, T extends Props<E>> = T &
@@ -75,33 +75,24 @@ export namespace Template {
               >}`)
 
     type ExtractPossibleAttributes<T extends Element> = Utils.WritablePart<{
-        [K in keyof T as K extends string
-            ? string extends K
-                ? never
-                : K extends Lowercase<K>
-                  ? T[K] extends string | boolean | number | null
-                      ? K
+        [K in keyof T as Exclude<T[K], string | boolean> extends never
+            ? K extends string
+                ? string extends K
+                    ? never
+                    : K extends Lowercase<K>
+                      ? Utils.KebabCase<K>
                       : never
-                  : never
-            : never]?: NonNullable<T[K]> | null
+                : never
+            : never]?: NonNullable<T[K] extends boolean ? "true" | "" : T[K]> | null
     }>
 
-    export type AriaAttributes = {
-        [K in `aria-`]?: string | null
-    } & {
-        [K in `aria-${string}`]?: string | null
-    } & {
-        [K in keyof ARIAMixin as string extends K
-            ? never
-            : K extends string
-              ? Utils.Kebab<K>
-              : never]?: NonNullable<ARIAMixin[K]> | null
+    export type ARIAAttributes = {
+        [K in keyof ARIAMixin as Utils.KebabCase<K>]?: NonNullable<ARIAMixin[K]> | null
     }
 
     export type Attributes<T extends Element> = {
         [K in `data-` | string]?: unknown
     } & ExtractPossibleAttributes<T> &
-        AriaAttributes &
         (T extends { className: string | null } ? { class?: string } : {})
 
     export type Styles<T extends ElementCSSInlineStyle> = Omit<
@@ -110,7 +101,7 @@ export namespace Template {
                 ? string extends K
                     ? never
                     : T["style"][K] extends string | null
-                      ? Utils.Kebab<K>
+                      ? Utils.KebabCase<K>
                       : never
                 : never]: T["style"][K] | null
         },

@@ -25,11 +25,11 @@ export namespace Utils {
         | "y"
         | "z"
 
-    export type Kebab<
+    export type KebabCase<
         T extends string,
         A extends string = "",
     > = T extends `${infer F}${infer R}`
-        ? Kebab<R, `${A}${F extends Lowercase<F> ? "" : "-"}${Lowercase<F>}`>
+        ? KebabCase<R, `${A}${F extends Lowercase<F> ? "" : "-"}${Lowercase<F>}`>
         : A
 
     export type CanDecide<T, U> = boolean extends (T extends U ? true : false)
@@ -84,11 +84,6 @@ export namespace Utils {
     }[keyof T]
     export type WritablePart<T> = Pick<T, WritableKeysOf<T>>
 
-    export type IsReadonly<T> = T extends { readonly [K in keyof T]: IsReadonly<T[K]> }
-        ? true
-        : false
-
-    export type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } & {} : T
     export type DeepOptional<T> = T extends object
         ? { [K in keyof T]?: DeepOptional<T[K]> }
         : T

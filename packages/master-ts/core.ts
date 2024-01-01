@@ -361,7 +361,9 @@ let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
               : doc!.createTextNode(value + EMPTY_STRING)
 }
 
-export let fragment = <const TChildren extends readonly Template.Member<ParentNode>[]>(
+export let fragment = <
+    const TChildren extends readonly Template.MemberOf<DocumentFragment>[],
+>(
     ...children: TChildren
 ): DocumentFragment => {
     let result = doc!.createDocumentFragment()
@@ -414,13 +416,14 @@ export let populate: {
     isArray(args[1])
         ? (populate_Node as any)(...args)
         : (populate_Element as any)(...args)
-let populate_Node = <T extends ParentNode>(node: T, children?: Template.Member<T>[]) => (
-    children && node.appendChild(toNode(children)), node
-)
+let populate_Node = <T extends ParentNode>(
+    node: T,
+    children?: Template.MemberOf<T>[],
+) => (children && node.appendChild(toNode(children)), node)
 let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
     element: T,
     props?: Template.Props<T>,
-    children?: Template.Member<T>[],
+    children?: Template.MemberOf<T>[],
 ) => (
     props &&
         Object.keys(props)[FOR_EACH]((key) =>
