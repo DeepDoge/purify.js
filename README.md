@@ -80,6 +80,11 @@ It gives you the freedom to build your app however you want:
 Do whatever you want, in the way you want, and **cherry-ts** will work with you.<br/>
 Because, **cherry-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
 
+## Why not cherry-js?
+
+`cherry-ts` is relays heavily on TypeScript's type system. It's not possible to use it safely without TypeScript. So it's named `cherry-ts` instead of `cherry-js`.
+If types comes to JS with this new "types as comments" proposal, then I can call it `cherry-js` instead.
+
 ## Todo Example
 
 Todo example with a functional component and CSS `@scoped`
