@@ -1,25 +1,25 @@
 {
-    "type": "module",
-    "name": "cherry-ts-workspace",
-    "workspaces": [
-        "./apps/*",
-        "./packages/*"
-    ],
-    "scripts": {
-        "format": "bunx --bun prettier -w ./",
-        "docs:dev": "bun run ./apps/docs/scripts/dev.ts",
-        "docs:build": "bun run ./apps/docs/scripts/build.ts",
-        "docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
-        "todo:dev": "bun run ./apps/todo/scripts/dev.ts",
-        "todo:build": "bun run ./apps/todo/scripts/build.ts",
-        "empty:build": "bun run ./apps/empty/scripts/build.ts && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/min -x && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/gzip -g -x",
-        "cherry-ts:typecheck": "bunx --bun tsc -p ./packages/cherry-ts --noEmit",
-        "tests": "bun cherry-ts:typecheck && bun test && bun docs:typecheck && bun html:typecheck"
-    },
-    "devDependencies": {
-        "bun-types": "latest",
-        "prettier": "latest",
-        "prettier-plugin-organize-imports": "latest",
-        "typescript": "latest"
-    }
+  "type": "module",
+  "name": "cherry-ts-workspace",
+  "workspaces": [
+    "./apps/*",
+    "./packages/*"
+  ],
+  "scripts": {
+    "format": "bunx --bun prettier -w ./",
+    "docs:dev": "bun run ./apps/docs/scripts/dev.ts",
+    "docs:build": "bun run ./apps/docs/scripts/build.ts",
+    "docs:typecheck": "bunx --bun tsc -p ./apps/docs --noEmit",
+    "todo:dev": "bun run ./apps/todo/scripts/dev.ts",
+    "todo:build": "bun run ./apps/todo/scripts/build.ts",
+    "empty:build": "bun run ./apps/empty/scripts/build.ts && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/min -x && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/gzip -g -x",
+    "cherry-ts:typecheck": "bunx --bun tsc -p ./packages/cherry-ts --noEmit",
+    "tests": "bun cherry-ts:typecheck && bun test && bun docs:typecheck && bun html:typecheck"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "prettier": "latest",
+    "prettier-plugin-organize-imports": "latest",
+    "typescript": "latest"
+  }
 }
