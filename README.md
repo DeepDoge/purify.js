@@ -15,7 +15,7 @@
 **min.js:** 4.68kb
 
 <p align="center">
-    <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
+    <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt?" />
 </p>
 
 #### All of this gives you:
