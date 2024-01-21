@@ -79,12 +79,13 @@ export namespace Template {
             ? K extends string
                 ? string extends K
                     ? never
-                    : K extends Lowercase<K>
-                      ? Utils.KebabCase<K>
-                      : never
+                    : Utils.KebabCase<K>
                 : never
-            : never]?: NonNullable<T[K] extends boolean ? "true" | "" : T[K]> | null
-    }>
+            : never]?: NonNullable<
+            T[K] extends boolean ? "" | "true" | (string & {}) : T[K]
+        > | null
+    }> &
+        (T extends { className: string | null } ? { class?: string } : {})
 
     export type ARIAAttributes = {
         [K in keyof ARIAMixin as Utils.KebabCase<K>]?: NonNullable<ARIAMixin[K]> | null
@@ -93,7 +94,6 @@ export namespace Template {
     export type Attributes<T extends Element> = {
         [K in `data-` | string]?: unknown
     } & ExtractPossibleAttributes<T> &
-        (T extends { className: string | null } ? { class?: string } : {}) &
         ARIAAttributes
 
     export type Styles<T extends ElementCSSInlineStyle> = Omit<
