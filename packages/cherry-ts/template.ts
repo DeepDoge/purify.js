@@ -93,7 +93,8 @@ export namespace Template {
     export type Attributes<T extends Element> = {
         [K in `data-` | string]?: unknown
     } & ExtractPossibleAttributes<T> &
-        (T extends { className: string | null } ? { class?: string } : {})
+        (T extends { className: string | null } ? { class?: string } : {}) &
+        ARIAAttributes
 
     export type Styles<T extends ElementCSSInlineStyle> = Omit<
         {
