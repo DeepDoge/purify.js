@@ -147,11 +147,13 @@ export namespace Template {
     export type Directives<T extends Element> = Readonly<
         Partial<
             { [K in `on:`]: never } & {
-                [K in `on:${string}`]: { (event: Event & { target: T }): void } | Function
+                [K in `on:${string}`]:
+                    | { (event: Event & { currentTarget: T }): void }
+                    | Function
             } & {
                 [K in keyof EventMap<T> as K extends string ? `on:${K}` : never]:
                     | {
-                          (event: EventMap<T>[K] & { target: T }): void
+                          (event: EventMap<T>[K] & { currentTarget: T }): void
                       }
                     | Function
             } & (T extends ElementCSSInlineStyle
