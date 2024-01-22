@@ -1,7 +1,7 @@
 # cherry-ts
 
 <p align="center">
-    <img width="50px" height="auto" alt="cherry-ts logo" src="https://ipfs.io/ipfs/QmWtKLVqAg4Y4oFCeExpkua3SQzuBk4FaiPfNQefsU8dKA" />
+    <img width="100px" height="auto" alt="cherry-ts logo" src="https://ipfs.io/ipfs/QmWtKLVqAg4Y4oFCeExpkua3SQzuBk4FaiPfNQefsU8dKA" />
 </p>
 <p align="center">
     A lightweight TypeScript library designed for creating SPAs. Cherry on top of vanilla JS.
