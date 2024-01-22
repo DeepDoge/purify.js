@@ -430,18 +430,15 @@ let populate_Element = <T extends Element & Partial<ElementCSSInlineStyle>>(
             startsWith(key, "bind:")
                 ? bindSignalAsValue(
                       element as never,
-                      key.slice(4) as never,
+                      key.slice(5) as never,
                       props[key as never] as never,
                   )
                 : startsWith(key, "style:")
-                  ? bindOrSet(
-                        element,
-                        props[key as never]!,
-                        (value) =>
-                            element.style?.setProperty(
-                                key.slice(6),
-                                value === NULL ? value : value + EMPTY_STRING,
-                            ),
+                  ? bindOrSet(element, props[key as never]!, (value) =>
+                        element.style?.setProperty(
+                            key.slice(6),
+                            value === NULL ? value : value + EMPTY_STRING,
+                        ),
                     )
                   : startsWith(key, "class:")
                     ? bindOrSet(element, props[key], (value) =>
