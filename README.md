@@ -1,7 +1,7 @@
 # cherry-ts
 
 <p align="center">
-    <img width="50px" height="auto" src="https://ipfs.io/ipfs/QmeJYkkWTX27V2wUKbhu1syGqPorcVznTNQhArUGVPDqn7" />
+    <img width="50px" height="auto" alt="cherry-ts logo" src="https://ipfs.io/ipfs/QmWtKLVqAg4Y4oFCeExpkua3SQzuBk4FaiPfNQefsU8dKA" />
 </p>
 <p align="center">
     A lightweight TypeScript library designed for creating SPAs. Cherry on top of vanilla JS.
@@ -15,7 +15,7 @@
 **min.js:** 4.68kb
 
 <p align="center">
-    <img width="auto" height="auto" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
+    <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
 </p>
 
 #### All of this gives you:
