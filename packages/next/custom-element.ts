@@ -8,7 +8,6 @@ export namespace CustomElement {
 
 export type CustomElement<T extends HTMLElement = HTMLElement> = T & {
     onConnect$(listener: CustomElement.ConnectListener): void
-    onCleanup$(listener: CustomElement.DisconnectListener): void
 }
 
 let cache = new Map<string, new () => HTMLElement>()
@@ -33,32 +32,32 @@ export let CustomElement: {
 } = (tag: CustomElement.Tag, extendsTag?: string): new () => CustomElement => {
     let constructor = extendsTag ? constructorOf(extendsTag) : HTMLElement
 
-    let connectedListeners = new Set<CustomElement.ConnectListener>()
-    let disconnectedListeners = new Set<CustomElement.DisconnectListener>()
-    let callConnectedListener = (listener: CustomElement.ConnectListener) => {
-        let result = listener()
-        result && disconnectedListeners.add(result)
-    }
-
     custom.define(
         tag,
         class extends constructor implements CustomElement {
-            [ON_CONNECT](listener: CustomElement.ConnectListener): void {
-                connectedListeners.add(listener)
-                this.isConnected && callConnectedListener(listener)
+            #connectedListeners = new Set<CustomElement.ConnectListener>()
+            #disconnectedListeners = new Set<CustomElement.DisconnectListener>()
+
+            #callConnectedListener(listener: CustomElement.ConnectListener) {
+                let result = listener()
+                result && this.#disconnectedListeners.add(result)
             }
 
-            onCleanup$(listener: CustomElement.DisconnectListener): void {
-                disconnectedListeners.add(listener)
-                this.isConnected && listener()
+            [ON_CONNECT](listener: CustomElement.ConnectListener): void {
+                let self = this
+                self.#connectedListeners.add(listener)
+                self.isConnected && self.#callConnectedListener(listener)
             }
 
             connectedCallback() {
-                connectedListeners.forEach(callConnectedListener)
+                let self = this
+                self.#connectedListeners.forEach((listener) =>
+                    self.#callConnectedListener(listener),
+                )
             }
 
             disconnectedCallback() {
-                disconnectedListeners.forEach((listener) => listener())
+                this.#disconnectedListeners.forEach((listener) => listener())
             }
         },
         extendsTag ? { extends: extendsTag } : {},

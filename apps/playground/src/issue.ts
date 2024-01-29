@@ -1,4 +1,4 @@
-import { derive, signal, tags } from "cherry-ts"
+import { derive, signal, Tags } from "cherry-ts-next"
 
 export function Issue() {
     const value = signal(null as string[] | null)
@@ -9,24 +9,9 @@ export function Issue() {
         value.ref = value.ref ? null : arr
     }
 
-    const dom = tags.div([
-        tags.button({ "on:click": toggle }, ["Toggle"]),
-        derive(
-            () => (
-                console.log("outer", value.ref, dom.innerHTML),
-                value.ref instanceof Array
-                    ? derive(
-                          () => (
-                              console.log("inner", value.ref, dom.innerHTML),
-                              [
-                                  tags.div({ "data-test": "inner" }),
-                                  value.ref.map((v) => tags.div([v])),
-                              ]
-                          ),
-                      )
-                    : "nothing"
-            ),
-        ),
+    const dom = Tags.div([
+        Tags.button({ "on:click": toggle }, ["Toggle"]),
+        derive(() => (value.ref instanceof Array ? derive(() => value.ref) : "nothing")),
     ])
 
     return dom

@@ -13,17 +13,31 @@ import {
 import { Signal, SignalLikeOrValue, isSignal } from "./signal"
 import { Utils } from "./utils"
 
+let constructors = new Map<string, new () => CustomElement>()
+
 export let Tags = new Proxy(
     {},
     {
-        get(_, tag: string) {},
+        get(_, tag: string) {
+            let constructor = constructors.get(tag)
+            return (...args: Tags.Builder.Parameters<CustomElement>) =>
+                populate(
+                    new (constructor ||
+                        (constructors.set(
+                            tag,
+                            (constructor = CustomElement(`xch-${tag}`, tag)),
+                        ),
+                        constructor))(),
+                    ...args,
+                )
+        },
     },
 ) as Tags
 
 let fragment: Tags.Builder<DocumentFragment> = (
     children,
     fragment = doc.createDocumentFragment(),
-) => (children && populateNode(fragment, children), fragment)
+) => (children && fragment.append(...children.map(toNode)), fragment)
 
 let SignalElement = CustomElement("xch-signal")
 type SignalElement = InstanceType<typeof SignalElement>
@@ -32,18 +46,18 @@ let signalAsElement = <T>(signal: Signal<T>): SignalElement => {
     let dom = new SignalElement()
     dom.style.display = "contents"
 
-    dom[ON_CONNECT](
-        signal[FOLLOW](
-            (value: T) => ((dom.innerHTML = EMPTY_STRING), dom.append(toNode(value))),
-            FOLLOW_IMMEDIATE_OPTIONS,
-        ),
+    dom[ON_CONNECT](() =>
+        signal[FOLLOW]((value: T) => {
+            while (dom.firstChild) dom.firstChild.remove()
+            dom.append(toNode(value))
+        }, FOLLOW_IMMEDIATE_OPTIONS),
     )
 
     return dom
 }
 
-let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
-    return value === null
+let toNode = (value: unknown): CharacterData | Element | DocumentFragment =>
+    value === null
         ? fragment()
         : isArray(value)
           ? fragment(value.map(toNode))
@@ -51,8 +65,7 @@ let toNode = (value: unknown): CharacterData | Element | DocumentFragment => {
             ? value
             : isSignal(value)
               ? signalAsElement(value)
-              : doc.createTextNode(value + EMPTY_STRING)
-}
+              : doc!.createTextNode(value + EMPTY_STRING)
 
 let bindOrSet = <T>(
     customElement: CustomElement,
@@ -60,7 +73,7 @@ let bindOrSet = <T>(
     then: (value: T) => void,
 ): void =>
     isSignal(value)
-        ? customElement[ON_CONNECT](value[FOLLOW](then, FOLLOW_IMMEDIATE_OPTIONS))
+        ? customElement[ON_CONNECT](() => value[FOLLOW](then, FOLLOW_IMMEDIATE_OPTIONS))
         : then(value)
 
 let bindSignalAsValue = <
@@ -78,7 +91,7 @@ let bindSignalAsValue = <
         "input",
         (event: Event) => (signal.ref = (event.target as T)[key]),
     ), // All new browsers will remove the listeners automatically. So no need to waste code removing it manually here.
-    element[ON_CONNECT](
+    element[ON_CONNECT](() =>
         signal[FOLLOW]((value) => (element[key] = value), FOLLOW_IMMEDIATE_OPTIONS),
     )
 )
@@ -88,7 +101,7 @@ export let populate = <T extends ParentNode>(
 ) => (isArray(args[1]) ? populateNode(...args) : (populateElement as Function)(...args))
 
 let populateNode = <T extends ParentNode>(node: T, children?: Tags.MemberOf<T>[]) => (
-    children && node.appendChild(toNode(children)), node
+    children && node.append(toNode(children)), node
 )
 let populateElement = <T extends CustomElement>(
     element: T,
@@ -125,7 +138,9 @@ let populateElement = <T extends CustomElement>(
 )
 
 export type Tags = {
-    [K in keyof HTMLElementTagNameMap]: Tags.Builder<HTMLElementTagNameMap[K]>
+    [K in keyof HTMLElementTagNameMap]: Tags.Builder<
+        CustomElement<HTMLElementTagNameMap[K]>
+    >
 } & {
     [tag: string]: Tags.Builder<HTMLElement>
 }
@@ -251,104 +266,108 @@ export namespace Tags {
         >
     >
 
+    export type ARIAAttributes = {
+        [K in Exclude<keyof ARIAMixin, "role"> as Utils.KebabCase<K>]: ARIAMixin[K]
+    } & {
+        role?:
+            | "alert"
+            | "alertdialog"
+            | "application"
+            | "article"
+            | "banner"
+            | "button"
+            | "cell"
+            | "checkbox"
+            | "columnheader"
+            | "combobox"
+            | "command"
+            | "comment"
+            | "complementary"
+            | "composite"
+            | "contentinfo"
+            | "definition"
+            | "dialog"
+            | "directory"
+            | "document"
+            | "document"
+            | "feed"
+            | "figure"
+            | "form"
+            | "generic"
+            | "grid"
+            | "gridcell"
+            | "group"
+            | "heading"
+            | "img"
+            | "input"
+            | "landmark"
+            | "link"
+            | "list"
+            | "listbox"
+            | "listitem"
+            | "log"
+            | "main"
+            | "mark"
+            | "marquee"
+            | "math"
+            | "menu"
+            | "menubar"
+            | "menuitem"
+            | "menuitemcheckbox"
+            | "menuitemradio"
+            | "meter"
+            | "navigation"
+            | "none"
+            | "note"
+            | "option"
+            | "presentation"
+            | "progressbar"
+            | "radio"
+            | "radiogroup"
+            | "range"
+            | "region"
+            | "roletype"
+            | "row"
+            | "rowgroup"
+            | "rowheader"
+            | "scrollbar"
+            | "search"
+            | "searchbox"
+            | "section"
+            | "sectionhead"
+            | "select"
+            | "separator"
+            | "slider"
+            | "spinbutton"
+            | "status"
+            | "structure"
+            | "suggestion"
+            | "switch"
+            | "tab"
+            | "table"
+            | "tablist"
+            | "tabpanel"
+            | "term"
+            | "textbox"
+            | "timer"
+            | "toolbar"
+            | "tooltip"
+            | "tree"
+            | "treegrid"
+            | "treeitem"
+            | "widget"
+            | "window"
+            | (string & {})
+    }
+
     export type Attributes<T extends Element> = Readonly<
         {
-            [K in string]: unknown
+            [name: string]: unknown
         } & {
             [K in `data-`]: never
         } & {
             [K in `data-`]?: string
-        } & {
-            role?:
-                | "alert"
-                | "alertdialog"
-                | "application"
-                | "article"
-                | "banner"
-                | "button"
-                | "cell"
-                | "checkbox"
-                | "columnheader"
-                | "combobox"
-                | "command"
-                | "comment"
-                | "complementary"
-                | "composite"
-                | "contentinfo"
-                | "definition"
-                | "dialog"
-                | "directory"
-                | "document"
-                | "document"
-                | "feed"
-                | "figure"
-                | "form"
-                | "generic"
-                | "grid"
-                | "gridcell"
-                | "group"
-                | "heading"
-                | "img"
-                | "input"
-                | "landmark"
-                | "link"
-                | "list"
-                | "listbox"
-                | "listitem"
-                | "log"
-                | "main"
-                | "mark"
-                | "marquee"
-                | "math"
-                | "menu"
-                | "menubar"
-                | "menuitem"
-                | "menuitemcheckbox"
-                | "menuitemradio"
-                | "meter"
-                | "navigation"
-                | "none"
-                | "note"
-                | "option"
-                | "presentation"
-                | "progressbar"
-                | "radio"
-                | "radiogroup"
-                | "range"
-                | "region"
-                | "roletype"
-                | "row"
-                | "rowgroup"
-                | "rowheader"
-                | "scrollbar"
-                | "search"
-                | "searchbox"
-                | "section"
-                | "sectionhead"
-                | "select"
-                | "separator"
-                | "slider"
-                | "spinbutton"
-                | "status"
-                | "structure"
-                | "suggestion"
-                | "switch"
-                | "tab"
-                | "table"
-                | "tablist"
-                | "tabpanel"
-                | "term"
-                | "textbox"
-                | "timer"
-                | "toolbar"
-                | "tooltip"
-                | "tree"
-                | "treegrid"
-                | "treeitem"
-                | "widget"
-                | "window"
-                | (string & {})
-        }
+        } & ARIAAttributes
     >
 
     export type Props<T extends Element> = Readonly<{
