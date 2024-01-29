@@ -11,7 +11,11 @@ export function Issue() {
 
     const dom = Tags.div([
         Tags.button({ "on:click": toggle }, ["Toggle"]),
-        derive(() => (value.ref instanceof Array ? derive(() => value.ref) : "nothing")),
+        derive(() =>
+            value.ref instanceof Array
+                ? derive(() => [value.ref.map((v) => Tags.div([v]))])
+                : "nothing",
+        ),
     ])
 
     return dom
