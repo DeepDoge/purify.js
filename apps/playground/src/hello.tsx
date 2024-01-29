@@ -1,6 +1,6 @@
-import { css, customTag, sheet, signal, tags } from "cherry-ts"
+import { css, CustomElement, sheet, signal, tags } from "cherry-ts"
 
-const helloTag = customTag("x-hello")
+const helloTag = CustomElement("x-hello")
 export function Hello() {
     const root = helloTag()
     const dom = root.attachShadow({ mode: "open" })

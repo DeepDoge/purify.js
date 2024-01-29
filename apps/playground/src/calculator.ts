@@ -16,9 +16,9 @@ export function Calculator() {
 
     return div([
         input({ type: "text", "bind:value": value }),
-        div({ class: "result" }, [() => (isNumber(result()) ? result() : "")]),
+        div({ className: "result" }, [() => (isNumber(result()) ? result() : "")]),
 
-        div({ class: "buttons" }, [
+        div({ className: "buttons" }, [
             button({ "on:click": () => (value.ref = ""), "style:grid-area": "clear" }, [
                 "Clear",
             ]),

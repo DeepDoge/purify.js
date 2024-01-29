@@ -1,4 +1,4 @@
-import { INSTANCEOF, each, match, signal, tags } from "cherry-ts"
+import { derive, signal, tags } from "cherry-ts"
 
 export function Issue() {
     const value = signal(null as string[] | null)
@@ -9,14 +9,25 @@ export function Issue() {
         value.ref = value.ref ? null : arr
     }
 
-    return [
+    const dom = tags.div([
         tags.button({ "on:click": toggle }, ["Toggle"]),
-        match(value)
-            .case({ [INSTANCEOF]: Array }, (value) =>
-                each(value)
-                    .key((value) => value)
-                    .as((item) => item),
-            )
-            .default(() => "nothing"),
-    ] as const
+        derive(
+            () => (
+                console.log("outer", value.ref, dom.innerHTML),
+                value.ref instanceof Array
+                    ? derive(
+                          () => (
+                              console.log("inner", value.ref, dom.innerHTML),
+                              [
+                                  tags.div({ "data-test": "inner" }),
+                                  value.ref.map((v) => tags.div([v])),
+                              ]
+                          ),
+                      )
+                    : "nothing"
+            ),
+        ),
+    ])
+
+    return dom
 }

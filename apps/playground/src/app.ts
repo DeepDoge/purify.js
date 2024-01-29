@@ -1,4 +1,4 @@
-import { css, each, effect$, populate, sheet, signal, tags } from "cherry-ts"
+import { css, effect$, populate, sheet, signal, tags } from "cherry-ts"
 import { Issue } from "./issue"
 
 const { div, textarea, style, button } = tags
@@ -37,22 +37,24 @@ export function Todo() {
     effect$(dom, () => console.log("Effect: Todos changed", todos.ref))
     todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
 
-    populate(dom, { class: "" }, [
-        Issue(),
+    populate(dom, { className: "" }, [
+        div({ textContent: "<h1>Todo</h1>" }),
 
-        div({ class: "add" }, [
+        Issue(),
+        /* 
+        div({ className: "add" }, [
             textarea({ "bind:value": newTodoText }),
             button({ "on:click": addTodo }, ["Add Todo"]),
         ]),
 
-        div({ class: "items" }, [
+        div({ className: "items" }, [
             each(() => Array.from(todos.ref))
                 .key((todo) => todo)
                 .as((todo) =>
-                    div({ class: "item" }, [
+                    div({ className: "item" }, [
                         div(
                             {
-                                class: "toggle",
+                                className: "toggle",
                                 role: "button",
                                 "on:click": () => toggleTodo(todo.ref),
                             },
@@ -113,7 +115,7 @@ export function Todo() {
                     }
                 }
             `,
-        ]),
+        ]), */
     ])
 
     return dom
