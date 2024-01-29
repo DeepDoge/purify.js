@@ -48,7 +48,7 @@ let signalAsElement = <T>(signal: Signal<T>): SignalElement => {
 
     dom[ON_CONNECT](() =>
         signal[FOLLOW]((value: T) => {
-            while (dom.firstChild) dom.firstChild.remove()
+            dom.innerHTML = EMPTY_STRING
             dom.append(toNode(value))
         }, FOLLOW_IMMEDIATE_OPTIONS),
     )

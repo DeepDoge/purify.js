@@ -1,4 +1,4 @@
-import { ON_CONNECT, doc } from "./helpers"
+import { FOR_EACH, ON_CONNECT, doc } from "./helpers"
 
 export namespace CustomElement {
     export type Tag = `${string}${string}-${string}${string}`
@@ -51,13 +51,13 @@ export let CustomElement: {
 
             connectedCallback() {
                 let self = this
-                self.#connectedListeners.forEach((listener) =>
+                self.#connectedListeners[FOR_EACH]((listener) =>
                     self.#callConnectedListener(listener),
                 )
             }
 
             disconnectedCallback() {
-                this.#disconnectedListeners.forEach((listener) => listener())
+                this.#disconnectedListeners[FOR_EACH]((listener) => listener())
             }
         },
         extendsTag ? { extends: extendsTag } : {},
