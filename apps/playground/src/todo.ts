@@ -53,6 +53,7 @@ export function Todo(initial: Todo.Item[] = []) {
                                 todos.ping()
                             },
                         }),
+                        () => (todo.ref.done ? "Done!" : null),
                     ]),
                 ),
         ]),
