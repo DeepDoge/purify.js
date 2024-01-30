@@ -3,6 +3,7 @@ import {
     FOLLOW$,
     FOR_EACH,
     IMMEDIATE,
+    UNDEFINED,
     UNFOLLOW,
     isFunction,
     weakMap,
@@ -124,7 +125,7 @@ export let derive = <T>(
         : value ||
               (deriveCache.set(
                   fn,
-                  (value = signal<T>(undefined!, (set) => {
+                  (value = signal<T>(UNDEFINED!, (set) => {
                       let toUnfollow: Set<Signal<unknown>> | undefined
                       let follows = weakMap<Signal<unknown>, Signal.Follow>()
                       let unfollow = () =>

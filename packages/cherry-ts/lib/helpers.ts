@@ -1,6 +1,7 @@
 import { Signal } from "./signals/signal"
+export let UNDEFINED: undefined = (0 as never)[0]
 export let NULL: null = null
-export let doc = (typeof window)[8] ? NULL : document
+export let doc = typeof window == "undefined" ? NULL : document
 export let isFunction = (value: any): value is Function => typeof value == "function"
 export let instanceOf =
     <T extends (abstract new (...args: any) => any)[]>(...types: T) =>

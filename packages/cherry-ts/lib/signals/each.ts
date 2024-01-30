@@ -1,3 +1,4 @@
+import { UNDEFINED } from "../helpers"
 import type { Signal, SignalLike } from "./signal"
 import { signal, signalFrom } from "./signal"
 
@@ -7,7 +8,7 @@ export let each = <T>(arr: SignalLike<T[]>) => ({
             let arrSignal = signalFrom(arr)
             let cache = new Map<unknown, [R, Signal.Mut<T>, Signal.Mut<number>]>()
             return signal<R[]>(
-                undefined!,
+                UNDEFINED!,
                 (set) =>
                     arrSignal.follow(
                         (arr) => {

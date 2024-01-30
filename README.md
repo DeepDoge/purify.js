@@ -11,8 +11,8 @@
 
 **cherry-ts** has everything you need and feature complete, and yet it's still very small.
 
-**min.js.gz:** 2.27kb<br/>
-**min.js:** 4.54kb
+**min.js.gz:** 2.26kb<br/>
+**min.js:** 4.49kb
 
 <p align="center">
     <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />

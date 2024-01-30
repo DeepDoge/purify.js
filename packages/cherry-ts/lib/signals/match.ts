@@ -1,4 +1,4 @@
-import { FOLLOW, FOLLOW_IMMEDIATE_OPTIONS, UNFOLLOW } from "../helpers"
+import { FOLLOW, FOLLOW_IMMEDIATE_OPTIONS, UNDEFINED, UNFOLLOW } from "../helpers"
 import type { Utils } from "../utils"
 import type { Signal, SignalLike } from "./signal"
 import { signal, signalFrom } from "./signal"
@@ -41,23 +41,21 @@ export let match: {
         ) => (guards.push({ fn: guard, then }), self),
         default: (fallback?: (value: Signal<TValue>) => unknown) =>
             signal<unknown>(
-                undefined,
+                UNDEFINED,
                 (set, currentIndex = -1) =>
-                    valueSignal[FOLLOW]((value) => {
-                        if (currentIndex >= 0 && guards[currentIndex]!.fn(value)) return
-
-                        for (let i = 0; i < guards.length; i++) {
-                            if (i !== currentIndex) {
-                                let guard = guards[i]!
-                                if (guard.fn(value)) {
-                                    currentIndex = i
-                                    return set(guard.then(valueSignal))
-                                }
-                            }
-                        }
-                        currentIndex = -1
-
-                        return set(fallback?.(valueSignal))
-                    }, FOLLOW_IMMEDIATE_OPTIONS)[UNFOLLOW],
+                    valueSignal[FOLLOW](
+                        (value) =>
+                            (currentIndex >= 0 && guards[currentIndex]!.fn(value)) ||
+                            guards.find(
+                                (guard, i) =>
+                                    i !== currentIndex &&
+                                    guard.fn(value) &&
+                                    ((currentIndex = i),
+                                    set(guard.then(valueSignal)),
+                                    !0),
+                            ) ||
+                            ((currentIndex = -1), set(fallback?.(valueSignal))),
+                        FOLLOW_IMMEDIATE_OPTIONS,
+                    )[UNFOLLOW],
             ),
     } as never)
