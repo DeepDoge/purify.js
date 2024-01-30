@@ -65,6 +65,7 @@ export function Todo(initial: Todo.Item[] = []) {
     })
 
     return div([
+        todoStyle.cloneNode(true),
         todoForm,
         input({
             type: "text",
@@ -90,20 +91,21 @@ export function Todo(initial: Todo.Item[] = []) {
                     ]),
                 ),
         ]),
-        style([
-            css`
-                @scope {
-                    :scope {
-                        display: grid;
-                        gap: 1em;
-                        max-inline-size: 20em;
-                        margin-inline: auto;
-                    }
-                }
-            `,
-        ]),
     ])
 }
+
+const todoStyle = style([
+    css`
+        @scope {
+            :scope {
+                display: grid;
+                gap: 1em;
+                max-inline-size: 20em;
+                margin-inline: auto;
+            }
+        }
+    `,
+])
 
 document.adoptedStyleSheets.push(
     sheet(css`
