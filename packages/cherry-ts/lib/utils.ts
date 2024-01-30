@@ -71,7 +71,7 @@ export namespace Utils {
     > = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>
 
     export type LiteralKeys<T> = keyof {
-        [K in keyof T as K extends string ? (string extends K ? never : K) : never]: 0
+        [K in keyof T as K extends `${infer A}${infer B}` ? K : never]: T[K]
     }
     export type PickLiteralKeys<T> = Pick<
         T,
