@@ -24,7 +24,7 @@ export function Todo(initial: Todo.Item[] = []) {
             todos.ref.push({
                 id: randomId(),
                 text: currentText.ref,
-                done: true,
+                done: false,
             })
             todos.ping()
             currentText.ref = ""
