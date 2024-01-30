@@ -9,3 +9,6 @@ false satisfies Utils.Equals<string | number, string>
 true satisfies Utils.Equals<string, string | "">
 false satisfies Utils.Equals<true, boolean>
 true satisfies Utils.Equals<true | false, true | false>
+
+"foo" satisfies Utils.Narrow<string, "foo">
+"foo" satisfies Utils.Narrow<"foo", string>

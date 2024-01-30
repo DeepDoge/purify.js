@@ -1,6 +1,7 @@
-import { css, CustomElement, sheet, signal, tags } from "cherry-ts"
+import { css, customTag, sheet, signal, Tags } from "cherry-ts"
 
-const helloTag = CustomElement("x-hello")
+const helloTag = customTag("x-hello")
+
 export function Hello() {
     const root = helloTag()
     const dom = root.attachShadow({ mode: "open" })
@@ -17,7 +18,7 @@ export function Hello() {
                     {123}
                     {Time()}
                     {World("World")}
-                    {tags.input({ type: "number", "bind:value": n })}
+                    {Tags.input({ type: "number", "bind:value": n })}
                     {/* <input type="number" bind:value={n}></input> Doesn't work */}
                 </div>
                 <div>123</div>

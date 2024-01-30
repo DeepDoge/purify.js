@@ -1,13 +1,12 @@
 import { Signal } from "./signals/signal"
-
-export let doc = document
 export let NULL: null = null
+export let doc = (typeof window)[8] ? NULL : document
 export let isFunction = (value: any): value is Function => typeof value == "function"
-export let isArray = (value: unknown): value is unknown[] => Array.isArray(value)
-export let instanceOf = <T extends (abstract new (...args: any) => any)[]>(
-    value: unknown,
-    ...types: T
-): value is InstanceType<T[number]> => types.some((type) => value instanceof type)
+export let instanceOf =
+    <T extends (abstract new (...args: any) => any)[]>(...types: T) =>
+    (value: unknown): value is InstanceType<T[number]> =>
+        types.some((type) => value instanceof type)
+export let isArray = instanceOf(Array)
 
 export let startsWith = <const T extends string>(
     text: string,

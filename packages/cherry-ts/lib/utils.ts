@@ -52,8 +52,6 @@ export namespace Utils {
             : never
         : never
 
-    type _ = `${string}` extends `${string}${string}` ? true : false
-
     type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
         k: infer I,
     ) => void
@@ -109,67 +107,33 @@ export namespace Utils {
         ? { [K in keyof T]?: DeepOptional<T[K]> }
         : T
 
-    // We don't check if the `T is an object` because `string & {}` can exsist
-    export type NoNever<T> = T extends PrimitiveType | Fn
+    export type ValueGuard<T> = (value: any) => value is T
+    export type ValueGuardType<T extends ValueGuard<any>> =
+        T extends ValueGuard<infer R> ? R : never
+
+    export type Narrow<TValue, TGuardType> = TValue &
+        (Extract<TGuardType, TValue> extends never
+            ? Extract<TValue, TGuardType> extends never
+                ? never
+                : Extract<TValue, TGuardType>
+            : Extract<TGuardType, TValue>)
+
+    export type Pretty<T> = {
+        [K in keyof T]: T[K]
+    }
+
+    export type ValueOf<T> = T extends Object ? ReturnType<T["valueOf"]> : never
+
+    export type IsReferenceType<T> = Equals<ValueOf<T>, Object>
+    export type Fn = (...args: any[]) => any
+
+    export type NoNever<T> = T extends Fn
         ? T
-        : NonNullable<
-                { [K in keyof T]: [T[K]] extends [never] ? 0 : 1 }[keyof T]
-            > extends 1
+        : IsReferenceType<T> extends false
           ? T
-          : never
-
-    export type Fn = (...args: unknown[]) => any
-    export type PrimitiveType =
-        | string
-        | number
-        | bigint
-        | boolean
-        | symbol
-        | undefined
-        | null
-    export type ReferanceType = object | Fn
-
-    export type TypeString =
-        | "string"
-        | "number"
-        | "bigint"
-        | "boolean"
-        | "symbol"
-        | "undefined"
-        | "object"
-        | "function"
-    export type TypeStringToType<T extends TypeString> = T extends "string"
-        ? string
-        : T extends "number"
-          ? number
-          : T extends "bigint"
-            ? bigint
-            : T extends "boolean"
-              ? boolean
-              : T extends "symbol"
-                ? symbol
-                : T extends "undefined"
-                  ? undefined
-                  : T extends "object"
-                    ? object | null
-                    : T extends "function"
-                      ? Function
-                      : never
-    export type TypeToTypeString<T> = T extends string
-        ? "string"
-        : T extends number
-          ? "number"
-          : T extends bigint
-            ? "bigint"
-            : T extends boolean
-              ? "boolean"
-              : T extends symbol
-                ? "symbol"
-                : T extends undefined
-                  ? "undefined"
-                  : T extends Function
-                    ? "function"
-                    : T extends object | null
-                      ? "object"
-                      : never
+          : NonNullable<
+                  { [K in keyof T]: [T[K]] extends [never] ? 0 : 1 }[keyof T]
+              > extends 1
+            ? T
+            : never
 }

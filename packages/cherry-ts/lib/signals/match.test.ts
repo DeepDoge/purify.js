@@ -1,12 +1,21 @@
 import { expect, test } from "bun:test"
+import { instanceOf } from "../helpers"
 import { Utils } from "../utils"
-import { INSTANCEOF, TYPEOF, match } from "./match"
+import { match } from "./match"
 import type { Signal } from "./signal"
 import { signal } from "./signal"
 
 const describe = () => {
     const line = new Error().stack!.split("\n")[2]!.split(":").at(-2)!.replace(/\D/g, "")
-    return `switch at line: ${line}`
+    return `match at line: ${line}`
+}
+
+function isNull(value: unknown): value is null {
+    return value === null
+}
+
+function equals<const TValue>(value: TValue) {
+    return (other: unknown): other is TValue => value === other
 }
 
 test(describe(), () => {
@@ -17,7 +26,7 @@ test(describe(), () => {
     }
 
     const result = match(signalValue)
-        .case(null, () => "value is null")
+        .case(isNull, () => "value is null")
         .default((value) => {
             expect(value.ref).toBeTypeOf("string")
             return toUpperCase(value.ref)
@@ -34,7 +43,7 @@ test(describe(), () => {
     const signalValue = signal<MyId | null>(createMyId("yo!"))
 
     const result = match(signalValue)
-        .case(null, (value) => {
+        .case(isNull, (value) => {
             value.ref satisfies null
             expect(value.ref).toBe(null)
             return value.ref
@@ -52,9 +61,9 @@ test(describe(), () => {
 })
 
 test(describe(), () => {
-    type MyId = Utils.Brand<"MyId", string>
-    function createMyId(id: string): MyId {
-        return id as MyId
+    type MyId<T extends string = string> = Utils.Brand<"MyId", T>
+    function createMyId<const T extends string>(id: T): MyId<T> {
+        return id as MyId<T>
     }
     const signalValue = signal<MyId>(createMyId("yo!"))
 
@@ -62,8 +71,12 @@ test(describe(), () => {
         return id
     }
 
+    function isMyId<const T extends string>(id: T) {
+        return (value: unknown): value is MyId<T> => value === id
+    }
+
     match(signalValue)
-        .case(createMyId("another"), (value) => value.ref satisfies MyId)
+        .case(isMyId("another"), (value) => value.ref satisfies MyId)
         .default((value) => {
             value.ref satisfies MyId
             acceptMyId(value.ref)
@@ -90,18 +103,22 @@ test(describe(), () => {
 
     const signalValue = signal<Value>({ type: "foo", foo: "foo", common: "common" })
 
+    function isType<T extends Value["type"]>(type: T) {
+        return (value: Value): value is Extract<Value, { type: T }> => value.type === type
+    }
+
     const result = match(signalValue)
-        .case({ type: "foo" }, (value) => {
+        .case(isType("foo"), (value) => {
             value.ref.foo satisfies string
             value.ref.common satisfies string
             return "foo" as const
         })
-        .case({ type: "bar" }, (value) => {
+        .case(isType("bar"), (value) => {
             value.ref.bar satisfies string
             value.ref.common satisfies string
             return "bar" as const
         })
-        .case({ type: "baz" }, (value) => {
+        .case(isType("baz"), (value) => {
             value.ref.baz satisfies string
             value.ref.common satisfies number
             return "baz" as const
@@ -114,27 +131,14 @@ test(describe(), () => {
 })
 
 test(describe(), () => {
-    const signalValue = signal("foo")
-
-    let value = "foo" as string
-
-    const result = match(signalValue)
-        .case(value, (value) => "foo" as const)
-        .default((value) => "other" as const)
-
-    result satisfies Signal<"foo" | "other">
-    expect(result.ref).toBe("foo")
-})
-
-test(describe(), () => {
     const signalValue = signal<{ foo: string } | null | Error>({ foo: "foo" })
     const result = match(signalValue)
-        .case(null, (value) => {
+        .case(isNull, (value) => {
             value.ref satisfies null
             throw `value.ref is null, but it should be { foo: "foo" }`
             return "null" as const
         })
-        .case({ [INSTANCEOF]: Error }, (value) => {
+        .case(instanceOf(Error), (value) => {
             value.ref satisfies Error
             throw `value.ref is an error, but it should be { foo: "foo" }`
             return "error" as const
@@ -153,11 +157,11 @@ test(describe(), () => {
     const signalValue = signal<{ foo: string } | null | Error>(new Error())
 
     const result = match(signalValue)
-        .case(null, (value) => {
+        .case(isNull, (value) => {
             value.ref satisfies null
             return "null" as const
         })
-        .case({ [INSTANCEOF]: Error }, (value) => {
+        .case(instanceOf(Error), (value) => {
             value.ref satisfies Error
             return "error" as const
         })
@@ -172,15 +176,19 @@ test(describe(), () => {
     expect(result.ref).toBe("error")
 })
 
+function isString(value: unknown): value is string {
+    return typeof value == "string"
+}
+
 test(describe(), () => {
     const signalValue = signal<"foo" | null | Error>("foo")
 
     const result = match(signalValue)
-        .case(null, (value) => {
+        .case(isNull, (value) => {
             value.ref satisfies null
             return "null" as const
         })
-        .case({ [TYPEOF]: "string" }, (value) => {
+        .case(isString, (value) => {
             value.ref satisfies "foo"
             return value.ref
         })
@@ -192,19 +200,3 @@ test(describe(), () => {
     result.ref satisfies "null" | "error" | string
     expect(result.ref).toBe("foo")
 })
-
-/* 
-// TODO: Add array and tuple support 
-test(describe(), () => {
-    const signal = createSignalWritable([1, 2, 3, 4])
-    const result = createSwitch(signal)
-        .match([{ [TYPEOF]: "number" }, 2], (value) => {
-            value.ref satisfies [number, 2]
-            return "number 2" as const
-        })
-        .default((value) => "other" as const)
-
-    result satisfies SignalReadable<"number 2" | "other">
-
-    strictEqual(result.ref, "number 2", `result.ref is not "number 2", but ${result.ref}`)
-}) */

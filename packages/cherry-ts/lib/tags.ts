@@ -27,7 +27,7 @@ export let Tags = new Proxy(
         get:
             (_, tag: string) =>
             (...args: Parameters<Tags.Builder<HTMLElement>>) =>
-                populate(doc.createElement(tag), ...args),
+                populate(doc!.createElement(tag), ...args),
     },
 ) as Tags
 
@@ -114,7 +114,7 @@ let toNode = (value: unknown): CharacterData | Element | DocumentFragment =>
         ? fragment()
         : isArray(value)
           ? fragment(value.map(toNode))
-          : instanceOf(value, Element, DocumentFragment, CharacterData)
+          : instanceOf(Element, DocumentFragment, CharacterData)(value)
             ? value
             : isSignalLike(value)
               ? signalAsFragment(value)
