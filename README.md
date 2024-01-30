@@ -9,46 +9,14 @@
 
 ## Size ⚡
 
-**cherry-ts** has a really small bundle size. Yet it still has everything you need and more to build a SPA.
+**cherry-ts** has everything you need and feature complete, and yet it's still very small.
 
-**min.js.gz:** 2.39kb<br/>
-**min.js:** 4.68kb
+**min.js.gz:** 2.36kb<br/>
+**min.js:** 4.74kb
 
 <p align="center">
     <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
 </p>
-
-#### All of this gives you:
-
--   **Signals, signal derivations, effects:**
--   -   `signal()`: Create a signal.
--   -   `derive()`: Create a derived signal from a function, and optionally a list of static dependencies. Also uses a `WeakMap` to memoize the function's result. So you get the same signal instance for the same function when no static dependencies are provided.
--   Signals only update when they have a listener.
--   **Built-in signals:**
--   -   `match()`: Pattern match on a signal to another value.
--   -   `each()`: Map a signal with a key.
--   -   `defer()`: Defer a signal update.
--   -   `awaited()`: Return a placeholder value while awating a promise or signal of a promise.
--   -   and more...
--   **Built-in signal utilities:**
--   -   `isSignal()`: Check if a value is a signal.
--   -   `signalFrom()`: Gets a `Signal` or `Function`. If it's a `Function`, it converts it into a derived `Signal`. And if it's a `Signal`, it returns it.
--   -   and many more...
--   **DOM templating:**
--   -   `tags`: Build templates easily using the `tags`, `Proxy`.
--   -   `customTag()`: Create a simple custom tag with custom element API.
--   -   Render any `Element`, `Node`, primative value and their recursive `Array`(s) or `Signal`(s) into the DOM.
--   -   Bind signals to attributes, input values, and more...
--   -   Add event listeners to elements.
--   -   `populate()`: Populate already created DOM `Node`(s) or `Element`(s) with attributes, children, bindings, events, and more...
--   -   Careful and efficient DOM updates with the minimal DOM changes, even when a signal of an `Array` changes.
--   **More:**
--   -   With `follow$()` and `effect$()`, bind your signal listener a DOM `Node`, to avoid manual cleanup.
--   -   With `onConnected$()` listen lifecycle of any DOM `Node` including comments, text nodes, and more...
--   -   CSS template literals to write CSS strings with IDE highlighting.
--   -   With `sheet()` convert any CSS string into a `CSSStyleSheet` that can be used with `adoptedStyleSheet`(s).
-
-...and many more.
 
 ## Installation 🍙
 
@@ -57,6 +25,115 @@
 ## Documentation 🍱
 
 Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all the time atm, maintaining the documentation is hard this early.
+
+## Todo Example
+
+Todo example with a functional component and CSS `@scoped`
+
+```ts
+import { Tags, css, each, sheet, signal } from "cherry-ts"
+
+const { div, input, form, style } = Tags
+
+const randomId = () => Math.random().toString(36).substring(2)
+
+export namespace Todo {
+    export type Item = {
+        id: string
+        text: string
+        done: boolean
+    }
+}
+
+export function Todo(initial: Todo.Item[] = []) {
+    const todos = signal(initial)
+
+    const currentText = signal("")
+    const todoForm = form({
+        hidden: true,
+        id: randomId(),
+        "on:submit"(event) {
+            event.preventDefault()
+            todos.ref.push({
+                id: randomId(),
+                text: currentText.ref,
+                done: true,
+            })
+            todos.ping()
+            currentText.ref = ""
+        },
+    })
+
+    return div([
+        todoForm,
+        input({
+            type: "text",
+            "attr:form": todoForm.id,
+            placeholder: "Add todo",
+            "bind:value": currentText,
+        }),
+        div({ className: "todos" }, [
+            each(todos)
+                .key((todo) => todo.id)
+                .as((todo) =>
+                    div({ className: "todo" }, [
+                        todo.ref.text,
+                        input({
+                            type: "checkbox",
+                            checked: () => todo.ref.done,
+                            "on:change"(event) {
+                                todo.ref.done = event.currentTarget.checked
+                                todos.ping()
+                            },
+                        }),
+                    ]),
+                ),
+        ]),
+        style([
+            css`
+                @scope {
+                    :scope {
+                        display: grid;
+                        gap: 1em;
+                        max-inline-size: 20em;
+                        margin-inline: auto;
+                    }
+                }
+            `,
+        ]),
+    ])
+}
+
+document.adoptedStyleSheets.push(
+    sheet(css`
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+    `),
+)
+
+document.body.append(
+    Todo([
+        {
+            id: "1",
+            text: "Buy milk",
+            done: false,
+        },
+        {
+            id: "2",
+            text: "Buy eggs",
+            done: false,
+        },
+        {
+            id: "3",
+            text: "Buy bread",
+            done: false,
+        },
+    ]),
+)
+```
 
 ## Motivation 🍣
 
@@ -84,147 +161,3 @@ Because, **cherry-ts** is not a framework, it's just a library of helpful tools 
 
 `cherry-ts` is relays heavily on TypeScript's type system. It's not possible to use it safely without TypeScript. So it's named `cherry-ts` instead of `cherry-js`.
 If types comes to JS with this new "types as comments" proposal, then I can call it `cherry-js` instead.
-
-## Todo Example
-
-Todo example with a functional component and CSS `@scoped`
-
-```ts
-import { css, each, effect$, populate, sheet, signal, tags } from "cherry-ts"
-
-const { div, textarea, style, button } = tags
-
-export function Todo() {
-    const dom = div()
-
-    type TodoItem = { text: string; completed: boolean }
-
-    const todos = signal(
-        new Set<TodoItem>([
-            { text: "Learn about Web Components", completed: true },
-            { text: "Learn about native JS APIs", completed: false },
-            { text: "Learn cherry-ts", completed: false },
-            { text: "Build an app", completed: false },
-        ]),
-    )
-
-    const newTodoText = signal("Buy Eggs")
-    function addTodo() {
-        todos.ref.add({ text: newTodoText.ref, completed: false })
-        todos.ping()
-        newTodoText.ref = ""
-    }
-
-    function removeTodo(todo: TodoItem) {
-        todos.ref.delete(todo)
-        todos.ping()
-    }
-
-    function toggleTodo(todo: TodoItem) {
-        todo.completed = !todo.completed
-        todos.ping()
-    }
-
-    effect$(dom, () => console.log("Effect: Todos changed", todos.ref))
-    todos.follow$(dom, (todos) => console.log("Follow: Todos changed", todos))
-
-    populate(dom, [
-        div({ class: "add" }, [
-            textarea({ "bind:value": newTodoText }),
-            button({ "on:click": addTodo }, ["Add Todo"]),
-        ]),
-
-        div({ class: "items" }, [
-            each(() => Array.from(todos.ref))
-                .key((todo) => todo)
-                .as((todo) =>
-                    div({ class: "item" }, [
-                        div(
-                            {
-                                class: "toggle",
-                                role: "button",
-                                "on:click": () => toggleTodo(todo.ref),
-                            },
-                            [
-                                div([() => (todo.ref.completed ? "✅" : "🔲")]),
-                                div([() => todo.ref.text]),
-                            ],
-                        ),
-                        button({ "on:click": (e) => removeTodo(todo.ref) }, ["Remove"]),
-                    ]),
-                ),
-        ]),
-
-        style([
-            css`
-                @scope {
-                    :scope {
-                        display: grid;
-                        gap: 1em;
-                        grid-template-columns: minmax(0, 25em);
-                        justify-content: center;
-                    }
-
-                    .add {
-                        display: grid;
-                        gap: 1em;
-
-                        & textarea {
-                            resize: vertical;
-                            min-height: 6ch;
-                            font: inherit;
-                            padding: 0.5em;
-                        }
-                    }
-
-                    .items {
-                        display: grid;
-                        gap: 1em;
-                    }
-
-                    .item {
-                        display: grid;
-                        grid-template-columns: auto 1fr auto;
-                        gap: 0.5em;
-
-                        & .toggle {
-                            cursor: pointer;
-                            display: grid;
-                            grid-template-columns: subgrid;
-                            grid-column: span 2;
-                        }
-                    }
-                }
-            `,
-        ]),
-    ])
-
-    return dom
-}
-
-document.adoptedStyleSheets.push(
-    sheet(css`
-        :root {
-            font-family: sans-serif;
-            font-size: 2rem;
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        textarea,
-        input,
-        button,
-        select,
-        option,
-        optgroup {
-            font: inherit;
-        }
-    `),
-)
-
-document.body.append(Todo())
-```

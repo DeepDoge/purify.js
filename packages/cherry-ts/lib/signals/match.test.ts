@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
-import type { Signal } from "./core"
-import { signal } from "./core"
+import { Utils } from "../utils"
 import { INSTANCEOF, TYPEOF, match } from "./match"
-import { Utils } from "./utils"
+import type { Signal } from "./signal"
+import { signal } from "./signal"
 
 const describe = () => {
     const line = new Error().stack!.split("\n")[2]!.split(":").at(-2)!.replace(/\D/g, "")

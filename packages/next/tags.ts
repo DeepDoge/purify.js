@@ -246,24 +246,26 @@ export namespace Tags {
                               ? `style:${K}`
                               : never]: SignalLikeOrValue<string | null>
                       }
-                    : {}) &
-                (T extends { type: string; value: string | null }
-                    ? {
-                          [Type in keyof InputTypeToValueMap]: {
-                              type: Type
-                          } & {
-                              [K in `bind:${InputTypeToValueMap[Type]}`]: SignalLikeOrValue<
-                                  T[Extract<InputTypeToValueMap[Type], keyof T>]
-                              >
-                          }
-                      }[keyof InputTypeToValueMap]
-                    : {}) &
+                    : never) &
                 (T extends { className: string | null }
                     ? { [K in `class:`]: never } & {
                           [K in `class:${string}`]: SignalLikeOrValue<boolean | {}>
                       }
-                    : {})
-        >
+                    : never)
+        > &
+            (T extends { type: string; value: string | null }
+                ? {
+                      [Type in keyof InputTypeToValueMap]:
+                          | ({
+                                type: Type
+                            } & {
+                                [K in `bind:${InputTypeToValueMap[Type]}`]?: SignalLikeOrValue<
+                                    T[Extract<InputTypeToValueMap[Type], keyof T>]
+                                >
+                            })
+                          | Utils.EmptyObject
+                  }[keyof InputTypeToValueMap]
+                : never)
     >
 
     export type ARIAAttributes = {

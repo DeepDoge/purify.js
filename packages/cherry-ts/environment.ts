@@ -1,1 +1,0 @@
-export let browser = !(typeof window)[8]

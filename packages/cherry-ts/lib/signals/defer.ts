@@ -1,7 +1,7 @@
-import type { Signal, SignalOrFn } from "./core"
-import { signal, signalFrom } from "./core"
+import type { Signal, SignalLike } from "./signal"
+import { signal, signalFrom } from "./signal"
 
-export let defer = <T>(signalOrFunction: SignalOrFn<T>, timeout_ms = 250): Signal<T> => {
+export let defer = <T>(signalOrFunction: SignalLike<T>, timeout_ms = 250): Signal<T> => {
     let sourceSignal = signalFrom(signalOrFunction)
     let timeout = null as Timer | null
     let follow: Signal.Follow | null = null

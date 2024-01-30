@@ -1,4 +1,5 @@
-import { Lifecycle, derive } from "./core"
+import { Lifecycle } from "../lifecyle"
+import { derive } from "./signal"
 
 export let effect$ = (
     node: Lifecycle.Connectable,

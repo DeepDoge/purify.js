@@ -1,14 +1,14 @@
-import type { Signal, SignalOrValueOrFn } from "./core"
-import { isSignalOrFn, signal, signalFrom } from "./core"
+import type { Signal, SignalLikeOrValue } from "./signal"
+import { isSignalLike, signal, signalFrom } from "./signal"
 
 export let awaited: {
-    <T>(promise: SignalOrValueOrFn<Promise<T>>): Signal<T | null>
-    <T, U>(promise: SignalOrValueOrFn<Promise<T>>, until: U): Signal<T | U>
+    <T>(promise: SignalLikeOrValue<Promise<T>>): Signal<T | null>
+    <T, U>(promise: SignalLikeOrValue<Promise<T>>, until: U): Signal<T | U>
 } = (
-    promise: SignalOrValueOrFn<Promise<unknown>>,
+    promise: SignalLikeOrValue<Promise<unknown>>,
     until: unknown = null,
 ): Signal<unknown> =>
-    isSignalOrFn(promise)
+    isSignalLike(promise)
         ? signal(
               until,
               (set) =>

@@ -1,3 +1,3 @@
-import * as core from "cherry-ts-next"
+import * as $ from "cherry-ts"
 
-console.log(core)
+console.log($)

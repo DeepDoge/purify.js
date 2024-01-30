@@ -1,5 +1,3 @@
-import type { Template } from "./template"
-
 /* 
     TODO: Simple enough for now but later can be improved
     JSX itself is kinda limited and bad, like its designed by someone who doesn't understand typescript,
@@ -16,7 +14,7 @@ type TagNameMap = SVGElementTagNameMap &
 
 export namespace JSX {
     export type IntrinsicElements = {
-        [K in keyof TagNameMap]: Template.Attributes<TagNameMap[K]>
+        [K in keyof TagNameMap]: Record<string, string>
     }
     export type Element = {
         readonly xml: string
@@ -26,7 +24,7 @@ export namespace JSX {
 }
 
 type ChildrenProp = { children?: JSX.Element | JSX.Element[] }
-type Props<T extends Element> = Template.Attributes<T> & ChildrenProp
+type Props<T extends Element> = Record<string, string> & ChildrenProp
 type Factory<TProps extends ChildrenProp = ChildrenProp, TReturn = unknown> = {
     (props: TProps): TReturn
 }

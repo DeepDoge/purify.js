@@ -1,6 +1,6 @@
-import type { Signal, SignalOrFn } from "./core"
-import { signal, signalFrom } from "./core"
-import type { Utils } from "./utils"
+import type { Utils } from "../utils"
+import type { Signal, SignalLike } from "./signal"
+import { signal, signalFrom } from "./signal"
 
 export const TYPEOF = Symbol()
 export type TYPEOF = typeof TYPEOF
@@ -43,9 +43,8 @@ true satisfies CanExhaust<1n>
 
 // Exhaust with pattern lets use exhaust with the reference types and non-literal primitive types
 // 	with pattern matching
-type Exhaust<TType, TExhauster> = CanExhaust<TExhauster> extends true
-    ? Exclude<TType, TExhauster>
-    : TType
+type Exhaust<TType, TExhauster> =
+    CanExhaust<TExhauster> extends true ? Exclude<TType, TExhauster> : TType
 type ExhaustWithPattern<TType, TPattern> = TPattern extends Utils.PrimitiveType
     ? Exhaust<TType, TPattern>
     : Utils.NoNever<
@@ -137,9 +136,9 @@ namespace MatchBuilder {
 }
 
 export let match: {
-    <TValue>(valueSignalOrFn: SignalOrFn<TValue>): MatchBuilder<TValue>
+    <TValue>(valueSignalOrFn: SignalLike<TValue>): MatchBuilder<TValue>
 } = <TValue>(
-    valueSignalOrFn: SignalOrFn<TValue>,
+    valueSignalOrFn: SignalLike<TValue>,
     cases: {
         pattern: Utils.DeepOptional<TValue>
         then: (value: Signal<TValue>) => unknown

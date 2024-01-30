@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
-import { signal } from "./core"
 import { each } from "./each"
+import { signal } from "./signal"
 
 const describe = () => {
     const line = new Error().stack!.split("\n")[2]!.split(":").at(-2)!.replace(/\D/g, "")

@@ -1,6 +1,6 @@
-import { css, signal, tags } from "cherry-ts"
+import { css, signal, Tags } from "cherry-ts"
 
-const { div, input, button, style } = tags
+const { div, input, button, style } = Tags
 
 export function Calculator() {
     const value = signal("")

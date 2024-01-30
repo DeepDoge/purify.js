@@ -1,4 +1,4 @@
-import { derive, signal, Tags } from "cherry-ts-next"
+import { derive, INSTANCEOF, match, signal, Tags } from "cherry-ts"
 
 export function Issue() {
     const value = signal(null as string[] | null)
@@ -11,11 +11,11 @@ export function Issue() {
 
     const dom = Tags.div([
         Tags.button({ "on:click": toggle }, ["Toggle"]),
-        derive(() =>
-            value.ref instanceof Array
-                ? derive(() => [value.ref.map((v) => Tags.div([v]))])
-                : "nothing",
-        ),
+        match(value)
+            .case({ [INSTANCEOF]: Array }, (value) =>
+                derive(() => [value.ref.map((v) => Tags.div([v]))]),
+            )
+            .default(() => "nothing"),
     ])
 
     return dom

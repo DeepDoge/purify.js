@@ -36,7 +36,7 @@ export namespace Utils {
         ? false
         : true
 
-    export type EmptyObject = { [K in PropertyKey]: never }
+    export type EmptyObject = { [key: string]: never }
 
     type BuildTuple<L extends number, T extends any[] = []> = T extends {
         length: L
@@ -52,9 +52,33 @@ export namespace Utils {
             : never
         : never
 
-    export type OmitNonLiteral<T extends { [key: PropertyKey]: any }> = {
-        [K in keyof T as PropertyKey extends K ? never : K]: T[K]
+    type _ = `${string}` extends `${string}${string}` ? true : false
+
+    type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+        k: infer I,
+    ) => void
+        ? I
+        : never
+    type LastOf<T> =
+        UnionToIntersection<T extends any ? () => T : never> extends () => infer R
+            ? R
+            : never
+
+    type Push<T extends any[], V> = [...T, V]
+
+    export type TuplifyUnion<
+        T,
+        L = LastOf<T>,
+        N = [T] extends [never] ? true : false,
+    > = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>
+
+    export type LiteralKeys<T> = keyof {
+        [K in keyof T as K extends string ? (string extends K ? never : K) : never]: 0
     }
+    export type PickLiteralKeys<T> = Pick<
+        T,
+        LiteralKeys<T> extends keyof T ? LiteralKeys<T> : never
+    >
 
     declare const ERROR: unique symbol
     type ERROR = typeof ERROR
@@ -67,14 +91,11 @@ export namespace Utils {
             ? { [BRAND]: Type[BRAND] | Name }
             : { [BRAND]: Name })
 
-    export type Equals<T, U> = (<G>() => G extends T ? 1 : 0) extends <G>() => G extends U
-        ? 1
-        : 0
-        ? true
-        : false
+    export type Equals<T, U> =
+        (<G>() => G extends T ? 1 : 0) extends <G>() => G extends U ? 1 : 0 ? true : false
     export type NotEquals<T, U> = Equals<T, U> extends true ? false : true
 
-    export type WritableKeysOf<T> = {
+    export type MutableKeysOf<T> = {
         [P in keyof T]: Equals<
             { [Q in P]: T[P] },
             { -readonly [Q in P]: T[P] }
@@ -82,7 +103,7 @@ export namespace Utils {
             ? P
             : never
     }[keyof T]
-    export type WritablePart<T> = Pick<T, WritableKeysOf<T>>
+    export type PickMutable<T> = Pick<T, MutableKeysOf<T>>
 
     export type DeepOptional<T> = T extends object
         ? { [K in keyof T]?: DeepOptional<T[K]> }
