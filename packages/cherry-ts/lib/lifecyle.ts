@@ -1,15 +1,4 @@
-/* 
-    All core functionality is in one file, so internal stuff can be isolated
-    Code in this file should be as small and as optimized as much as posibble
-    While keeping the readablity in an optimum level 
-*/
-
 import { FOR_EACH, REMOVE, doc, weakMap, weakSet } from "./helpers"
-
-/* 
-    While typing be aware of difference between Node, Element HTMLElement, SVGElement MathMLElement and etc.
-    `tags` will only work with HTMLElement(s), while all other functions support Element.
-*/
 
 export namespace Lifecycle {
     export type Connectable = Element | CharacterData

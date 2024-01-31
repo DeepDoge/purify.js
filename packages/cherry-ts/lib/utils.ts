@@ -122,6 +122,10 @@ export namespace Utils {
         [K in keyof T]: T[K]
     }
 
+    export type AsType<T> = {
+        [K in keyof T]: T[K]
+    }
+
     export type ValueOf<T> = T extends Object ? ReturnType<T["valueOf"]> : never
 
     export type IsReferenceType<T> = Equals<ValueOf<T>, Object>

@@ -21,16 +21,6 @@ import {
 } from "./signals/signal"
 import { Utils } from "./utils"
 
-export let Tags = new Proxy(
-    {},
-    {
-        get:
-            (_, tag: string) =>
-            (...args: Parameters<Tags.Builder<HTMLElement>>) =>
-                populate(doc!.createElement(tag), ...args),
-    },
-) as Tags
-
 export let fragment: Tags.Builder<DocumentFragment> = (children) => {
     let fragment = doc!.createDocumentFragment()
     children && fragment.append(...children.map(toNode))
@@ -202,11 +192,55 @@ let populateElement = <T extends Element>(
     populateNode(element, children)
 )
 
-export type Tags = {
-    [K in keyof HTMLElementTagNameMap]: Tags.Builder<HTMLElementTagNameMap[K]>
-} & {
-    [tag: string]: Tags.Builder<HTMLElement>
+export namespace Tags {
+    export type NamespaceTagNameMap = {
+        "http://www.w3.org/1999/xhtml": {
+            Default: HTMLElement
+            Map: Utils.AsType<HTMLElementTagNameMap>
+        }
+        "http://www.w3.org/2000/svg": {
+            Default: SVGElement
+            Map: Utils.AsType<SVGElementTagNameMap>
+        }
+        "http://www.w3.org/1998/Math/MathML": {
+            Default: MathMLElement
+            Map: Utils.AsType<MathMLElementTagNameMap>
+        }
+    }
 }
+
+export let TagsNS = <
+    T extends keyof Tags.NamespaceTagNameMap = "http://www.w3.org/1999/xhtml",
+>(
+    namespace?: T,
+) =>
+    new Proxy(
+        {},
+        {
+            get:
+                (_, tag: string) =>
+                (...args: Parameters<Tags.Builder<Element>>) =>
+                    populate(
+                        namespace
+                            ? doc!.createElementNS(namespace, tag)
+                            : doc!.createElement(tag),
+                        ...args,
+                    ),
+        },
+    ) as Tags<Tags.NamespaceTagNameMap[T]["Default"], Tags.NamespaceTagNameMap[T]["Map"]>
+
+export let Tags = TagsNS()
+
+export type Tags<
+    Default extends Element,
+    TagNameMap extends { [K in string]: Default },
+> = Readonly<
+    {
+        [K in keyof TagNameMap]: Tags.Builder<TagNameMap[K]>
+    } & {
+        [key: string]: Tags.Builder<Default>
+    }
+>
 
 export namespace Tags {
     export type ChildNodeOf<TParentNode extends ParentNode> =
