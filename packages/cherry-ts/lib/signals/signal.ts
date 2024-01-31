@@ -118,9 +118,9 @@ export let derive = <T>(
     return staticDependencies
         ? signal<T>(fn(), (set) => {
               let follows = staticDependencies.map((dependency) =>
-                  dependency.follow(() => set(fn())),
+                  dependency[FOLLOW](() => set(fn())),
               )
-              return () => follows.forEach((follow) => follow.unfollow())
+              return () => follows.forEach((follow) => follow[UNFOLLOW]())
           })
         : value ||
               (deriveCache.set(
@@ -130,14 +130,14 @@ export let derive = <T>(
                       let follows = weakMap<Signal<unknown>, Signal.Follow>()
                       let unfollow = () =>
                           toUnfollow?.[FOR_EACH]((signal) =>
-                              follows.get(signal)!.unfollow(),
+                              follows.get(signal)![UNFOLLOW](),
                           )
                       let update = () => {
                           let toFollow = new Set<Signal<unknown>>()
                           set(callAndCaptureUsedSignals(fn, toFollow))
                           toFollow[FOR_EACH]((signal) => {
                               !follows.has(signal) &&
-                                  follows.set(signal, signal.follow(update))
+                                  follows.set(signal, signal[FOLLOW](update))
                               toUnfollow?.delete(signal)
                           })
                           unfollow()

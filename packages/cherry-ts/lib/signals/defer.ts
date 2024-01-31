@@ -1,3 +1,4 @@
+import { FOLLOW, UNFOLLOW } from "../helpers"
 import type { Signal, SignalLike } from "./signal"
 import { signal, signalFrom } from "./signal"
 
@@ -8,11 +9,11 @@ export let defer = <T>(signalOrFunction: SignalLike<T>, timeout_ms = 250): Signa
     return signal(
         sourceSignal.ref,
         (set) => (
-            (follow = sourceSignal.follow((value) => {
+            (follow = sourceSignal[FOLLOW]((value) => {
                 timeout && clearTimeout(timeout)
                 timeout = setTimeout(() => ((timeout = null), set(value)), timeout_ms)
             })),
-            follow?.unfollow
+            follow?.[UNFOLLOW]
         ),
     )
 }

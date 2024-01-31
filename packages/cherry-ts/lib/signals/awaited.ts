@@ -1,3 +1,4 @@
+import { FOLLOW, FOLLOW_IMMEDIATE_OPTIONS, UNFOLLOW } from "../helpers"
 import type { Signal, SignalLikeOrValue } from "./signal"
 import { isSignalLike, signal, signalFrom } from "./signal"
 
@@ -12,12 +13,10 @@ export let awaited: {
         ? signal(
               until,
               (set) =>
-                  signalFrom(promise).follow(
+                  signalFrom(promise)[FOLLOW](
                       (promise) => (set(until), promise.then((value) => set(value))),
-                      {
-                          mode: "immediate",
-                      },
-                  ).unfollow,
+                      FOLLOW_IMMEDIATE_OPTIONS,
+                  )[UNFOLLOW],
           )
         : signal(until, (set) => {
               promise.then((value) => set(value))
