@@ -21,23 +21,19 @@
 | ReactDOM 18.2.0 | 130.2 KB | 42 KB      |
 | Angular 17.1.0  | 310 KB   | 104 KB     |
 
+---
+
 <p align="center">
     <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
 </p>
-
----
 
 ## Installation 🍙
 
 [Install Instructions](https://github.com/DeepDoge/cherry-ts/releases)
 
----
-
 ## Documentation 🍱
 
 Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all the time atm, maintaining the documentation is hard this early.
-
----
 
 ## Todo Example
 
@@ -151,8 +147,6 @@ document.body.append(
 )
 ```
 
----
-
 ## Motivation 🍣
 
 Native browser APIs has been getting better, and **cherry-ts** is designed to be complementary to native browser APIs, not to replace them.
@@ -174,8 +168,6 @@ It gives you the freedom to build your app however you want:
 
 Do whatever you want, in the way you want, and **cherry-ts** will work with you.<br/>
 Because, **cherry-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
-
----
 
 ## Why not cherry-js?
 
