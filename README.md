@@ -9,22 +9,35 @@
 
 ## Size ⚡
 
-**cherry-ts** has everything you need and feature complete, and yet it's still very small.
+**cherry-ts** is feature-complete, requires no building step, yet maintains a remarkably small footprint. To demonstrate its efficiency, here's a comparison with other well-known libraries:
 
-**min.js.gz:** 2.26kb<br/>
-**min.js:** 4.49kb
+| Library         | .min.js  | .min.js.gz |
+| --------------- | -------- | ---------- |
+| **cherry-ts**   | 4.49 KB  | 2.26 KB    |
+| Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
+| Solid 1.8.12    | 23 KB    | 8.1 KB     |
+| jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
+| Vue 3.4.15      | 110.4 KB | 40 KB      |
+| ReactDOM 18.2.0 | 130.2 KB | 42 KB      |
+| Angular 17.1.0  | 310 KB   | 104 KB     |
 
 <p align="center">
     <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
 </p>
 
+---
+
 ## Installation 🍙
 
 [Install Instructions](https://github.com/DeepDoge/cherry-ts/releases)
 
+---
+
 ## Documentation 🍱
 
 Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all the time atm, maintaining the documentation is hard this early.
+
+---
 
 ## Todo Example
 
@@ -138,6 +151,8 @@ document.body.append(
 )
 ```
 
+---
+
 ## Motivation 🍣
 
 Native browser APIs has been getting better, and **cherry-ts** is designed to be complementary to native browser APIs, not to replace them.
@@ -160,7 +175,19 @@ It gives you the freedom to build your app however you want:
 Do whatever you want, in the way you want, and **cherry-ts** will work with you.<br/>
 Because, **cherry-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
 
+---
+
 ## Why not cherry-js?
 
 `cherry-ts` is relays heavily on TypeScript's type system. It's not possible to use it safely without TypeScript. So it's named `cherry-ts` instead of `cherry-js`.
 If types comes to JS with this new "types as comments" proposal, then I can call it `cherry-js` instead.
+
+## Why not JSX/TSX templating?
+
+Lack of type safety.
+
+## Why SPA only?
+
+-   Works without server, so works with any static host including IPFS.
+-   SSR requires a framework, because SSR works with paths and requests, and **cherry-ts** is not a framework.
+-   This is a browser library similar to how jQuery was a library. And **cherry-ts** is a lot more smaller than jQuery.
