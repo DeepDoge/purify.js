@@ -23,6 +23,8 @@
 
 ---
 
+**You can see all of it at once:**
+
 <p align="center">
     <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
 </p>
