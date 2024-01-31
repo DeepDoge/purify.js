@@ -271,8 +271,8 @@ export namespace Tags {
     export type Builder<T extends ParentNode> = T extends Element
         ? (
               ...args:
-                  | [props?: Props<T>, children?: MemberOf<T>[]]
                   | [children?: MemberOf<T>[]]
+                  | [props?: Props<T>, children?: MemberOf<T>[]]
           ) => T
         : (children?: MemberOf<T>[]) => T
 
@@ -378,11 +378,9 @@ export namespace Tags {
         })
 
     type MutableFields<T extends Element> = {
-        [K in Utils.MutableKeysOf<Utils.PickLiteralKeys<T>> as Utils.Fn extends T[K]
+        [K in Utils.MutableKeysOf<Utils.PickLiteralKeys<T>> as object extends T[K]
             ? never
-            : object extends T[K]
-              ? never
-              : K]?: K extends "role" ? ARIARole : T[K]
+            : K]?: K extends "role" ? ARIARole : T[K]
     }
 
     export type Props<T extends Element> = Readonly<
