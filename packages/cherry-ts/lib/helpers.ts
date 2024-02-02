@@ -12,7 +12,7 @@ export let isArray = instanceOf(Array)
 export let startsWith = <const T extends string>(
     text: string,
     start: T,
-): text is `${T}${string}` => text.startsWith(start)
+): text is `${T}${any}` => text.startsWith(start)
 export let weakMap = <K extends object, V>() => new WeakMap<K, V>()
 export let weakSet = <T extends object>() => new WeakSet<T>()
 

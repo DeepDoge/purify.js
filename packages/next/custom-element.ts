@@ -1,7 +1,7 @@
 import { FOR_EACH, ON_CONNECT, doc } from "./helpers"
 
 export namespace CustomElement {
-    export type Tag = `${string}${string}-${string}${string}`
+    export type Tag = `${any}${any}-${any}${any}`
     export type ConnectListener = () => void | DisconnectListener
     export type DisconnectListener = () => void
 }

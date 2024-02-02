@@ -1,7 +1,7 @@
 import { Tags } from "./tags"
 
 export namespace CustomTag {
-    export type TagName = `${string}${string}-${string}${string}`
+    export type TagName = `${any}${any}-${any}${any}`
 }
 export let customTag: {
     (tag: CustomTag.TagName): Tags.Builder<HTMLElement>

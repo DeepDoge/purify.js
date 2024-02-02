@@ -286,7 +286,7 @@ export namespace Tags {
                       : never
                 : never]: T["style"][K] | null
         },
-        `webkit-${string}`
+        `webkit-${any}`
     > & {
         [unknown: string]: string | null
     }
@@ -346,7 +346,7 @@ export namespace Tags {
     type Directives<T extends Element> = ({
         [K in `on:`]?: never
     } & {
-        [K in `on:${string}`]?: { (event: Event & { currentTarget: T }): void } | Function
+        [K in `on:${any}`]?: { (event: Event & { currentTarget: T }): void } | Function
     }) & {
         [K in keyof EventMap<T> as K extends string ? `on:${K}` : never]?:
             | {
@@ -357,7 +357,7 @@ export namespace Tags {
             ? {
                   [K in `style:`]?: never
               } & {
-                  [K in `style:${string}`]?: SignalLikeOrValue<string | null>
+                  [K in `style:${any}`]?: SignalLikeOrValue<string | null>
               } & {
                   [K in keyof Styles<T> as K extends string
                       ? `style:${K}`
@@ -368,13 +368,13 @@ export namespace Tags {
             ? {
                   [K in `class:`]?: never
               } & {
-                  [K in `class:${string}`]?: SignalLikeOrValue<boolean | {}>
+                  [K in `class:${any}`]?: SignalLikeOrValue<boolean | {}>
               }
             : Utils.EmptyObject) &
         ({
             [K in `attr:`]?: never
         } & {
-            [K in `attr:${string}`]?: SignalLikeOrValue<string | boolean | null>
+            [K in `attr:${any}`]?: SignalLikeOrValue<string | boolean | null>
         })
 
     type MutableFields<T extends Element> = {

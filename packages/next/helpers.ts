@@ -9,7 +9,7 @@ export let instanceOf = <T extends (abstract new (...args: any) => any)[]>(
 export let startsWith = <const T extends string>(
     text: string,
     start: T,
-): text is `${T}${string}` => text.startsWith(start)
+): text is `${T}${any}` => text.startsWith(start)
 export let FOR_EACH = "forEach" as const
 export let EMPTY_STRING = "" as const
 

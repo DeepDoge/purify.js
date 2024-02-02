@@ -191,7 +191,7 @@ export namespace Tags {
                       : never
                 : never]: T["style"][K] | null
         },
-        `webkit-${string}`
+        `webkit-${any}`
     > & {
         [unknown: string]: string | null
     }
@@ -227,7 +227,7 @@ export namespace Tags {
     export type Directives<T extends Element> = Readonly<
         Partial<
             { [K in `on:`]: never } & {
-                [K in `on:${string}`]:
+                [K in `on:${any}`]:
                     | { (event: Event & { currentTarget: T }): void }
                     | Function
             } & {
@@ -240,7 +240,7 @@ export namespace Tags {
                     ? {
                           [K in `style:`]: never
                       } & {
-                          [K in `style:${string}`]: SignalLikeOrValue<string | null>
+                          [K in `style:${any}`]: SignalLikeOrValue<string | null>
                       } & {
                           [K in keyof Styles<T> as K extends string
                               ? `style:${K}`
@@ -249,7 +249,7 @@ export namespace Tags {
                     : never) &
                 (T extends { className: string | null }
                     ? { [K in `class:`]: never } & {
-                          [K in `class:${string}`]: SignalLikeOrValue<boolean | {}>
+                          [K in `class:${any}`]: SignalLikeOrValue<boolean | {}>
                       }
                     : never)
         > &
