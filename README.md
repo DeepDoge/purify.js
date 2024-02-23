@@ -51,7 +51,7 @@ Gonna try to make some changes next weekend (March 1 2024), Also as a note to my
 - Speaking of this, maybe this doesn't have to be a directive i was thinking about something similar to svelte's `use:` directive, but this one is not a directive its a prop that gets an array of functions, and practically works same as it. And `bind` can be a function that you supply to there instead of directive. Many things can act like this tbh. more consistent and more extenadable, better in general.
 - I think since now we will support Element propeties, we can also remove the `style:` directive since there is already style property object on the HTMLElement's.
 - So in general by adding a few general features, we can remove many of the directives that has a spesific jobs, so use what is there in the vanilla/native js, and enhance it.
-- I think I can also make types better too, for example i shouldn't allow nested forms, because it only works when you generete the form elements and breaks if you render it from html, so not consistent, and probably semantically wrong, so not allow it. if you need similar behevior you can already use "form" attribute. and move the form outside.
+- I think I can also make types better too, for example i shouldn't allow nested forms, because it only works when you create the form elements with js and breaks if you render it from html, so not consistent, and probably semantically wrong, so not allow it. if you need similar behevior you can already use "form" attribute. and move the form outside.
 
 ## Todo Example
 
