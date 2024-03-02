@@ -44,7 +44,7 @@ Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all t
 
 Didn't have time to work on this recently. But I have been thinking about it at the back of my mind (can't stop). 
 
-Gonna try to make some changes next weekend (March 1 2024), Also as a note to myself:
+Gonna try to make some changes ~~next weekend (March 1 2024)~~ on (April 1), Also as a note to myself:
 - I think I found a way to differentiate between Element properties vs attributes in the builder props without much code, So I can remove the `attr:` directive.
 - So since we use Element propeties now and attributes together, and both are, like all props, supports signals, we don't need the `on:` directive anymore.
 - Bind directive can only be used with `<input>`(s) or other input related Elements atm, but we can make this better i believe, we can bind any attribute or property by also providing the event name to the directive.
@@ -52,6 +52,7 @@ Gonna try to make some changes next weekend (March 1 2024), Also as a note to my
 - I think since now we will support Element propeties, we can also remove the `style:` directive since there is already style property object on the HTMLElement's.
 - So in general by adding a few general features, we can remove many of the directives that has a spesific jobs, so use what is there in the vanilla/native js, and enhance it.
 - I think I can also make types better too, for example i shouldn't allow nested forms, because it only works when you create the form elements with js and breaks if you render it from html, so not consistent, and probably semantically wrong, so not allow it. if you need similar behevior you can already use "form" attribute. and move the form outside.
+- Then I can use this for eternis.
 
 ## Todo Example
 
