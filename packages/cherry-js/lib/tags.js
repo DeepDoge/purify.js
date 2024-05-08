@@ -35,51 +35,61 @@ import { toAppendable } from "./element"
  */
 
 /**
- * @template {ParentNode} T
- * @typedef Builder
- * @type {[
- *      T extends Element
- *          ?   (...args: [children?: MemberOf<T>[]] | [props?: Partial<ARIAMixin> & Directives.On<T>, children?: MemberOf<T>[]]) => T
- *          : (children?: MemberOf<T>[]) => T
- * ][number]}
- */
-
-/**
- * @type {*}
- */
-const anyObj = {}
-
-/**
  * @type {{
- *    [K in keyof HTMLElementTagNameMap]: Builder<HTMLElementTagNameMap[K]>
+ *    [K in keyof HTMLElementTagNameMap]: () => Pipe<HTMLElementTagNameMap[K]>
  * }}
  */
-export const tags = new Proxy(anyObj, {
-    /**
-     *
-     * @param {never} _
-     * @param {keyof HTMLElementTagNameMap} tag
-     * @returns
-     */
-    get(_, tag) {
+// @ts-ignore
+export const tags = new Proxy(
+    {},
+    {
         /**
-         * @type {Builder<Element>}
+         *
+         * @param {never} _
+         * @param {keyof HTMLElementTagNameMap} tag
+         * @returns
          */
-        return (props, children) => {
-            const element = document.createElement(tag)
-            if (props) {
-                for (const [key, value] of Object.entries(props)) {
-                    if (key.startsWith("on:")) {
-                        element.addEventListener(key.slice(3), value)
-                    } else {
-                        element.setAttribute(key, value)
-                    }
-                }
-            }
-            if (children) {
-                element.append(...children.map(toAppendable))
-            }
-            return element
-        }
+        get: (_, tag) => () => pipe(document.createElement(tag)),
     },
-})
+)
+
+/**
+ * @template {ParentNode} T
+ * @typedef Pipe
+ * @type {{
+ *     [K in keyof T | 'render' | 'pipe']:
+ *          import("./utils").Equals<K, 'render'> extends true ?
+ *              (callback?: (element: T) => MemberOf<T>[]) => T :
+ *          import("./utils").Equals<K, 'pipe'> extends true ?
+ *              (callback?: (element: T) => void) => Pipe<T> :
+ *          K extends keyof T ?
+ *              <V extends T[K]>(value: V) => Pipe<T> :
+ *          never
+ * }}
+ */
+
+/**
+ * @template {ParentNode} T
+ * @param {T} element
+ * @returns {Pipe<T>}
+ */
+export function pipe(element) {
+    // @ts-ignore
+    const proxy = new Proxy(
+        {},
+        {
+            get(_, name) {
+                return name === "render"
+                    ? // @ts-ignore
+                      (callback) => (
+                          callback &&
+                              element.append(...callback(element).map(toAppendable)),
+                          element
+                      )
+                    : // @ts-ignore
+                      (value) => ((element[name] = value), proxy)
+            },
+        },
+    )
+    return proxy
+}

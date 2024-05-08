@@ -1,7 +1,7 @@
 import { isSignal } from "./signals/core"
 
 /**
- * @type {import('./tags').Builder<DocumentFragment>}
+ * @param {import("./tags").MemberOf<DocumentFragment>[]} [members]
  */
 export const fragment = (members) => {
     let fragment = document.createDocumentFragment()
@@ -55,7 +55,7 @@ export class CherrySignalElement extends HTMLElement {
     connectedCallback() {
         this.$unfollow = this.$signal.follow((val) => {
             this.replaceChildren(toAppendable(val))
-        })
+        }, true)
     }
 
     disconnectedCallback() {

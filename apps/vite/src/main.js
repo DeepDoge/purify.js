@@ -1,77 +1,86 @@
-import { ref, tags } from "cherry-js"
-import { setupCounter } from "./counter.js"
-import javascriptLogo from "./javascript.svg"
+import { css, derived, pipe, ref, sheet, tags } from "cherry-js"
 import "./style.css"
-import viteLogo from "/vite.svg"
 
-const app = document.querySelector("#app")
-if (!app) throw new Error("No #app element found")
+const { button, div, style } = tags
 
-app.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const time = ref(Date.now(), (set) => {
+    const id = setInterval(() => set(Date.now()), 1000)
+    return () => clearInterval(id)
+})
 
-const counter = document.querySelector("#counter")
-if (!counter) throw new Error("No #counter element found")
-setupCounter(counter)
+const timeString = ref("", (set) =>
+    time.follow((time) => set(new Date(time).toLocaleString())),
+)
 
-const { button, div } = tags
+/* document.body.append(
+    div().render(() => [
+        div().render(() => [
+            "The time is: ",
+            derived(() => new Date(time.val).toLocaleString()),
+        ]),
+        div().render(() => ["Timer ", time]),
+        fragment(["hello", " ", "world"]),
+        div().render(() => [
+            button()
+                .onclick(() => alert("Hello, world!"))
+                .render(() => ["Click me!"]),
+        ]),
+    ]),
+) */
 
-const count = ref(0)
-const element = button({ "on:": (event) => count.val++, ariaBusy: "true" }, [
-    "count is ",
-    count,
-])
-document.body.append(element)
+function Counter(value = ref(0)) {
+    const host = div().render()
+    host.append(counterStyle.cloneNode(true))
 
-// A
-div().render((myDiv) => [
-    button()
-        .onclick(() => (myDiv.style.background = "red"))
-        .ariaBusy("true")
-        .children(() => ["count is ", count]),
-    button()
-        .on("click", (event) => (myDiv.style.background = "red"))
-        .ariaBusy("true")
-        .set("")
-        .render(() => ["count is ", count]),
-])
+    host.append(
+        div().render(() => [
+            "Counter: ",
+            value,
+            button()
+                .onclick(() => value.val++)
+                .render(() => ["Increment"]),
+            button()
+                .onclick(() => value.val--)
+                .render(() => ["Decrement"]),
+        ]),
+    )
 
-input().type("text").build().valueAsNumber
-
-// B
-div({}, [
-    button({ onclick: () => count.val++, ariaBusy: "true" }, ["count is ", count]),
-    button({ onclick: () => count.val++, ariaBusy: "true" }, ["count is ", count]),
-])
-
-// Vanilla
-const outerDiv = document.createElement("div")
-const button1 = document.createElement("button")
-button1.addEventListener("click", () => (outerDiv.style.background = "red"))
-button1.ariaBusy = "true"
-button1.append("count is ", 1)
-
-const button2 = document.createElement("button")
-button2.addEventListener("click", () => (outerDiv.style.background = "red"))
-button2.ariaBusy = "true"
-button2.append("count is ", 1)
-
-outerDiv.append(button1, button2)
-
-{
+    return host
 }
+
+const counterStyle = style().render(() => [
+    css`
+        @scope {
+            :scope {
+                font-size: 2em;
+            }
+        }
+    `,
+])
+
+function App() {
+    const host = div().render()
+    const root = host.attachShadow({ mode: "open" })
+    root.adoptedStyleSheets.push(cardSheet)
+
+    const count = ref(123)
+
+    pipe(root).render(() => [
+        div().render(() => [
+            div().render(() => ["Hello, world!"]),
+            div().render(() => ["The time is: ", timeString]),
+        ]),
+        Counter(count),
+        derived(() => (count.val % 2 === 0 ? "Even" : "Odd")),
+    ])
+
+    return host
+}
+
+const cardSheet = sheet(css`
+    :host {
+        background-color: red;
+    }
+`)
+
+document.body.append(App())
