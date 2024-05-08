@@ -377,11 +377,29 @@ export namespace Tags {
             [K in `attr:${any}`]?: SignalLikeOrValue<string | boolean | null>
         })
 
-    type MutableFields<T extends Element> = {
-        [K in Utils.MutableKeysOf<Utils.PickLiteralKeys<T>> as object extends T[K]
-            ? never
-            : K]?: K extends "role" ? ARIARole : T[K]
+    type ExcludeNever<T> = {
+        [K in keyof T as NonNullable<T[K]> extends never ? never : K]: T[K]
     }
+
+    type IsMutable<T, K extends keyof T> = Utils.Equals<
+        { [Q in K]: T },
+        { -readonly [Q in K]: T }
+    >
+
+    type ExcludeEmptyObject<T> = {
+        [K in keyof T]: T[K]
+    }
+
+    type MutableFields<T> = ExcludeEmptyObject<ExcludeNever<{
+        [K in keyof Utils.PickLiteralKeys<T> as Extract<T[K], Function> extends never
+            ? K
+            : never]?: 
+            IsMutable<T, K> extends true
+                ? T[K]
+                : Extract<T[K], Record<string, any>> extends never ? never : MutableFields<T[K]>
+    }>>
+
+    type _ = NonNullable<MutableFields<HTMLDivElement>['assignedSlot']>
 
     export type Props<T extends Element> = Readonly<
         Directives<T> &

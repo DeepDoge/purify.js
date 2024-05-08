@@ -5,13 +5,5 @@
     "trailingComma": "all",
     "arrowParens": "always",
     "bracketSpacing": true,
-    "overrides": [
-        {
-            "files": ["./app/doc.ts"],
-            "options": {
-                "printWidth": 90
-            }
-        }
-    ],
     "plugins": ["prettier-plugin-organize-imports"]
 }

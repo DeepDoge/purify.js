@@ -6,16 +6,14 @@
         "./packages/*"
     ],
     "scripts": {
-        "format": "bunx --bun prettier -w ./",
-        "dev": "bun run ./apps/playground/scripts/dev.ts",
-        "empty:build": "bun run ./apps/empty/scripts/build.ts && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/min -x && bunx --bun minify-all-cli -s ./apps/empty/out/bun -d ./apps/empty/out/gzip -g -x",
-        "cherry-ts:typecheck": "bunx --bun tsc -p ./packages/cherry-ts --noEmit",
-        "tests": "bun cherry-ts:typecheck && bun test"
+        "format": "prettier -w ./"
     },
     "devDependencies": {
-        "bun-types": "latest",
+        "@eslint/js": "^9.2.0",
+        "eslint": "^8.57.0",
         "prettier": "latest",
         "prettier-plugin-organize-imports": "latest",
-        "typescript": "latest"
+        "typescript": "^5.4.5",
+        "typescript-eslint": "^7.8.0"
     }
 }

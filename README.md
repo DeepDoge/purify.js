@@ -1,3 +1,13 @@
+# NOTICE
+
+Rewrite in JS with JSDoc is in progress.<br>
+Which also changes how templating and signal rendering works.<br>
+Prioritizing using native js APIs more than ever.<br>
+And, it will be smaller than ever.<br>
+Everything below will be updated later.<br>
+This will be the final rewrite before 0.1.0 release.<br>
+Prototyping phase is going to end soon.<br>
+
 # cherry-ts
 
 <p align="center">
