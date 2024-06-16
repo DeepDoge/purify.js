@@ -35,7 +35,7 @@
 
 Soon
 
-## Example: **purify.js** + ShadowRoot
+## Example: purify.js + ShadowRoot
 
 ```ts
 import { computed, css, fragment, ref, sheet, tags } from "purifyjs"
@@ -96,8 +96,6 @@ JavaScript frameworks are often large and complex. As your project grows, they c
 -   **Simple Reactivity**: By using signals, we maintain straightforward reactivity. Signals are easy to detect in the code using the `instanceof` keyword, and you have control over manually notifying signal followers with the `notify()` function. This eliminates the need to wrap unrelated logic inside functions like `update()`. Getters and setters further improve the developer experience, making it clear when you're working with a signal.
 
 -   **Clear DOM Element Creation**: **purify.js** provides a simple and readable way to create DOM elements and templates with full type safety. It ensures a clear separation between element attributes and properties, so you always know what you’re setting.
-
--   **Scoped CSS**: Writing CSS and converting it into a `CSSStyleSheet` is made easy with purify.js. This promotes scoped and modular styles without the drawbacks of global CSS or complex CSS-in-JS solutions.
 
 -   **Minimal and Pure**: The library is minimal, focusing on providing signals and templating to enhance the developer experience. This approach reduces complexity and keeps your codebase closer to native JavaScript.
 
