@@ -1,32 +1,23 @@
-# NOTICE
-
-Rewrite in JS with JSDoc is in progress.<br>
-Which also changes how templating and signal rendering works.<br>
-Prioritizing using native js APIs more than ever.<br>
-And, it will be smaller than ever.<br>
-Everything below will be updated later.<br>
-This will be the final rewrite before 0.1.0 release.<br>
-Prototyping phase is going to end soon.<br>
-
-# cherry-ts
+# purify.js
 
 <p align="center">
-    <img width="100px" height="auto" alt="cherry-ts logo" src="https://ipfs.io/ipfs/QmWtKLVqAg4Y4oFCeExpkua3SQzuBk4FaiPfNQefsU8dKA" />
+    <img width="100px" height="auto" alt="**purify.js** logo" src="#" />
 </p>
 <p align="center">
-    A lightweight TypeScript library designed for creating SPAs. Cherry on top of vanilla JS.
+    Simplifying JavaScript UI, Empowering Native Features
 </p>
-<p align="center">
-    Enhance Vanilla JS
-</p>
+
+## What is purify.js
+
+**purify.js** is a lightweight JavaScript UI library that prioritizes transparency and direct access to native browser features.
 
 ## Size ⚡
 
-**cherry-ts** is feature-complete, requires no building step, yet maintains a remarkably small footprint. To demonstrate its efficiency, here's a comparison with other well-known libraries:
+**purify.js** boasts an incredibly small footprint without the need for a build step. Here's a size comparison with other popular libraries, highlighting its efficiency:
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
-| **cherry-ts**   | 4.4 KB   | 2.25 KB    |
+| **purify.js**   | 2.1 KB   | 970 bytes  |
 | Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
 | Solid 1.8.12    | 23 KB    | 8.1 KB     |
 | jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
@@ -36,180 +27,83 @@ Prototyping phase is going to end soon.<br>
 
 ---
 
-**You can see all of it at once:**
-
-<p align="center">
-    <img width="auto" height="auto" alt="screenshot of minified code showing how small the library is" src="https://ipfs.io/ipfs/QmYkbaQKLuRjXJGM3omab2WjfgVfxtGWJRARTa4K4HbjDt" />
-</p>
-
 ## Installation 🍙
 
-[Install Instructions](https://github.com/DeepDoge/cherry-ts/releases)
+[Install Instructions](https://github.com/DeepDoge/purifyjs/releases)
 
 ## Documentation 🍱
 
-Will be available once `0.1.0` or `0.2.0` releases. Everything is changing all the time atm, maintaining the documentation is hard this early.
+Soon
 
-## Hey
-
-Didn't have time to work on this recently. But I have been thinking about it at the back of my mind (can't stop).
-
-Gonna try to make some changes ~~next weekend (March 1 2024)~~ on (April 1), Also as a note to myself:
-
--   I think I found a way to differentiate between Element properties vs attributes in the builder props without much code, So I can remove the `attr:` directive.
--   So since we use Element propeties now and attributes together, and both are, like all props, supports signals, we don't need the `on:` directive anymore.
--   Bind directive can only be used with `<input>`(s) or other input related Elements atm, but we can make this better i believe, we can bind any attribute or property by also providing the event name to the directive.
--   Speaking of this, maybe this doesn't have to be a directive i was thinking about something similar to svelte's `use:` directive, but this one is not a directive its a prop that gets an array of functions, and practically works same as it. And `bind` can be a function that you supply to there instead of directive. Many things can act like this tbh. more consistent and more extenadable, better in general.
--   I think since now we will support Element propeties, we can also remove the `style:` directive since there is already style property object on the HTMLElement's.
--   So in general by adding a few general features, we can remove many of the directives that has a spesific jobs, so use what is there in the vanilla/native js, and enhance it.
--   I think I can also make types better too, for example i shouldn't allow nested forms, because it only works when you create the form elements with js and breaks if you render it from html, so not consistent, and probably semantically wrong, so not allow it. if you need similar behevior you can already use "form" attribute. and move the form outside.
--   Then I can use this for eternis.
-
-## Todo Example
-
-Todo example with a functional component and CSS `@scoped`
+## Example: **purify.js** + ShadowRoot
 
 ```ts
-import { Tags, css, each, sheet, signal } from "cherry-ts"
+import { computed, css, fragment, ref, sheet, tags } from "purifyjs"
 
-const { div, input, form, style } = Tags
+const { div, button } = tags
 
-const randomId = () => Math.random().toString(36).substring(2)
+const count = ref(0)
+const double = computed(() => count.val * 2)
 
-export namespace Todo {
-    export type Item = {
-        id: string
-        text: string
-        done: boolean
+function App() {
+    return div({ id: "app" }).children(Counter())
+}
+
+function Counter() {
+    const host = div()
+    const shadow = host.element.attachShadow({ mode: "open" })
+    shadow.adoptedStyleSheets.push(counterStyle)
+
+    shadow.append(
+        fragment(
+            button({ class: "my-button" })
+                .onclick(() => count.val++)
+                .children("Count:", count),
+            ["Double:", double],
+        ),
+    )
+    return host
+}
+
+const counterStyle = sheet(css`
+    :host {
+        display: grid;
+        place-content: center;
     }
-}
 
-export function Todo(initial: Todo.Item[] = []) {
-    const todos = signal(initial)
-
-    const currentText = signal("")
-    const todoForm = form({
-        hidden: true,
-        id: randomId(),
-        "on:submit"(event) {
-            event.preventDefault()
-            todos.ref.push({
-                id: randomId(),
-                text: currentText.ref,
-                done: false,
-            })
-            todos.ping()
-            currentText.ref = ""
-        },
-    })
-
-    return div([
-        todoStyle.cloneNode(true),
-        todoForm,
-        input({
-            type: "text",
-            "attr:form": todoForm.id,
-            placeholder: "Add todo",
-            "bind:value": currentText,
-        }),
-        div({ className: "todos" }, [
-            each(todos)
-                .key((todo) => todo.id)
-                .as((todo) =>
-                    div({ className: "todo" }, [
-                        todo.ref.text,
-                        input({
-                            type: "checkbox",
-                            checked: () => todo.ref.done,
-                            "on:change"(event) {
-                                todo.ref.done = event.currentTarget.checked
-                                todos.ping()
-                            },
-                        }),
-                        () => (todo.ref.done ? "Done!" : null),
-                    ]),
-                ),
-        ]),
-    ])
-}
-
-const todoStyle = style([
-    css`
-        @scope {
-            :scope {
-                display: grid;
-                gap: 1em;
-                max-inline-size: 20em;
-                margin-inline: auto;
-            }
-        }
-    `,
-])
+    .my-button {
+        overflow-wrap: break-word;
+    }
+`)
 
 document.adoptedStyleSheets.push(
     sheet(css`
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
+        :root {
+            color-scheme: dark;
         }
     `),
 )
 
-document.body.append(
-    Todo([
-        {
-            id: "1",
-            text: "Buy milk",
-            done: false,
-        },
-        {
-            id: "2",
-            text: "Buy eggs",
-            done: false,
-        },
-        {
-            id: "3",
-            text: "Buy bread",
-            done: false,
-        },
-    ]),
-)
+document.body.append(App().element)
 ```
 
 ## Motivation 🍣
 
-Native browser APIs has been getting better, and **cherry-ts** is designed to be complementary to native browser APIs, not to replace them.
+JavaScript frameworks are often large and complex. As your project grows, they can introduce obscure reactivity bugs and force you into their specific ecosystems, restricting your use of native browser APIs (Vanilla JavaScript). Many frameworks prevent direct DOM manipulation and struggle to keep up with new CSS features, resulting in poorly scoped CSS. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
 
-By only focusing on SPAs, **cherry-ts** is able work better with the browser's native APIs.
-This also makes it easier to learn, and easier to use with other libraries and frameworks. If you know browser's native vanilla APIs and HTML, you already know **cherry-ts**
+**purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. Here’s how:
 
-**cherry-ts** doesn't tell you how to build a component, how to mount a component, or what is a component. And most importantly, it doesn't break when you use browsers native APIs on your DOM because it works with them.
+-   **Simple Reactivity**: By using signals, we maintain straightforward reactivity. Signals are easy to detect in the code using the `instanceof` keyword, and you have control over manually notifying signal followers with the `notify()` function. This eliminates the need to wrap unrelated logic inside functions like `update()`. Getters and setters further improve the developer experience, making it clear when you're working with a signal.
 
-It gives you the freedom to build your app however you want:
+-   **Clear DOM Element Creation**: **purify.js** provides a simple and readable way to create DOM elements and templates with full type safety. It ensures a clear separation between element attributes and properties, so you always know what you’re setting.
 
--   Wanna use Shadow DOM? Go ahead.
--   Wanna use Custom Elements? Go ahead.
--   Wanna use fragments with CSS `@scoped`? Go ahead.
--   Wanna use history API? Go ahead.
--   Wanna use hash router? Go ahead.
--   Wanna make class based Components? Go ahead.
--   Wanna make functional Components? Go ahead.
+-   **Scoped CSS**: Writing CSS and converting it into a `CSSStyleSheet` is made easy with purify.js. This promotes scoped and modular styles without the drawbacks of global CSS or complex CSS-in-JS solutions.
 
-Do whatever you want, in the way you want, and **cherry-ts** will work with you.<br/>
-Because, **cherry-ts** is not a framework, it's just a library of helpful tools that helps you with templating and reactivity.
+-   **Minimal and Pure**: The library is minimal, focusing on providing signals and templating to enhance the developer experience. This approach reduces complexity and keeps your codebase closer to native JavaScript.
 
-## Why not cherry-js?
+By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
-`cherry-ts` is relays heavily on TypeScript's type system. It's not possible to use it safely without TypeScript. So it's named `cherry-ts` instead of `cherry-js`.
-If types comes to JS with this new "types as comments" proposal, then I can call it `cherry-js` instead.
+## Why Not JSX Templating?
 
-## Why not JSX/TSX templating?
-
-Lack of type safety.
-
-## Why SPA only?
-
--   Works without server, so works with any static host including IPFS.
--   SSR requires a framework, because SSR works with paths and requests, and **cherry-ts** is not a framework.
--   This is a browser library similar to how jQuery was a library. And **cherry-ts** is a lot more smaller than jQuery.
+-   **Lack of Type Safety**: JSX does not offer the same level of type safety, which can lead to runtime errors.
+-   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.
