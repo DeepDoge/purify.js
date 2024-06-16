@@ -1,9 +1,7 @@
 import { Signal } from "./signals"
 import { IfEquals, IsFunction, NotEventHandler } from "./utils"
 
-export function fragment(
-    ...members: import("./tags").MemberOf<DocumentFragment>[]
-): DocumentFragment
+export function fragment(...members: MemberOf<DocumentFragment>[]): DocumentFragment
 
 export function toAppendable(
     value: unknown,
@@ -12,7 +10,7 @@ export function toAppendable(
 export class SignalElement extends HTMLElement {
     constructor(signal: typeof this.$signal)
     $signal: Signal<any>
-    $unfollow: import("./signals").Signal.Unfollower | undefined
+    $unfollow: Signal.Unfollower | undefined
     connectedCallback(self?: this): void
     disconnectedCallback(): void
 }
@@ -41,7 +39,6 @@ export class Builder<T extends Element & ParentNode> {
 }
 
 export type ChildNodeOf<TParentNode extends ParentNode> =
-    | any
     | DocumentFragment
     | CharacterData
     | (TParentNode extends SVGElement
@@ -59,8 +56,9 @@ export type MemberOf<T extends ParentNode> =
     | bigint
     | null
     | ChildNodeOf<T>
-    | Builder<any>
-    | import("./signals").Signal<any>
+    | Builder<ChildNodeOf<T>>
+    | MemberOf<T>[]
+    | Signal<MemberOf<T>>
 
 export type EventMap<T extends Element> = T extends HTMLElement
     ? HTMLElementEventMap
