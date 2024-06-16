@@ -1,4 +1,4 @@
-import { computed, ref, tags } from "cherry-js"
+import { computed, ref, tags } from "../../.."
 
 const { div, button } = tags
 

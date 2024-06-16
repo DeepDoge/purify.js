@@ -1,9 +1,12 @@
 {
     "type": "module",
-    "name": "cherry-ts-workspace",
+    "name": "purifyjs",
+    "version": "0.0.0",
+    "main": "index.js",
+    "types": "[jsdoc]",
     "workspaces": [
         "./apps/*",
-        "./packages/*"
+        "./*"
     ],
     "scripts": {
         "format": "prettier -w ./"
