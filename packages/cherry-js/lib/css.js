@@ -1,8 +1,9 @@
 /**
  * @param {TemplateStringsArray} strings
  * @param {{}[]} values
+ * @constant
  */
-export let css = (strings, ...values) => String.raw(strings, ...values)
+export let css = String.raw
 /**
  * @param {string} css
  */
@@ -11,3 +12,4 @@ export let sheet = (css) => {
     sheet.replaceSync(css)
     return sheet
 }
+css = String
