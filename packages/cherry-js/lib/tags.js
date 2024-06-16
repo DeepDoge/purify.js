@@ -1,4 +1,4 @@
-import { isSignal } from "./signals/core"
+import { Signal } from "./signals"
 
 /**
  * @param {import("./tags").MemberOf<DocumentFragment>[]} members
@@ -18,7 +18,7 @@ export const fragment = (...members) => {
 /**
  * @template {ParentNode} T
  * @typedef MemberOf
- * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | import("./signals/core").Signal<any>}
+ * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | import("./signals").Signal<*>}
  */
 
 /**
@@ -38,22 +38,26 @@ export function toAppendable(value) {
         return value
     }
 
-    if (Array.isArray(value)) {
-        return fragment(...value.map(toAppendable))
+    if (value instanceof Signal) {
+        return new SignalElement(value)
     }
 
-    if (isSignal(value)) {
-        return new CherrySignalElement(value)
+    if (value instanceof Builder) {
+        return value.element
+    }
+
+    if (Array.isArray(value)) {
+        return fragment(...value.map(toAppendable))
     }
 
     return String(value)
 }
 
-export class CherrySignalElement extends HTMLElement {
-    /** @type {import('./signals/core').Signal.Mut<unknown>} */
+export class SignalElement extends HTMLElement {
+    /** @type {Signal<*>} */
     $signal
 
-    /** @type {import('./signals/core').Signal.Unfollow<unknown> | undefined} */
+    /** @type {import('./signals').Signal.Unfollower | undefined} */
     $unfollow
     /**
      * @param {typeof this.$signal} signal
@@ -64,9 +68,9 @@ export class CherrySignalElement extends HTMLElement {
         this.$signal = signal
     }
 
-    connectedCallback() {
-        this.$unfollow = this.$signal.follow((val) => {
-            this.replaceChildren(toAppendable(val))
+    connectedCallback(self = this) {
+        self.$unfollow = self.$signal.follow((value) => {
+            self.replaceChildren(toAppendable(value))
         }, true)
     }
 
@@ -74,7 +78,7 @@ export class CherrySignalElement extends HTMLElement {
         this.$unfollow?.()
     }
 }
-customElements.define("cherry-signal", CherrySignalElement)
+customElements.define("signal-element", SignalElement)
 
 /**
  *
@@ -85,7 +89,7 @@ customElements.define("cherry-signal", CherrySignalElement)
  *          T extends HTMLElement ? HTMLElementEventMap :
  *          T extends SVGElement ? SVGElementEventMap :
  *          T extends MathMLElement ? MathMLElementEventMap :
- *          import("./utils").EmptyObject
+ *          { [key: PropertyKey]: never }
  * ][number]}
  */
 
@@ -100,78 +104,50 @@ customElements.define("cherry-signal", CherrySignalElement)
 
 /**
  * @type {{
- *    [K in keyof HTMLElementTagNameMap]: () => Populate<HTMLElementTagNameMap[K]>
+ *    [K in keyof HTMLElementTagNameMap]: () => Builder<HTMLElementTagNameMap[K]>
  * }}
  */
-// @ts-ignore
-export const tags = new Proxy(
-    {},
-    {
-        /**
-         *
-         * @param {never} _
-         * @param {keyof HTMLElementTagNameMap} tag
-         * @returns
-         */
-        get: (_, tag) => () => populate(document.createElement(tag)),
-    },
+export const tags = /** @type {*} */ (
+    new Proxy(
+        {},
+        {
+            /**
+             *
+             * @param {never} _
+             * @param {keyof HTMLElementTagNameMap} tag
+             * @returns
+             */
+            get: (_, tag) => new Builder(document.createElement(tag)),
+        },
+    )
 )
 
 /**
- * @template {ParentNode} T
- * @typedef Populate
- * @type {{
- *     [K in (keyof T) | (keyof typeof defaults)]:
- *          K extends keyof typeof defaults ? typeof defaults[K]:
- *          K extends keyof T ? <V extends T[K]>(value: V) => Populate<T> :
- *          never
- * }}
+ * @template {HTMLElement | SVGElement | MathMLElement} T
  */
+export class Builder {
+    /** @type {T} */
+    element
 
-const defaults = {
-    /**
-     * @template {Element} T
-     * @param {T} element
-     * @param {MemberOf<T>[]} members
-     * @param {Populate<T>} proxy
-     * @returns {T}
-     */
-    children: (element, proxy, ...members) => (
-        element.append(...members.map(toAppendable)), element
-    ),
+    /** @param {T} element */
+    constructor(element) {
+        this.element = element
+    }
+
+    /** @param {MemberOf<T>[]} members */
+    children(...members) {
+        let element = this.element
+        element.append(...members.map(toAppendable))
+        return this
+    }
 
     /**
-     * @template {Element} T
-     * @param {T} element
-     * @param {(element: T) => void} callback
-     * @param {Populate<T>} proxy
-     * @returns {Populate<T>}
+     * @param {{ [name: string]: string | number | boolean | bigint | null }} attrs
      */
-    use: (element, proxy, callback) => (callback(element), proxy),
-}
-
-/**
- * @template {ParentNode} T
- * @param {T} element
- * @returns {Populate<T>}
- */
-export function populate(element) {
-    // @ts-ignore
-    const proxy = new Proxy(
-        {},
-        {
-            get:
-                (_, name) =>
-                // @ts-ignore
-                (...args) =>
-                    // @ts-ignore
-                    defaults[key]
-                        ? // @ts-ignore
-                          defaults[key](element, proxy, ...args)
-                        : // @ts-ignore
-                          ((element[name] = value), proxy),
-        },
-    )
-    // @ts-ignore
-    return proxy
+    attr(attrs) {
+        for (const [name, value] of Object.entries(attrs)) {
+            this.element.setAttribute(name, String(value))
+        }
+        return this
+    }
 }

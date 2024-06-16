@@ -43,6 +43,11 @@ export class Signal {
          */
         class State extends Signal {
             set = this.#set
+
+            /** @param {T} value */
+            set val(value) {
+                this.set(value)
+            }
         }
 
     static Compute =
@@ -139,6 +144,10 @@ export class Signal {
         return self.#value
     }
 
+    get val() {
+        return this.get()
+    }
+
     /**
      * @param {Signal.Follower<T>} follower
      * @param {boolean} immediate
@@ -156,3 +165,15 @@ export class Signal {
         }
     }
 }
+
+/**
+ * @template T
+ * @param {T} value
+ */
+export let ref = (value) => new Signal.State(value)
+
+/**
+ * @template T
+ * @param {Signal.Compute.Callback<T>} callback
+ */
+export let computed = (callback) => new Signal.Compute(callback)

@@ -7,9 +7,4 @@ export let css = String.raw
 /**
  * @param {string} css
  */
-export let sheet = (css) => {
-    let sheet = new CSSStyleSheet()
-    sheet.replaceSync(css)
-    return sheet
-}
-css = String
+export let sheet = (css, sheet = new CSSStyleSheet()) => (sheet.replaceSync(css), sheet)
