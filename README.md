@@ -107,5 +107,5 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 ## Why Not JSX Templating?
 
--   **Lack of Type Safety**: JSX does not offer the same level of type safety, which can lead to runtime errors.
+-   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience. 
 -   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.
