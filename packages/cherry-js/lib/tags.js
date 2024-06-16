@@ -1,7 +1,7 @@
 import { Signal } from "./signals"
 
 /**
- * @param {import("./tags").MemberOf<DocumentFragment>[]} members
+ * @param {import("./tags.js").MemberOf<DocumentFragment>[]} members
  */
 export const fragment = (...members) => {
     let fragment = document.createDocumentFragment()
@@ -29,14 +29,14 @@ export const fragment = (...members) => {
 /**
  * @template {ParentNode} T
  * @typedef MemberOf
- * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | Builder<*> | import("./signals").Signal<*>}
+ * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | Builder<*> | import("./signals.js").Signal<*>}
  */
 
 /**
  * @param {unknown} value
  * @returns {string | CharacterData | Element | DocumentFragment}
  */
-export function toAppendable(value) {
+export let toAppendable = (value) => {
     if (value === null) {
         return fragment()
     }
@@ -68,7 +68,7 @@ export class SignalElement extends HTMLElement {
     /** @type {Signal<*>} */
     $signal
 
-    /** @type {import('./signals').Signal.Unfollower | undefined} */
+    /** @type {import('./signals.js').Signal.Unfollower | undefined} */
     $unfollow
     /**
      * @param {typeof this.$signal} signal
@@ -104,16 +104,29 @@ customElements.define("signal-element", SignalElement)
 
 /**
  * @template {Element} T
- * @typedef Directives.On
- * @type {[
- *      | { [K in `on:`]?: never }
- *      | { [K in `on:${any}${any}`]?: K extends `on:${infer N}` ? N extends keyof EventMap<T> ? { (event: EventMap<T>[N] & { currentTarget: T }): unknown } : { (event: Event & { currentTarget: T }): unknown } : never }
- * ][number]}
+ * @typedef ToBuilderFunctions
+ * @type {{
+ *   [K in keyof T as
+ *      true extends (
+ *          | import("./utils.js").IsReadonly<T, K>
+ *          | (import("./utils.js").IsFunction<T[K]> & import("./utils.js").NotEventHandler<T[K]>)
+ *      ) ? never : K]:
+ *      (
+ *          value:
+ *              NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R ? U extends Event ?
+ *                  (this: X, event: U & { currentTarget: T }) => R
+ *              : T[K]
+ *              : T[K]
+ *      ) => Builder<T> & ToBuilderFunctions<T>
+ * }}
  */
 
 /**
  * @type {{
- *    [K in keyof HTMLElementTagNameMap]: () => Builder<HTMLElementTagNameMap[K]>
+ *    [K in keyof HTMLElementTagNameMap]:
+ *       (
+ *          attributes?: { [name: string]: string | number | boolean | bigint | null }) =>
+ *              Builder<HTMLElementTagNameMap[K]> & ToBuilderFunctions<HTMLElementTagNameMap[K]>
  * }}
  */
 export const tags = /** @type {*} */ (
@@ -126,7 +139,24 @@ export const tags = /** @type {*} */ (
              * @param {keyof HTMLElementTagNameMap} tag
              * @returns
              */
-            get: (_, tag) => () => new Builder(document.createElement(tag)),
+            get:
+                (_, tag) =>
+                /**
+                 * @param {*} attributes
+                 * @param {*} element
+                 */
+                (
+                    attributes = {},
+                    element = document.createElement(tag),
+                    proxy = new Proxy(new Builder(element, attributes), {
+                        get: (target, name) =>
+                            /** @type {*} */ (target)[name] ??
+                            ((/** @type {*} */ value) => (
+                                (element[name] = value), proxy
+                            )),
+                    }),
+                ) =>
+                    proxy,
         },
     )
 )
@@ -138,35 +168,25 @@ export class Builder {
     /** @type {T} */
     element
 
-    /** @param {T} element */
-    constructor(element) {
+    /**
+     * @param {T} element
+     * @param {{ [name: string]: string | number | boolean | bigint | null }} attributes
+     */
+    constructor(element, attributes = {}) {
         this.element = element
+        for (const [name, value] of Object.entries(attributes)) {
+            if (value === null) {
+                element.removeAttribute(name)
+            } else {
+                element.setAttribute(name, String(value))
+            }
+        }
     }
 
     /** @param {MemberOf<T>[]} members */
     children(...members) {
         let element = this.element
         element.append(...members.map(toAppendable))
-        return this
-    }
-
-    /**
-     * @param {{ [name: string]: string | number | boolean | bigint | null }} attrs
-     */
-    attr(attrs) {
-        for (const [name, value] of Object.entries(attrs)) {
-            this.element.setAttribute(name, String(value))
-        }
-        return this
-    }
-
-    /**
-     * @template {keyof EventMap<T>} TEventName
-     * @param {TEventName} name
-     * @param {(event: EventMap<T>[TEventName] & { currentTarget: T}) => unknown} listener
-     */
-    on(name, listener) {
-        this.element.addEventListener(/** @type {*} */ (name), listener)
         return this
     }
 }

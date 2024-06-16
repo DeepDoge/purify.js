@@ -1,3 +1,2 @@
-export * from "./lib/css.js"
-export * from "./lib/signals"
-export * from "./lib/tags.js"
+export * from "./lib/all.js"
+export * as purifyjs from "./lib/all.js"

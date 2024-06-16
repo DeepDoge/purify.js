@@ -34,6 +34,18 @@ const trackerStack = []
 
 /**
  * @template T
+ * @typedef Signal.State
+ * @type {Signal<T> & { set: Signal.Setter<T>, val: T }}
+ */
+
+/**
+ * @template T
+ * @typedef Signal.Compute
+ * @type {Signal<T>}
+ */
+
+/**
+ * @template const T
  */
 export class Signal {
     static State =
@@ -181,3 +193,26 @@ export let ref = (value) => new Signal.State(value)
  * @param {Signal.Compute.Callback<T>} callback
  */
 export let computed = (callback) => new Signal.Compute(callback)
+
+/**
+ * @template T
+ * @template [const U = null]
+ * @param {Promise<T>} promise
+ * @param {U?} until
+ * @param {Signal.State<T | U>=} signal
+ * @returns {Signal<T | U>}
+ */
+export let awaited = (
+    promise,
+    until = null,
+    signal = /** @type {never} */ (ref(until)),
+) => {
+    promise.then((value) => signal.set(value))
+    return signal
+}
+
+/**
+ * @template T
+ * @param {Signal.Compute.Callback<T>} callback
+ */
+export let effect = (callback) => computed(callback).follow(() => {})
