@@ -12,13 +12,24 @@ export const fragment = (...members) => {
 /**
  * @template {ParentNode} TParentNode
  * @typedef ChildNodeOf
- * @type {DocumentFragment | CharacterData | (TParentNode extends SVGElement ? SVGElement : TParentNode extends HTMLElement ? Element : TParentNode extends MathMLElement ? MathMLElement : Element)}
+ * @type {
+ * | DocumentFragment
+ * | CharacterData
+ * | (
+ *      TParentNode extends SVGElement ?
+ *          SVGElement :
+ *      TParentNode extends HTMLElement ?
+ *          Element :
+ *      TParentNode extends MathMLElement ?
+ *          MathMLElement :
+ *          Element
+ *  )}
  */
 
 /**
  * @template {ParentNode} T
  * @typedef MemberOf
- * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | import("./signals").Signal<*>}
+ * @type {string | number | boolean | bigint | null | ChildNodeOf<T> | Builder<*> | import("./signals").Signal<*>}
  */
 
 /**
@@ -84,13 +95,11 @@ customElements.define("signal-element", SignalElement)
  *
  * @template {Element} T
  * @typedef EventMap
- * @type {[
- *      GlobalEventHandlersEventMap &
- *          T extends HTMLElement ? HTMLElementEventMap :
+ * @type {T extends HTMLElement ? HTMLElementEventMap :
  *          T extends SVGElement ? SVGElementEventMap :
  *          T extends MathMLElement ? MathMLElementEventMap :
- *          { [key: PropertyKey]: never }
- * ][number]}
+ *          ElementEventMap
+ * }
  */
 
 /**
@@ -117,13 +126,13 @@ export const tags = /** @type {*} */ (
              * @param {keyof HTMLElementTagNameMap} tag
              * @returns
              */
-            get: (_, tag) => new Builder(document.createElement(tag)),
+            get: (_, tag) => () => new Builder(document.createElement(tag)),
         },
     )
 )
 
 /**
- * @template {HTMLElement | SVGElement | MathMLElement} T
+ * @template {Element & ParentNode} T
  */
 export class Builder {
     /** @type {T} */
@@ -148,6 +157,16 @@ export class Builder {
         for (const [name, value] of Object.entries(attrs)) {
             this.element.setAttribute(name, String(value))
         }
+        return this
+    }
+
+    /**
+     * @template {keyof EventMap<T>} TEventName
+     * @param {TEventName} name
+     * @param {(event: EventMap<T>[TEventName] & { currentTarget: T}) => unknown} listener
+     */
+    on(name, listener) {
+        this.element.addEventListener(/** @type {*} */ (name), listener)
         return this
     }
 }

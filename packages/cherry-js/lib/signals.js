@@ -48,6 +48,10 @@ export class Signal {
             set val(value) {
                 this.set(value)
             }
+
+            get val() {
+                return super.val
+            }
         }
 
     static Compute =
@@ -71,9 +75,8 @@ export class Signal {
             get(self = this) {
                 if (self.#dirty) {
                     self.#update()
-                    self.#dirty = false
                 }
-                return self.#value
+                return super.get()
             }
 
             #update(self = this) {
@@ -81,9 +84,10 @@ export class Signal {
 
                 let trackedSet = new Set()
                 trackerStack.push(trackedSet)
-                this.#set(self.#callback())
+                self.#set(self.#callback())
                 trackerStack.pop()
                 trackedSet.delete(self)
+                self.#dirty = false
 
                 // Unfollow and remove dependencies that are no longer being tracked
                 for (const [dependency, unfollow] of dependencies) {
@@ -133,7 +137,7 @@ export class Signal {
     #set(value, self = this) {
         const changed = self.#value !== value
         self.#value = value
-        if (changed) self.emit()
+        if (changed) self.notify()
     }
 
     /**
@@ -154,14 +158,14 @@ export class Signal {
      * @returns {Signal.Unfollower}
      */
     follow(follower, immediate = false, self = this) {
+        if (immediate || !self.#followers.size) follower(self.val)
         self.#followers.add(follower)
-        if (immediate) follower(self.#value)
         return () => self.#followers.delete(follower)
     }
 
-    emit(self = this) {
+    notify(self = this, value = self.val) {
         for (const follower of self.#followers) {
-            follower(self.#value)
+            follower(value)
         }
     }
 }

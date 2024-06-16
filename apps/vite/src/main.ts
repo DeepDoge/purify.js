@@ -1,4 +1,22 @@
-import { Signal } from "cherry-js"
+import { computed, ref, tags } from "cherry-js"
 
-const count = new Signal.State(0)
-const double = new Signal.Compute(() => count.get() * 2)
+const { div, button } = tags
+
+const count = ref(0)
+const double = computed(() => count.val * 2)
+
+function App() {
+    return div().children(Counter())
+}
+
+function Counter() {
+    return div().children(
+        button()
+            .on("click", (event) => count.val++)
+            .children("Count:", count),
+        "Double:",
+        double,
+    )
+}
+
+document.body.append(App().element)
