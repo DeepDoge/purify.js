@@ -1,3 +1,3 @@
-export * from "./css.js";
-export * from "./signals.js";
-export * from "./tags.js";
+export * from "./css";
+export * from "./signals";
+export * from "./tags";
