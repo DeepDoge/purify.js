@@ -31,6 +31,10 @@
 
 [Install Instructions](https://github.com/DeepDoge/purifyjs/releases)
 
+## Guide 🍱
+
+Sooner
+
 ## Documentation 🍱
 
 Soon
