@@ -9,7 +9,7 @@
     "exports": {
         ".": {
             "default": "./packages/lib/all.js",
-            "types": "./types/all.js"
+            "types": "./packages/lib/all.d.ts"
         }
     },
     "scripts": {

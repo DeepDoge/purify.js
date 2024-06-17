@@ -15,27 +15,25 @@ export class SignalElement extends HTMLElement {
     disconnectedCallback(): void
 }
 
-export const tags: {
+export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (attributes?: {
-        [name: string]: string | number | boolean | bigint | null
+        [name: string]: Builder.AttributeValue | Signal<Builder.AttributeValue>
     }) => Builder<HTMLElementTagNameMap[K]> & ToBuilderFunctions<HTMLElementTagNameMap[K]>
 }
+export const tags: Tags
 
 export class Builder<T extends Element & ParentNode> {
     constructor(
         element: T,
         attributes?: {
-            [name: string]: string | number | boolean | bigint | null
+            [name: string]: Builder.AttributeValue | Signal<Builder.AttributeValue>
         },
     )
     element: T
-    constructor(
-        element: T,
-        attributes?: {
-            [name: string]: string | number | boolean | bigint | null
-        },
-    )
     children(...members: MemberOf<T>[]): this
+}
+export namespace Builder {
+    type AttributeValue = string | number | boolean | bigint | null
 }
 
 export type ChildNodeOf<TParentNode extends ParentNode> =
@@ -59,14 +57,6 @@ export type MemberOf<T extends ParentNode> =
     | Builder<Extract<ChildNodeOf<T>, Element>>
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
-
-export type EventMap<T extends Element> = T extends HTMLElement
-    ? HTMLElementEventMap
-    : T extends SVGElement
-      ? SVGElementEventMap
-      : T extends MathMLElement
-        ? MathMLElementEventMap
-        : ElementEventMap
 
 export type ToBuilderFunctions<T extends Element> = {
     [K in keyof T as true extends

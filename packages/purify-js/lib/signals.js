@@ -1,41 +1,10 @@
-/**
- * @template T
- * @typedef Signal.Setter<T>
- * @type {{ (value: T): void}}
- */
-
-/**
- * @template T
- * @typedef Signal.Getter<T>
- * @type {{ (): T}}
- */
-
-/**
- * @template T
- * @typedef Signal.Compute.Callback<T>
- * @type {{ (): T}}
- */
-
-/**
- * @template T
- * @typedef Signal.Follower
- * @type {{ (value: T): unknown }}
- */
-
-/**
- * @typedef Signal.Unfollower
- * @type {{ (): void }}
- */
-
-/**
- * @type {Set<Signal<*>>[]}
- */
+/** @type {Set<Signal<*>>[]} */
 const trackerStack = []
 
 /**
  * @template [T = unknown]
  * @typedef Signal.State
- * @type {Signal<T> & { set: Signal.Setter<T>, val: T }}
+ * @type {Signal<T> & { set: import("./signals.js").Signal.Setter<T>, val: T }}
  */
 
 /**
@@ -73,12 +42,12 @@ export class Signal {
          */
         class Compute extends Signal {
             #dirty = true
-            /** @type {Map<Signal<unknown>, Signal.Unfollower>} */
+            /** @type {Map<Signal<unknown>, import("./signals.js").Signal.Unfollower>} */
             #dependencies = new Map()
-            /** @type {Signal.Compute.Callback<T>} */
+            /** @type {import("./signals.js").Signal.Compute.Callback<T>} */
             #callback
 
-            /** @param {Signal.Compute.Callback<T>} callback */
+            /** @param {import("./signals.js").Signal.Compute.Callback<T>} callback */
             constructor(callback) {
                 super(/** @type {*} */ (0))
                 this.#callback = callback
@@ -133,7 +102,7 @@ export class Signal {
 
     /** @type {T} */
     #value
-    /** @type {Set<Signal.Follower<T>>} */
+    /** @type {Set<import("./signals.js").Signal.Follower<T>>} */
     #followers = new Set()
 
     /**
@@ -165,9 +134,9 @@ export class Signal {
     }
 
     /**
-     * @param {Signal.Follower<T>} follower
+     * @param {import("./signals.js").Signal.Follower<T>} follower
      * @param {boolean} immediate
-     * @returns {Signal.Unfollower}
+     * @returns {import("./signals.js").Signal.Unfollower}
      */
     follow(follower, immediate = false, self = this) {
         if (immediate || !self.#followers.size) follower(self.val)
@@ -190,7 +159,7 @@ export let ref = (value) => new Signal.State(value)
 
 /**
  * @template T
- * @param {Signal.Compute.Callback<T>} callback
+ * @param {import("./signals.js").Signal.Compute.Callback<T>} callback
  */
 export let computed = (callback) => new Signal.Compute(callback)
 
@@ -213,6 +182,6 @@ export let awaited = (
 
 /**
  * @template T
- * @param {Signal.Compute.Callback<T>} callback
+ * @param {import("./signals.js").Signal.Compute.Callback<T>} callback
  */
 export let effect = (callback) => computed(callback).follow(() => {})

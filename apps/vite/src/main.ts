@@ -16,7 +16,7 @@ function Counter() {
 
     shadow.append(
         fragment(
-            button({ class: "my-button" })
+            button({ class: "my-button", hello: count })
                 .onclick(() => count.val++)
                 .children("Count:", count),
             ["Double:", double],

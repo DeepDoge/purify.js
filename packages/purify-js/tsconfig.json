@@ -1,17 +1,14 @@
 {
     "compilerOptions": {
-        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "lib": ["ESNext", "DOM"],
 
         "module": "ESNext",
         "target": "ESNext",
 
-        "noEmit": true,
         "moduleDetection": "force",
 
-        "esModuleInterop": true,
-
-        "skipLibCheck": true,
         "strict": true,
+        "forceConsistentCasingInFileNames": true,
         "noUncheckedIndexedAccess": true,
         "noPropertyAccessFromIndexSignature": true,
         "exactOptionalPropertyTypes": true,

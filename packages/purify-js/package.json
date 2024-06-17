@@ -4,7 +4,7 @@
     "exports": {
         ".": {
             "default": "./lib/all.js",
-            "types": "./lib/all.js"
+            "types": "./lib/all.d.ts"
         }
     }
 }

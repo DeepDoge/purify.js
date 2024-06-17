@@ -1,52 +1,11 @@
 import { Signal } from "./signals.js"
 
-/**
- * @param {MemberOf<DocumentFragment>[]} members
- */
+/** @param {import("./tags.js").MemberOf<DocumentFragment>[]} members */
 export const fragment = (...members) => {
     let fragment = document.createDocumentFragment()
     members && fragment.append(...members.map(toAppendable))
     return fragment
 }
-
-/**
- * @template {ParentNode} TParentNode
- * @typedef ChildNodeOf
- * @type { DocumentFragment | CharacterData | (
- *      TParentNode extends SVGElement ?
- *          SVGElement :
- *      TParentNode extends HTMLElement ?
- *          Element :
- *      TParentNode extends MathMLElement ?
- *          MathMLElement :
- *          Element
- *  )}
- */
-
-/**
- * @template {ParentNode} T
- * @typedef MemberOf
- * @type {string |
- *  number |
- *  boolean |
- *  bigint |
- *  null |
- *  ChildNodeOf<T> |
- *  Builder<Extract<ChildNodeOf<T>, Element>> |
- *  unknown[] |
- *  import("./signals.js").Signal<*>
- * }
- */
-/* 
-    TODO: Above type had to use * and unknown in few places, 
-        because it's not posibble to create recursive types with JSDoc at this time.
-
-    Not a huge problem because we have to use .d.ts anyway, 
-        otherwise apps using the package has to use `maxNodeModuleJsDepth > 0`
-        which can create other problems.
-
-    So when JSDoc supports recursive types like TS update this.
-*/
 
 /**
  * @param {unknown} value
@@ -107,45 +66,7 @@ export class SignalElement extends HTMLElement {
 }
 customElements.define("signal-element", SignalElement)
 
-/**
- *
- * @template {Element} T
- * @typedef EventMap
- * @type {T extends HTMLElement ? HTMLElementEventMap :
- *          T extends SVGElement ? SVGElementEventMap :
- *          T extends MathMLElement ? MathMLElementEventMap :
- *          ElementEventMap
- * }
- */
-
-/**
- * @template {Element} T
- * @typedef ToBuilderFunctions
- * @type {{
- *   [K in keyof T as
- *      true extends (
- *          import("./utils.js").IsReadonly<T, K>
- *          | (import("./utils.js").IsFunction<T[K]> & import("./utils.js").NotEventHandler<T[K]>)
- *      ) ? never : K]:
- *      (
- *          value:
- *              NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R ? U extends Event ?
- *                  (this: X, event: U & { currentTarget: T }) => R
- *              : T[K]
- *              : T[K]
- *      ) => Builder<T> & ToBuilderFunctions<T>
- * }}
- */
-
-/**
- * @type {{
- *    [K in keyof HTMLElementTagNameMap]:
- *       (
- *          attributes?: { [name: string]: string | number | boolean | bigint | null }) =>
- *              Builder<HTMLElementTagNameMap[K]> & ToBuilderFunctions<HTMLElementTagNameMap[K]>
- * }}
- */
-export const tags = /** @type {*} */ (
+export const tags = /** @type {import("./tags.js").Tags} */ (
     new Proxy(
         {},
         {
@@ -186,7 +107,7 @@ export class Builder {
 
     /**
      * @param {T} element
-     * @param {{ [name: string]: string | number | boolean | bigint | null }} attributes
+     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue | Signal<import('./tags.js').Builder.AttributeValue> }} attributes
      */
     constructor(element, attributes = {}) {
         this.element = element
@@ -199,7 +120,9 @@ export class Builder {
         }
     }
 
-    /** @param {MemberOf<T>[]} members */
+    /**
+     * @param {import("./tags.js").MemberOf<T>[]} members
+     */
     children(...members) {
         let element = this.element
         element.append(...members.map(toAppendable))
