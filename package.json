@@ -8,8 +8,8 @@
     ],
     "exports": {
         ".": {
-            "default": "./packages/lib/all.js",
-            "types": "./packages/lib/all.d.ts"
+            "default": "./packages/purify-js/lib/all.js",
+            "types": "./packages/purify-js/lib/all.d.ts"
         }
     },
     "scripts": {
