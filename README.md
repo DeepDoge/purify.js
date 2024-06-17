@@ -17,7 +17,7 @@
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
-| **purify.js**   | 2.2 KB   | 997 bytes  |
+| **purify.js**   | 2.3 KB   | 1.0 KB     |
 | Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
 | Solid 1.8.12    | 23 KB    | 8.1 KB     |
 | jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
@@ -58,23 +58,12 @@ function Counter() {
     const shadow = host.element.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets.push(counterStyle)
 
-    const text = awaited(
-        fetch("data:text/plain,Hello World")
-            .then(async (response) => {
-                await new Promise((r) => setTimeout(r, 1000))
-                return response.text()
-            })
-            .catch((error) => String(error)),
-        "Loading...",
-    )
-
     shadow.append(
         fragment(
             button({ class: "my-button", hello: count })
                 .onclick(() => count.val++)
                 .children("Count:", count),
             ["Double:", double],
-            div().children("Text: ", text),
         ),
     )
     return host
@@ -100,6 +89,75 @@ document.adoptedStyleSheets.push(
 )
 
 document.body.append(App().element)
+```
+
+## Example: Async Search
+
+```ts
+import { awaited, computed, css, fragment, ref, sheet, tags } from "purify-js"
+
+const { input, div, ul, li } = tags
+
+function SearchInput(text = ref("")) {
+    return input({ type: "search" })
+        .value(text)
+        .oninput((event) => (text.val = event.currentTarget.value))
+}
+
+function Loading() {
+    return div().children("Loading...")
+}
+
+const searchStyle = sheet(css`
+    :host {
+        display: grid;
+        grid-template-columns: minmax(0, 30em);
+        place-content: center;
+        gap: 1em;
+    }
+`)
+
+export function SearchExample() {
+    const host = div()
+    const shadow = host.element.attachShadow({ mode: "open" })
+    shadow.adoptedStyleSheets.push(searchStyle)
+
+    const search = ref("")
+
+    shadow.append(
+        fragment(
+            SearchInput(search),
+            ["Search: ", search],
+            computed(() => awaited(SearchResults(search.val), Loading())),
+        ),
+    )
+
+    return host
+}
+
+async function SearchResults(query: string) {
+    const result = (await fetch(
+        `data:application/json;utf8,${JSON.stringify(
+            mockDb.filter((item) => item.toLowerCase().includes(query.toLowerCase())),
+        )}`,
+    ).then((response) => response.json())) as string[]
+
+    return ul().children(...result.map((item) => li().children(item))).element
+}
+
+const mockDb = [
+    "Egg",
+    "Milk",
+    "Bread",
+    "Butter",
+    "Cheese",
+    "Bacon",
+    "Beef",
+    "Chicken",
+    "Pork",
+    "Fish",
+    "Pasta",
+]
 ```
 
 ## Motivation 🍣
