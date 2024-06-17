@@ -1,7 +1,7 @@
 import { Signal } from "./signals.js"
 
 /** @param {import("./tags.js").MemberOf<DocumentFragment>[]} members */
-export const fragment = (...members) => {
+export let fragment = (...members) => {
     let fragment = document.createDocumentFragment()
     members && fragment.append(...members.map(toAppendable))
     return fragment
@@ -25,7 +25,9 @@ export let toAppendable = (value) => {
     }
 
     if (value instanceof Signal) {
-        return new SignalElement(value)
+        return new TrackerElement((self) =>
+            value.follow((value) => self.replaceChildren(toAppendable(value)), true),
+        )
     }
 
     if (value instanceof Builder) {
@@ -39,34 +41,32 @@ export let toAppendable = (value) => {
     return String(value)
 }
 
-export class SignalElement extends HTMLElement {
-    /** @type {Signal<*>} */
-    $signal
+export class TrackerElement extends HTMLElement {
+    /** @type {((() => void) | void)=} */
+    #disconnected
+    /** @type {(element: this) => (() => void) | void} */
+    #connected
 
-    /** @type {import('./signals.js').Signal.Unfollower | undefined} */
-    $unfollow
     /**
-     * @param {typeof this.$signal} signal
+     * @param {(element: TrackerElement) => (() => void) | void} onConnected
      */
-    constructor(signal) {
+    constructor(onConnected) {
         super()
         this.style.display = "contents"
-        this.$signal = signal
+        this.#connected = onConnected
     }
 
     connectedCallback(self = this) {
-        self.$unfollow = self.$signal.follow((value) => {
-            self.replaceChildren(toAppendable(value))
-        }, true)
+        self.#disconnected = self.#connected(self)
     }
 
-    disconnectedCallback() {
-        this.$unfollow?.()
+    disconnectedCallback(self = this) {
+        self.#disconnected?.()
     }
 }
-customElements.define("signal-element", SignalElement)
+customElements.define("tracker-element", TrackerElement)
 
-export const tags = /** @type {import("./tags.js").Tags} */ (
+export let tags = /** @type {import("./tags.js").Tags} */ (
     new Proxy(
         {},
         {
@@ -112,10 +112,20 @@ export class Builder {
     constructor(element, attributes = {}) {
         this.element = element
         for (const [name, value] of Object.entries(attributes)) {
-            if (value === null) {
-                element.removeAttribute(name)
+            /** @param {unknown} value */
+            let setOrRemoveAttribute = (value) => {
+                if (value === null) {
+                    element.removeAttribute(name)
+                } else {
+                    element.setAttribute(name, String(value))
+                }
+            }
+            if (value instanceof Signal) {
+                element.append(
+                    new TrackerElement(() => value.follow(setOrRemoveAttribute, true)),
+                )
             } else {
-                element.setAttribute(name, String(value))
+                setOrRemoveAttribute(value)
             }
         }
     }

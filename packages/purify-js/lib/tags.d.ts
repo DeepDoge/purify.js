@@ -7,12 +7,16 @@ export function toAppendable(
     value: unknown,
 ): string | CharacterData | Element | DocumentFragment
 
-export class SignalElement extends HTMLElement {
-    constructor(signal: Signal)
-    $signal: Signal
-    $unfollow: Signal.Unfollower | undefined
+export class TrackerElement extends HTMLElement {
+    constructor(onConnected: (element: TrackerElement) => (() => void) | void)
     connectedCallback(self?: this): void
-    disconnectedCallback(): void
+    disconnectedCallback(self?: this): void
+    #private
+}
+declare global {
+    interface HTMLElementTagNameMap {
+        "tracker-element": TrackerElement
+    }
 }
 
 export type Tags = {
