@@ -109,3 +109,9 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 -   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience.
 -   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.
+
+## What is Next?
+
+-   **Element Lifecycles**: Addressing issues related to element lifecycles is a priority. Tracking when an element is connected or disconnected from the DOM without fully utilizing WebComponents is challenging. Currently, updating attributes with signals can lead to follower leaks. Mutation observers are not an ideal solution due to their asynchronous nature and inability to observe inside ShadowDOM. Potential solutions are being explored to keep the codebase small and efficient.
+-   **JSDoc Support**: Enhancing JSDoc support is necessary, as maintaining both .js and .d.ts files is cumbersome. Generating .d.ts files from JSDoc has its own set of issues. Future improvements may involve finding alternative solutions or waiting for more robust JSDoc support.
+-   **Real-World Application and PWA Template**: I plan to build a project with **purify.js** to ensure it works well in a complex environment. This process will help identify any gaps and refine the library. Additionally, I aim to create a PWA template or package focused on enhancing the **purify.js** experience for building progressive web apps.
