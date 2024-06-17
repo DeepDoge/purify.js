@@ -65,10 +65,11 @@ export class Signal {
 
                 let trackedSet = new Set()
                 trackerStack.push(trackedSet)
-                self.#set(self.#callback())
+                let value = self.#callback()
                 trackerStack.pop()
                 trackedSet.delete(self)
                 self.#dirty = false
+                self.#set(value)
 
                 // Unfollow and remove dependencies that are no longer being tracked
                 for (const [dependency, unfollow] of dependencies) {

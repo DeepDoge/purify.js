@@ -1,5 +1,5 @@
 import { Signal } from "./signals"
-import { IfEquals, IsFunction, NotEventHandler } from "./utils"
+import { IsFunction, IsReadonly, NotEventHandler } from "./utils"
 
 export function fragment(...members: MemberOf<DocumentFragment>[]): DocumentFragment
 
@@ -64,19 +64,14 @@ export type MemberOf<T extends ParentNode> =
 
 export type ToBuilderFunctions<T extends Element> = {
     [K in keyof T as true extends
-        | IfEquals<{ [Q in K]: T[K] }, { readonly [Q_1 in K]: T[K] }, true, false>
+        | IsReadonly<T, K>
         | (IsFunction<T[K]> & NotEventHandler<T[K]>)
         ? never
         : K]: (
         value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
             ? U extends Event
-                ? (
-                      this: X,
-                      event: U & {
-                          currentTarget: T
-                      },
-                  ) => R
+                ? (this: X, event: U & { currentTarget: T }) => R
                 : T[K]
-            : T[K],
+            : T[K] | Signal<T[K]>,
     ) => Builder<T> & ToBuilderFunctions<T>
 }

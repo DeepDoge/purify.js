@@ -80,7 +80,7 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
                 (_, tag) =>
                 /**
                  * @param {*} attributes
-                 * @param {*} element
+                 * @param {any} element
                  */
                 (
                     attributes = {},
@@ -88,9 +88,20 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
                     proxy = new Proxy(new Builder(element, attributes), {
                         get: (target, name) =>
                             /** @type {*} */ (target)[name] ??
-                            ((/** @type {*} */ value) => (
-                                (element[name] = value), proxy
-                            )),
+                            ((/** @type {*} */ value) => {
+                                if (value instanceof Signal) {
+                                    element.append(
+                                        new TrackerElement(() =>
+                                            value.follow(
+                                                (value) => (element[name] = value),
+                                            ),
+                                        ),
+                                    )
+                                } else {
+                                    element[name] = value
+                                }
+                                return proxy
+                            }),
                     }),
                 ) =>
                     proxy,
