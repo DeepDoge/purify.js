@@ -7,6 +7,8 @@
 
         "moduleDetection": "force",
 
+        "noEmit": true,
+
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "noUncheckedIndexedAccess": true,
