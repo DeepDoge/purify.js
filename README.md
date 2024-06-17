@@ -42,7 +42,7 @@ Soon
 ## Example: purify.js + ShadowRoot
 
 ```ts
-import { computed, css, fragment, ref, sheet, tags } from "purify-js"
+import { awaited, computed, css, fragment, ref, sheet, tags } from "purify-js"
 
 const { div, button } = tags
 
@@ -58,12 +58,23 @@ function Counter() {
     const shadow = host.element.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets.push(counterStyle)
 
+    const text = awaited(
+        fetch("data:text/plain,Hello World")
+            .then(async (response) => {
+                await new Promise((r) => setTimeout(r, 1000))
+                return response.text()
+            })
+            .catch((error) => String(error)),
+        "Loading...",
+    )
+
     shadow.append(
         fragment(
-            button({ class: "my-button" })
+            button({ class: "my-button", hello: count })
                 .onclick(() => count.val++)
                 .children("Count:", count),
             ["Double:", double],
+            div().children("Text: ", text),
         ),
     )
     return host
