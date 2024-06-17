@@ -8,8 +8,8 @@ export function toAppendable(
 ): string | CharacterData | Element | DocumentFragment
 
 export class SignalElement extends HTMLElement {
-    constructor(signal: typeof this.$signal)
-    $signal: Signal<any>
+    constructor(signal: Signal)
+    $signal: Signal
     $unfollow: Signal.Unfollower | undefined
     connectedCallback(self?: this): void
     disconnectedCallback(): void
@@ -56,7 +56,7 @@ export type MemberOf<T extends ParentNode> =
     | bigint
     | null
     | ChildNodeOf<T>
-    | Builder<ChildNodeOf<T>>
+    | Builder<Extract<ChildNodeOf<T>, Element>>
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
 

@@ -1,4 +1,4 @@
-export class Signal<const T> {
+export class Signal<const T = unknown> {
     constructor(initial: T)
     get(self?: this): T
     get val(): T
@@ -10,12 +10,12 @@ export class Signal<const T> {
     notify(self?: this, value?: T): void
 }
 export namespace Signal {
-    class State<T> extends Signal<T> {
+    class State<T = unknown> extends Signal<T> {
         set(value: T, self?: this): void
-        set val(value: T): void
+        set val(value: T)
         get val(): T
     }
-    class Compute<T> extends Signal<T> {
+    class Compute<T = unknown> extends Signal<T> {
         constructor(callback: Compute.Callback<T>)
     }
     namespace Compute {

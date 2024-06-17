@@ -33,19 +33,19 @@
 const trackerStack = []
 
 /**
- * @template T
+ * @template [T = unknown]
  * @typedef Signal.State
  * @type {Signal<T> & { set: Signal.Setter<T>, val: T }}
  */
 
 /**
- * @template T
+ * @template [T = unknown]
  * @typedef Signal.Compute
  * @type {Signal<T>}
  */
 
 /**
- * @template const T
+ * @template [const T = unknown]
  */
 export class Signal {
     static State =

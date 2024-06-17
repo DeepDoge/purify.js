@@ -29,7 +29,7 @@
 
 ## Installation 🍙
 
-[Install Instructions](https://github.com/DeepDoge/purifyjs/releases)
+[Install Instructions](https://github.com/DeepDoge/purify.js/releases)
 
 ## Guide 🍱
 
@@ -42,7 +42,7 @@ Soon
 ## Example: purify.js + ShadowRoot
 
 ```ts
-import { computed, css, fragment, ref, sheet, tags } from "purifyjs"
+import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 
 const { div, button } = tags
 
@@ -107,5 +107,5 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 ## Why Not JSX Templating?
 
--   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience. 
+-   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience.
 -   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.

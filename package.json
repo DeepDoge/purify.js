@@ -1,13 +1,17 @@
 {
     "type": "module",
-    "name": "purifyjs",
+    "name": "purify-js",
     "version": "0.0.0",
-    "main": "./lib/all.js",
-    "types": "./types/all.d.ts",
     "workspaces": [
         "./apps/*",
-        "./*"
+        "./packages/*"
     ],
+    "exports": {
+        ".": {
+            "default": "./packages/lib/all.js",
+            "types": "./types/all.js"
+        }
+    },
     "scripts": {
         "format": "prettier -w ./",
         "types": "tsc ./lib/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"

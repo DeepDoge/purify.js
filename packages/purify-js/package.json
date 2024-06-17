@@ -1,0 +1,10 @@
+{
+    "name": "purify-js",
+    "type": "module",
+    "exports": {
+        ".": {
+            "default": "./lib/all.js",
+            "types": "./lib/all.js"
+        }
+    }
+}

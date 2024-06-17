@@ -1,4 +1,4 @@
-import { computed, css, fragment, ref, sheet, tags } from "../../.."
+import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 
 const { div, button } = tags
 

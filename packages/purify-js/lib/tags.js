@@ -1,4 +1,4 @@
-import { Signal } from "./signals"
+import { Signal } from "./signals.js"
 
 /**
  * @param {MemberOf<DocumentFragment>[]} members
@@ -32,11 +32,21 @@ export const fragment = (...members) => {
  *  bigint |
  *  null |
  *  ChildNodeOf<T> |
- *  Builder<*> |
- *  import("./signals.js").Signal<*> |
- *  unknown[]
+ *  Builder<Extract<ChildNodeOf<T>, Element>> |
+ *  unknown[] |
+ *  import("./signals.js").Signal<*>
  * }
  */
+/* 
+    TODO: Above type had to use * and unknown in few places, 
+        because it's not posibble to create recursive types with JSDoc at this time.
+
+    Not a huge problem because we have to use .d.ts anyway, 
+        otherwise apps using the package has to use `maxNodeModuleJsDepth > 0`
+        which can create other problems.
+
+    So when JSDoc supports recursive types like TS update this.
+*/
 
 /**
  * @param {unknown} value
