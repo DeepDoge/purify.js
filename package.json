@@ -14,7 +14,7 @@
     },
     "scripts": {
         "format": "prettier -w ./",
-        "types": "tsc ./lib/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+        "types": "tsc ./packages/purify-js/lib/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
     },
     "devDependencies": {
         "@eslint/js": "^9.2.0",
