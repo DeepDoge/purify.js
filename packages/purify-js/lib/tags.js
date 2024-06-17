@@ -13,7 +13,7 @@ export let fragment = (...members) => {
  */
 export let toAppendable = (value) => {
     if (value === null) {
-        return fragment()
+        return ""
     }
 
     if (
