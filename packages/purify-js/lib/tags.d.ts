@@ -22,7 +22,7 @@ declare global {
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (attributes?: {
         [name: string]: Builder.AttributeValue | Signal<Builder.AttributeValue>
-    }) => Builder<HTMLElementTagNameMap[K]> & ToBuilderFunctions<HTMLElementTagNameMap[K]>
+    }) => BuilderProxy<HTMLElementTagNameMap[K]>
 }
 export const tags: Tags
 
@@ -62,7 +62,7 @@ export type MemberOf<T extends ParentNode> =
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
 
-export type ToBuilderFunctions<T extends Element> = {
+type BuilderProxy<T extends Element & ParentNode> = Builder<T> & {
     [K in keyof T as true extends
         | IsReadonly<T, K>
         | (IsFunction<T[K]> & NotEventHandler<T[K]>)
@@ -73,5 +73,5 @@ export type ToBuilderFunctions<T extends Element> = {
                 ? (this: X, event: U & { currentTarget: T }) => R
                 : T[K]
             : T[K] | Signal<T[K]>,
-    ) => Builder<T> & ToBuilderFunctions<T>
+    ) => BuilderProxy<T>
 }
