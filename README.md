@@ -176,10 +176,26 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 ## Why Not JSX Templating?
 
--   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience.
+-   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience. For instance, if you create a `<img>` element with JSX, it can't have the HTMLImageElement type, because all JSX elements has to return the same type.
 -   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.
 
-## What is Next?
+## What is Next and Caveats
 
 -   **JSDoc Support**: Enhancing JSDoc support is necessary, as maintaining both .js and .d.ts files is cumbersome. Generating .d.ts files from JSDoc has its own set of issues. Future improvements may involve finding alternative solutions or waiting for more robust JSDoc support.
+-   **Lifecycle and Reactivity**: Currently we abuse CustomElements to detect if an element is connected to the DOM or not, this makes us have to wrap our signals renders in a CustomElements with `display: contents` style. This is "fine", but causes issues in CSS for example doing `.parent > *` wouldn't actually select all of the "children", if some of them are signals. We have to do the same thing for attributes that are binded with the signals. This is not good. But but browser APIs doesn't let use do that easily while still letting user the manipulate the DOM how ever they want.
+    Ideally we would wanna have something like this:
+
+```ts
+onConnected(mountable: CharacterData | Element, callback: () => Cleanup | void)
+```
+
+That's not possible currently, but i will explore options. And try to come up with something better with CustomElements.
+You might say "Why not use `MutationObserver`?". Well, there are two reasons why, first of all, `MutationObserver` is asynchronous which causes problems wiht conditional UI rendering with signals. secondly they can't look inside ShadowDOMs without hacking around and modifying `HTMLElement.prototype.attachShadow`. Which is also not future-proof. The reasons why we don't want to wrap too much around the native browser api is also this, being future-proof.
+
+Anway so I'm still exploring options in this area, major frameworks usually do this by not allowing developers to modify the DOM by themselves, we don't want that, and also some other smaller libraries do this with Garbage Collection, which doesn't allow, connecting and disconnecting element from the DOM multiple times. So yeah, I'm still exploring.
+
 -   **Real-World Application and PWA Template**: I plan to build a project with **purify.js** to ensure it works well in a complex environment. This process will help identify any gaps and refine the library. Additionally, I aim to create a PWA template or package focused on enhancing the **purify.js** experience for building progressive web apps.
+
+## testing to see if i add issue link the README, it shows up in the issue page, we dont want to
+
+https://github.com/DeepDoge/discord-steam-proton-rpc/issues/4

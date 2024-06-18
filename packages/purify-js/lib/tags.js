@@ -20,7 +20,7 @@ export let fragment = (...members) => {
  * @param {unknown} value
  * @returns {string | CharacterData | Element | DocumentFragment}
  */
-export let toAppendable = (value) => {
+let toAppendable = (value) => {
     if (value == null) {
         return ""
     }

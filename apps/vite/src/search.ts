@@ -19,6 +19,10 @@ const searchStyle = sheet(css`
         place-content: center;
         gap: 1em;
     }
+
+    :host > * {
+        display: block;
+    }
 `)
 
 export function SearchExample() {
@@ -46,7 +50,7 @@ async function SearchResults(query: string) {
         )}`,
     ).then((response) => response.json())) as string[]
 
-    return ul().children(...result.map((item) => li().children(item))).element
+    return ul().children(...result.map((item) => li().children(item)))
     // TODO: weird bug here, returning the builder proxy cause returned Promise to never be resolved
 }
 
