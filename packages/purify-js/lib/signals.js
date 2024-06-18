@@ -13,6 +13,8 @@ const trackerStack = []
  * @type {Signal<T>}
  */
 
+let signalCountForDebug = 0
+
 /**
  * @template [const T = unknown]
  */
@@ -87,7 +89,7 @@ export class Signal {
                             dependency.follow(() => {
                                 if (self.#followers.size) {
                                     self.#update()
-                                } else {
+                                } else if (!self.#dirty) {
                                     self.#dirty = true
                                     for (const [dependency, unfollow] of dependencies) {
                                         unfollow()
@@ -111,7 +113,12 @@ export class Signal {
      */
     constructor(initial) {
         this.#value = initial
+        console.log("New Signal", ++signalCountForDebug)
+        Signal.#finalizer.register(this, null, this)
     }
+    static #finalizer = new FinalizationRegistry(() => {
+        console.log("Finalizing Signal", --signalCountForDebug)
+    })
 
     /**
      * @param {T} value
