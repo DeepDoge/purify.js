@@ -174,28 +174,34 @@ JavaScript frameworks are often large and complex. As your project grows, they c
 
 By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
-## Why Not JSX Templating?
-
--   **Lack of Type Safety**: JSX does not offer the same level of type safety, which decreases the developer experience. For instance, if you create a `<img>` element with JSX, it can't have the HTMLImageElement type, because all JSX elements has to return the same type.
--   **Build Step Required**: JSX requires a build step, adding complexity to the development workflow.
-
 ## What is Next and Caveats
 
--   **JSDoc Support**: Enhancing JSDoc support is necessary, as maintaining both .js and .d.ts files is cumbersome. Generating .d.ts files from JSDoc has its own set of issues. Future improvements may involve finding alternative solutions or waiting for more robust JSDoc support.
--   **Lifecycle and Reactivity**: Currently we abuse CustomElements to detect if an element is connected to the DOM or not, this makes us have to wrap our signals renders in a CustomElements with `display: contents` style. This is "fine", but causes issues in CSS for example doing `.parent > *` wouldn't actually select all of the "children", if some of them are signals. We have to do the same thing for attributes that are binded with the signals. This is not good. But but browser APIs doesn't let use do that easily while still letting user the manipulate the DOM how ever they want.
-    Ideally we would wanna have something like this:
+-   **JSDoc Support**: Enhancing JSDoc support is crucial for better developer experience. Maintaining both `.js` and `.d.ts` files is cumbersome, and generating `.d.ts` files from JSDoc has its challenges. I aim to explore alternative solutions or wait for more robust JSDoc support.
 
-```ts
-onConnected(mountable: CharacterData | Element, callback: () => Cleanup | void)
-```
+    Relevant issues: [TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369).
 
-That's not possible currently, but i will explore options. And try to come up with something better with CustomElements.
-You might say "Why not use `MutationObserver`?". Well, there are two reasons why, first of all, `MutationObserver` is asynchronous which causes problems wiht conditional UI rendering with signals. secondly they can't look inside ShadowDOMs without hacking around and modifying `HTMLElement.prototype.attachShadow`. Which is also not future-proof. The reasons why we don't want to wrap too much around the native browser api is also this, being future-proof.
+-   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM, wrapping signal renders in Custom Elements with `display: contents` style. This approach has CSS limitations, such as `.parent > *` not selecting all children if some are signals. Similar workarounds are needed for attributes bound with signals.
 
-Anway so I'm still exploring options in this area, major frameworks usually do this by not allowing developers to modify the DOM by themselves, we don't want that, and also some other smaller libraries do this with Garbage Collection, which doesn't allow, connecting and disconnecting element from the DOM multiple times. So yeah, I'm still exploring.
+    Ideally, I would like an API like:
 
--   **Real-World Application and PWA Template**: I plan to build a project with **purify.js** to ensure it works well in a complex environment. This process will help identify any gaps and refine the library. Additionally, I aim to create a PWA template or package focused on enhancing the **purify.js** experience for building progressive web apps.
+    ```ts
+    onConnected(mountable: CharacterData | Element, callback: () => Cleanup | void)
+    ```
 
-## testing to see if i add issue link the README, it shows up in the issue page, we dont want to
+    This is currently not feasible ([DOM#533](https://github.com/whatwg/dom/issues/533)), but I will explore other options, including enhancing Custom Elements. MutationObserver is not ideal due to its asynchronous nature and limitations with ShadowDOMs, which would require modifying `HTMLElement.prototype.attachShadow`. Most frameworks avoid allowing developers to directly manipulate the DOM, but I aim to maintain flexibility while seeking future-proof solutions.
 
-https://github.com/DeepDoge/discord-steam-proton-rpc/issues/4
+-   **Real-World Application and PWA Template**: I plan to build a project using **purify.js** to test its robustness in a complex environment. This will help identify any gaps and refine the library. Additionally, I aim to create a PWA template or package to enhance the **purify.js** experience for building progressive web apps.
+
+## Why Not JSX Templating?
+
+-   **Lack of Type Safety**: JSX does not provide the same level of type safety as **purify.js**. For example, creating an `<img>` element with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This reduces the developer experience and increases the risk of type-related issues.
+
+-   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purify.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
+
+-   **Attributes vs. Properties**: In **purify.js**, I can differentiate between attributes and properties of an element while building it, which is not currently possible with JSX. This distinction enhances clarity and control when defining element characteristics. Additionally, if I were to use JSX, I would prefer a syntax like this:
+
+    ```js
+    <MyComponent("Hello", { World: "!" }) class="my-component" aria-busy="true" />
+    ```
+
+This format clearly separates props and attributes, making it easier to understand and maintain.
