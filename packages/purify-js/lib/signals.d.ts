@@ -1,6 +1,5 @@
 export class Signal<const T = unknown> {
     constructor(initial: T)
-    get(self?: this): T
     get val(): T
     follow(
         follower: Signal.Follower<T>,
@@ -11,7 +10,6 @@ export class Signal<const T = unknown> {
 }
 export namespace Signal {
     class State<T = unknown> extends Signal<T> {
-        set(value: T, self?: this): void
         set val(value: T)
         get val(): T
     }
@@ -33,4 +31,3 @@ export function awaited<T, const U = null>(
     until?: U,
     signal?: Signal.State<T | U>,
 ): Signal<T | U>
-export function effect<T>(callback: Signal.Compute.Callback<T>): Signal.Unfollower

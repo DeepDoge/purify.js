@@ -4,7 +4,7 @@ const trackerStack = []
 /**
  * @template [T = unknown]
  * @typedef Signal.State
- * @type {Signal<T> & { set: import("./signals.js").Signal.Setter<T>, val: T }}
+ * @type {Signal<T> & { val: T }}
  */
 
 /**
@@ -12,8 +12,6 @@ const trackerStack = []
  * @typedef Signal.Compute
  * @type {Signal<T>}
  */
-
-let signalCountForDebug = 0
 
 /**
  * @template [const T = unknown]
@@ -25,11 +23,9 @@ export class Signal {
          * @extends {Signal<T>}
          */
         class State extends Signal {
-            set = this.#set
-
             /** @param {T} value */
             set val(value) {
-                this.set(value)
+                this.#set(value)
             }
 
             get val() {
@@ -55,11 +51,9 @@ export class Signal {
                 this.#callback = callback
             }
 
-            get(self = this) {
-                if (self.#dirty) {
-                    self.#update()
-                }
-                return super.get()
+            get val() {
+                this.#dirty && this.#update()
+                return super.val
             }
 
             #update(self = this) {
@@ -74,29 +68,28 @@ export class Signal {
                 self.#set(value)
 
                 // Unfollow and remove dependencies that are no longer being tracked
-                for (const [dependency, unfollow] of dependencies) {
+                dependencies.forEach((unfollow, dependency) => {
                     if (!trackedSet.has(dependency)) {
                         unfollow()
                         dependencies.delete(dependency)
                     }
-                }
+                })
 
                 // Follow new dependencies
-                for (const dependency of trackedSet) {
+                for (let dependency of trackedSet) {
                     if (!dependencies.has(dependency)) {
                         dependencies.set(
                             dependency,
-                            dependency.follow(() => {
-                                if (self.#followers.size) {
-                                    self.#update()
-                                } else if (!self.#dirty) {
-                                    self.#dirty = true
-                                    for (const [dependency, unfollow] of dependencies) {
-                                        unfollow()
-                                        dependencies.delete(dependency)
-                                    }
-                                }
-                            }),
+                            dependency.follow(() =>
+                                self.#followers.size
+                                    ? self.#update()
+                                    : !self.#dirty &&
+                                      ((self.#dirty = true),
+                                      dependencies.forEach((unfollow, dependency) => {
+                                          unfollow()
+                                          dependencies.delete(dependency)
+                                      })),
+                            ),
                         )
                     }
                 }
@@ -113,32 +106,19 @@ export class Signal {
      */
     constructor(initial) {
         this.#value = initial
-        console.log("New Signal", ++signalCountForDebug)
-        Signal.#finalizer.register(this, null, this)
     }
-    static #finalizer = new FinalizationRegistry(() => {
-        console.log("Finalizing Signal", --signalCountForDebug)
-    })
 
     /**
      * @param {T} value
      */
     #set(value, self = this) {
-        const changed = self.#value !== value
+        let changed = self.#value !== value
         self.#value = value
         if (changed) self.notify()
     }
 
-    /**
-     * @returns {T}
-     */
-    get(self = this) {
-        trackerStack.at(-1)?.add(self)
-        return self.#value
-    }
-
     get val() {
-        return this.get()
+        return trackerStack.at(-1)?.add(this), this.#value
     }
 
     /**
@@ -146,14 +126,14 @@ export class Signal {
      * @param {boolean} immediate
      * @returns {import("./signals.js").Signal.Unfollower}
      */
-    follow(follower, immediate = false, self = this) {
-        if (immediate || !self.#followers.size) follower(self.val)
-        self.#followers.add(follower)
-        return () => self.#followers.delete(follower)
-    }
+    follow = (follower, immediate = false, self = this) => (
+        (immediate || !self.#followers.size) && follower(self.val),
+        self.#followers.add(follower),
+        () => self.#followers.delete(follower)
+    )
 
-    notify(self = this, value = self.val) {
-        for (const follower of self.#followers) {
+    notify = (self = this, value = self.val) => {
+        for (let follower of self.#followers) {
             follower(value)
         }
     }
@@ -184,7 +164,7 @@ export let awaited = (
     until = null,
     signal = /** @type {never} */ (ref(until)),
 ) => {
-    promise.then((value) => signal.set(value))
+    promise.then((value) => (signal.val = value))
     return signal
 }
 

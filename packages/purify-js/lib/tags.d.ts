@@ -7,22 +7,18 @@ export function toAppendable(
     value: unknown,
 ): string | CharacterData | Element | DocumentFragment
 
-export class TrackerElement extends HTMLElement {
-    constructor(onConnected: (element: TrackerElement) => (() => void) | void)
-    connectedCallback(self?: this): void
-    disconnectedCallback(self?: this): void
-    #private
+export interface Enhanced<T extends HTMLElement> extends HTMLElement {
+    onConnect(callback: Enhanced.ConnectedCallback): void
 }
-declare global {
-    interface HTMLElementTagNameMap {
-        "tracker-element": TrackerElement
-    }
+export namespace Enhanced {
+    type DisconnectedCallback = () => void
+    type ConnectedCallback = () => void | DisconnectedCallback
 }
 
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (attributes?: {
         [name: string]: Builder.AttributeValue | Signal<Builder.AttributeValue>
-    }) => BuilderProxy<HTMLElementTagNameMap[K]>
+    }) => BuilderProxy<Enhanced<HTMLElementTagNameMap[K]>>
 }
 export const tags: Tags
 
@@ -62,7 +58,7 @@ export type MemberOf<T extends ParentNode> =
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
 
-type BuilderProxy<T extends Element & ParentNode> = Builder<T> & {
+type BuilderProxy<T extends Enhanced<HTMLElement>> = Builder<T> & {
     [K in keyof T as true extends
         | IsReadonly<T, K>
         | (IsFunction<T[K]> & NotEventHandler<T[K]>)

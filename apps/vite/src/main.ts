@@ -1,4 +1,7 @@
-import { computed, css, fragment, ref, sheet, tags } from "purify-js"
+import * as _ from "purify-js"
+alert(_)
+
+/* import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 import { PortalExample } from "./portal"
 import { SearchExample } from "./search"
 
@@ -47,3 +50,4 @@ document.adoptedStyleSheets.push(
 )
 
 document.body.append(App().element)
+ */

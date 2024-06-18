@@ -20,56 +20,95 @@ export let fragment = (...members) => {
  * @param {unknown} value
  * @returns {string | CharacterData | Element | DocumentFragment}
  */
-let toAppendable = (value) => {
-    if (value == null) {
-        return ""
-    }
+let toAppendable = (value) =>
+    value == null
+        ? ""
+        : instancesOf(value, Element, DocumentFragment, CharacterData)
+          ? value
+          : instancesOf(value, Signal)
+            ? ((wrapper = enchance("div")) => (
+                  (wrapper.style.display = "contents"),
+                  wrapper.onConnect(() =>
+                      value.follow(
+                          (value) => wrapper.replaceChildren(toAppendable(value)),
+                          true,
+                      ),
+                  ),
+                  wrapper
+              ))()
+            : instancesOf(value, Builder)
+              ? value.element
+              : Array.isArray(value)
+                ? fragment(...value.map(toAppendable))
+                : String(value)
 
-    if (instancesOf(value, Element, DocumentFragment, CharacterData)) {
-        return value
-    }
+/**
+ * @template {keyof HTMLElementTagNameMap | (string & {})} T
+ * @param {T} tagname
+ * @returns {import("./tags.js").Enhanced<HTMLElementTagNameMap[T extends keyof HTMLElementTagNameMap ?
+ *      HTMLElementTagNameMap[T] :
+ *      HTMLElement
+ * ]>}
+ */
+let enchance = (
+    tagname,
+    newTagName = `x-${tagname}`,
+    custom = customElements,
+    constructor = custom.get(newTagName),
+) => {
+    if (!constructor) {
+        custom.define(
+            newTagName,
+            (constructor = class
+                extends /** @type {typeof HTMLElement} */ (
+                    (/** @type {unknown} */ (document.createElement(tagname).constructor))
+                )
+            {
+                /** @type {import("./tags.js").Enhanced.ConnectedCallback=} */
+                #connected
+                /** @type {import("./tags.js").Enhanced.DisconnectedCallback=} */
+                #disconnected
 
-    if (instancesOf(value, Signal)) {
-        return new TrackerElement((self) =>
-            value.follow((value) => self.replaceChildren(toAppendable(value)), true),
+                connectedCallback() {
+                    this.#connected?.()
+                }
+
+                disconnectedCallback() {
+                    this.#disconnected?.()
+                }
+
+                /**
+                 * @param {import("./tags.js").Enhanced.ConnectedCallback} connectedCallback
+                 */
+                onConnect = (
+                    connectedCallback,
+                    self = this,
+                    connectedStack = self.#connected,
+                    connected = (
+                        disconnectedCallback = connectedCallback(),
+                        disconnectedStack = self.#disconnected,
+                    ) => {
+                        self.#disconnected = () => {
+                            disconnectedStack?.()
+                            disconnectedCallback?.()
+                        }
+                    },
+                ) => {
+                    self.#connected = () => {
+                        connectedStack?.()
+                        connected()
+                    }
+                    if (self.isConnected) {
+                        connected()
+                    }
+                }
+            }),
+            { extends: tagname },
         )
     }
 
-    if (instancesOf(value, Builder)) {
-        return value.element
-    }
-
-    if (Array.isArray(value)) {
-        return fragment(...value.map(toAppendable))
-    }
-
-    return String(value)
+    return /** @type {never} */ (new constructor())
 }
-
-export class TrackerElement extends HTMLElement {
-    /** @type {((() => void) | void)=} */
-    #disconnected
-    /** @type {(element: this) => (() => void) | void} */
-    #connected
-
-    /**
-     * @param {(element: TrackerElement) => (() => void) | void} onConnected
-     */
-    constructor(onConnected) {
-        super()
-        this.style.display = "contents"
-        this.#connected = onConnected
-    }
-
-    connectedCallback(self = this) {
-        self.#disconnected = self.#connected(self)
-    }
-
-    disconnectedCallback(self = this) {
-        self.#disconnected?.()
-    }
-}
-customElements.define("tracker-element", TrackerElement)
 
 export let tags = /** @type {import("./tags.js").Tags} */ (
     new Proxy(
@@ -77,37 +116,33 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
         {
             /**
              *
-             * @param {never} _
-             * @param {keyof HTMLElementTagNameMap} tag
+             * @param {*} _
+             * @param {*} tag
              * @returns
              */
             get:
                 (_, tag) =>
                 /**
                  * @param {*} attributes
-                 * @param {any} element
+                 * @param {*} element
                  */
                 (
                     attributes = {},
-                    element = document.createElement(tag),
+                    element = enchance(tag),
                     proxy = new Proxy(new Builder(element, attributes), {
                         get: (target, name) =>
                             /** @type {*} */ (target)[name] ??
                             (name in element &&
-                                ((/** @type {*} */ value) => {
-                                    if (instancesOf(value, Signal)) {
-                                        element.append(
-                                            new TrackerElement(() =>
-                                                value.follow(
-                                                    (value) => (element[name] = value),
-                                                ),
-                                            ),
-                                        )
-                                    } else {
-                                        element[name] = value
-                                    }
-                                    return proxy
-                                })),
+                                ((/** @type {*} */ value) => (
+                                    instancesOf(value, Signal)
+                                        ? element.onConnect(() =>
+                                              value.follow(
+                                                  (value) => (element[name] = value),
+                                              ),
+                                          )
+                                        : (element[name] = value),
+                                    proxy
+                                ))),
                     }),
                 ) =>
                     proxy,
@@ -116,7 +151,7 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
 )
 
 /**
- * @template {Element & ParentNode} T
+ * @template {import("./tags.js").Enhanced<HTMLElement>} T
  */
 export class Builder {
     /** @type {T} */
@@ -128,22 +163,17 @@ export class Builder {
      */
     constructor(element, attributes = {}) {
         this.element = element
-        for (const [name, value] of Object.entries(attributes)) {
+        for (let name in attributes) {
+            let value = attributes[name]
             /** @param {unknown} value */
-            let setOrRemoveAttribute = (value) => {
-                if (value == null) {
-                    element.removeAttribute(name)
-                } else {
-                    element.setAttribute(name, String(value))
-                }
-            }
-            if (instancesOf(value, Signal)) {
-                element.append(
-                    new TrackerElement(() => value.follow(setOrRemoveAttribute, true)),
-                )
-            } else {
-                setOrRemoveAttribute(value)
-            }
+            let setOrRemoveAttribute = (value) =>
+                value == null
+                    ? element.removeAttribute(name)
+                    : element.setAttribute(name, String(value))
+
+            instancesOf(value, Signal)
+                ? element.onConnect(() => value.follow(setOrRemoveAttribute, true))
+                : setOrRemoveAttribute(value)
         }
     }
 
