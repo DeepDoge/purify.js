@@ -52,7 +52,7 @@ let toAppendable = (value) =>
  */
 let enchance = (
     tagname,
-    newTagName = `x-${tagname}`,
+    newTagName = `enhanced-${tagname}`,
     custom = customElements,
     constructor = custom.get(newTagName),
 ) => {
