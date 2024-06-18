@@ -91,7 +91,7 @@ document.adoptedStyleSheets.push(
 document.body.append(App().element)
 ```
 
-<a href="https://jsfiddle.net/nomadshiba/p5t8o0zL/4/" target="_blank"> Play on JSFiddle </a>
+[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/6/)
 
 ## Example: Async Search
 
