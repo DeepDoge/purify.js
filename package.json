@@ -15,6 +15,7 @@
     "scripts": {
         "format": "prettier -w ./",
         "dev": "npm run dev --prefix ./apps/vite",
+        "build": "npm run build --prefix ./apps/vite",
         "types": "tsc ./packages/purify-js/lib/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
     },
     "devDependencies": {

@@ -64,43 +64,30 @@ let enchance = (
                     (/** @type {unknown} */ (document.createElement(tagname).constructor))
                 )
             {
-                /** @type {import("./tags.js").Enhanced.ConnectedCallback=} */
-                #connected
-                /** @type {import("./tags.js").Enhanced.DisconnectedCallback=} */
-                #disconnected
+                /** @type {Set<import("./tags.js").Enhanced.ConnectedCallback>} */
+                #connectedCallbacks = new Set()
+                /** @type {Set<import("./tags.js").Enhanced.DisconnectedCallback>} */
+                #disconnectedCallbacks = new Set()
 
                 connectedCallback() {
-                    this.#connected?.()
+                    for (let callback of this.#connectedCallbacks) {
+                        let disconnectedCallback = callback()
+                        if (disconnectedCallback)
+                            this.#disconnectedCallbacks.add(disconnectedCallback)
+                    }
                 }
 
                 disconnectedCallback() {
-                    this.#disconnected?.()
+                    for (let callback of this.#disconnectedCallbacks) {
+                        callback()
+                    }
                 }
 
                 /**
                  * @param {import("./tags.js").Enhanced.ConnectedCallback} connectedCallback
                  */
-                onConnect = (
-                    connectedCallback,
-                    self = this,
-                    connectedStack = self.#connected,
-                    connected = (
-                        disconnectedCallback = connectedCallback(),
-                        disconnectedStack = self.#disconnected,
-                    ) => {
-                        self.#disconnected = () => {
-                            disconnectedStack?.()
-                            disconnectedCallback?.()
-                        }
-                    },
-                ) => {
-                    self.#connected = () => {
-                        connectedStack?.()
-                        connected()
-                    }
-                    if (self.isConnected) {
-                        connected()
-                    }
+                onConnect = (connectedCallback) => {
+                    this.#connectedCallbacks.add(connectedCallback)
                 }
             }),
             { extends: tagname },
