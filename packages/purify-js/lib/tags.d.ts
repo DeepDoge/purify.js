@@ -3,10 +3,6 @@ import { IsFunction, IsReadonly, NotEventHandler } from "./utils"
 
 export function fragment(...members: MemberOf<DocumentFragment>[]): DocumentFragment
 
-export function toAppendable(
-    value: unknown,
-): string | CharacterData | Element | DocumentFragment
-
 export interface Enhanced<T extends HTMLElement> extends HTMLElement {
     onConnect(callback: Enhanced.ConnectedCallback): void
 }

@@ -1,5 +1,15 @@
-import * as _ from "purify-js"
-alert(_)
+import {
+    Builder,
+    Signal,
+    awaited,
+    computed,
+    css,
+    fragment,
+    ref,
+    sheet,
+    tags,
+} from "purify-js"
+console.log(Builder, Signal, awaited, computed, css, fragment, ref, sheet, tags)
 
 /* import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 import { PortalExample } from "./portal"
