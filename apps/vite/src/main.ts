@@ -1,4 +1,5 @@
 import { computed, css, fragment, ref, sheet, tags } from "purify-js"
+import { PortalExample } from "./portal"
 import { SearchExample } from "./search"
 
 const { div, button } = tags
@@ -7,7 +8,7 @@ const count = ref(0)
 const double = computed(() => count.val * 2)
 
 function App() {
-    return div({ id: "app" }).children(Counter(), SearchExample())
+    return div({ id: "app" }).children(Counter(), SearchExample(), PortalExample())
 }
 
 function Counter() {
