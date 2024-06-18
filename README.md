@@ -91,6 +91,8 @@ document.adoptedStyleSheets.push(
 document.body.append(App().element)
 ```
 
+[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/4/)
+
 ## Example: Async Search
 
 ```ts
