@@ -52,11 +52,44 @@ export class Signal {
             }
 
             get val() {
-                this.#dirty && this.#update()
+                let self = this
+                if (self.#dirty) {
+                    if (!self.#followers.size) {
+                        return self.#callback()
+                    }
+                    self.#updateAndTrack()
+                }
                 return super.val
             }
 
-            #update(self = this) {
+            /**
+             * @param {import("./signals.js").Signal.Follower<T>} follower
+             * @param {boolean=} immediate
+             * @returns {import("./signals.js").Signal.Unfollower}
+             */
+            follow(follower, immediate) {
+                let self = this
+                if (self.#dirty) {
+                    self.#updateAndTrack()
+                }
+                let unfollow = super.follow(follower, immediate)
+                return () => {
+                    unfollow()
+                    if (!self.#followers.size) {
+                        self.#unfollowDependencies()
+                    }
+                }
+            }
+
+            #unfollowDependencies(self = this) {
+                self.#dependencies.forEach((unfollow, dependency) => {
+                    unfollow()
+                    self.#dependencies.delete(dependency)
+                })
+                self.#dirty = true
+            }
+
+            #updateAndTrack(self = this) {
                 let dependencies = self.#dependencies
 
                 let trackedSet = new Set()
@@ -69,29 +102,23 @@ export class Signal {
 
                 // Unfollow and remove dependencies that are no longer being tracked
                 dependencies.forEach((unfollow, dependency) => {
-                    if (!trackedSet.has(dependency)) {
-                        unfollow()
-                        dependencies.delete(dependency)
-                    }
+                    if (trackedSet.has(dependency)) return
+                    unfollow()
+                    dependencies.delete(dependency)
                 })
 
                 // Follow new dependencies
-                for (let dependency of trackedSet) {
-                    if (!dependencies.has(dependency)) {
-                        let unfollow = dependency.follow(() => {
-                            if (self.#followers.size) {
-                                self.#update()
-                            } else if (!self.#dirty) {
-                                self.#dirty = true
-                                dependencies.forEach((unfollow, dependency) => {
-                                    unfollow()
-                                    dependencies.delete(dependency)
-                                })
-                            }
-                        })
-                        dependencies.set(dependency, unfollow)
-                    }
-                }
+                trackedSet.forEach((dependency) => {
+                    if (dependencies.has(dependency)) return
+                    let unfollow = dependency.follow(() => {
+                        if (self.#followers.size) {
+                            self.#updateAndTrack()
+                        } else {
+                            self.#unfollowDependencies()
+                        }
+                    })
+                    dependencies.set(dependency, unfollow)
+                })
             }
         }
 
@@ -110,14 +137,15 @@ export class Signal {
     /**
      * @param {T} value
      */
-    #set(value) {
-        let changed = this.#value !== value
-        this.#value = value
-        if (changed) this.notify()
+    #set(value, self = this) {
+        let changed = self.#value !== value
+        self.#value = value
+        if (changed) self.notify()
     }
 
     get val() {
-        return trackerStack.at(-1)?.add(this), this.#value
+        trackerStack.at(-1)?.add(this)
+        return this.#value
     }
 
     /**
@@ -126,7 +154,7 @@ export class Signal {
      * @returns {import("./signals.js").Signal.Unfollower}
      */
     follow(follower, immediate = false) {
-        if (immediate || !this.#followers.size) follower(this.val)
+        if (immediate) follower(this.val)
         this.#followers.add(follower)
         return () => this.#followers.delete(follower)
     }

@@ -1,19 +1,23 @@
-import {
-    Builder,
-    Signal,
-    awaited,
-    computed,
-    css,
-    fragment,
-    ref,
-    sheet,
-    tags,
-} from "purify-js"
-console.log(Builder, Signal, awaited, computed, css, fragment, ref, sheet, tags)
-
-/* import { computed, css, fragment, ref, sheet, tags } from "purify-js"
+import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 import { PortalExample } from "./portal"
 import { SearchExample } from "./search"
+
+{
+    const count = ref(0)
+
+    for (let i = 0; i < 1_000; i++) {
+        computed(() => count.val * 2).val
+    }
+
+    for (let i = 0; i < 1_000; i++) {
+        const double = computed(() => count.val * 2)
+        double.val
+        setTimeout(
+            double.follow(() => {}),
+            0,
+        )
+    }
+}
 
 const { div, button } = tags
 
@@ -60,4 +64,3 @@ document.adoptedStyleSheets.push(
 )
 
 document.body.append(App().element)
- */

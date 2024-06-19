@@ -72,6 +72,6 @@ export type MemberOf<T extends ParentNode> =
     | bigint
     | null
     | ChildNodeOf<T>
-    | Builder<Extract<ChildNodeOf<T>, Enhanced<HTMLElement>>>
+    | Builder<Enhanced<Extract<ChildNodeOf<T>, HTMLElement>>>
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
