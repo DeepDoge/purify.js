@@ -58,7 +58,7 @@ export type ChildNodeOf<TParentNode extends ParentNode> =
     | (TParentNode extends SVGElement
           ? TParentNode extends SVGForeignObjectElement
               ? Element
-              : SVGAElement
+              : SVGElement
           : TParentNode extends HTMLElement
             ? Element
             : TParentNode extends MathMLElement
