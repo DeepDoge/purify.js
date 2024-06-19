@@ -1,12 +1,8 @@
 export class Signal<const T = unknown> {
     constructor(initial: T)
     get val(): T
-    follow(
-        follower: Signal.Follower<T>,
-        immediate?: boolean,
-        self?: this,
-    ): Signal.Unfollower
-    notify(self?: this, value?: T): void
+    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower
+    notify(): void
 }
 export namespace Signal {
     class State<T = unknown> extends Signal<T> {

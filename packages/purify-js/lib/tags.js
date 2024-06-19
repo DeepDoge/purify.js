@@ -20,27 +20,34 @@ export let fragment = (...members) => {
  * @param {unknown} value
  * @returns {string | CharacterData | Element | DocumentFragment}
  */
-let toAppendable = (value) =>
-    value == null
-        ? ""
-        : instancesOf(value, Element, DocumentFragment, CharacterData)
-          ? value
-          : instancesOf(value, Signal)
-            ? ((wrapper = enchance("div")) => (
-                  (wrapper.style.display = "contents"),
-                  wrapper.onConnect(() =>
-                      value.follow(
-                          (value) => wrapper.replaceChildren(toAppendable(value)),
-                          true,
-                      ),
-                  ),
-                  wrapper
-              ))()
-            : instancesOf(value, Builder)
-              ? value.element
-              : Array.isArray(value)
-                ? fragment(...value.map(toAppendable))
-                : String(value)
+let toAppendable = (value) => {
+    if (value == null) {
+        return ""
+    }
+
+    if (instancesOf(value, Element, DocumentFragment, CharacterData)) {
+        return value
+    }
+
+    if (instancesOf(value, Signal)) {
+        let wrapper = enchance("div")
+        wrapper.style.display = "contents"
+        wrapper.onConnect(() =>
+            value.follow((value) => wrapper.replaceChildren(toAppendable(value)), true),
+        )
+        return wrapper
+    }
+
+    if (instancesOf(value, Builder)) {
+        return value.element
+    }
+
+    if (Array.isArray(value)) {
+        return fragment(...value.map(toAppendable))
+    }
+
+    return String(value)
+}
 
 /**
  * @template {keyof HTMLElementTagNameMap | (string & {})} T
@@ -52,7 +59,7 @@ let toAppendable = (value) =>
  */
 let enchance = (
     tagname,
-    newTagName = `enhanced-${tagname}`,
+    newTagName = `enchance-${tagname}`,
     custom = customElements,
     constructor = custom.get(newTagName),
 ) => {
@@ -102,37 +109,37 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
         {},
         {
             /**
-             *
-             * @param {*} _
-             * @param {*} tag
+             * @template {keyof HTMLElementTagNameMap} T
+             * @param {never} _
+             * @param {T} tag
              * @returns
              */
             get:
                 (_, tag) =>
                 /**
-                 * @param {*} attributes
+                 * @param {Record<string, import("./tags.js").Builder.AttributeValue>} attributes
                  * @param {*} element
                  */
-                (
-                    attributes = {},
-                    element = enchance(tag),
-                    proxy = new Proxy(new Builder(element, attributes), {
-                        get: (target, name) =>
-                            /** @type {*} */ (target)[name] ??
+                (attributes = {}, element = enchance(tag)) =>
+                    new Proxy(new Builder(element, attributes), {
+                        /** @param {*} target */
+                        get: (target, name, proxy) =>
+                            target[name] ??
                             (name in element &&
-                                ((/** @type {*} */ value) => (
-                                    instancesOf(value, Signal)
-                                        ? element.onConnect(() =>
-                                              value.follow(
-                                                  (value) => (element[name] = value),
-                                              ),
-                                          )
-                                        : (element[name] = value),
-                                    proxy
-                                ))),
+                                ((/** @type {unknown} */ value) => {
+                                    if (instancesOf(value, Signal)) {
+                                        element.onConnect(() =>
+                                            value.follow((value) => {
+                                                element[name] = value
+                                            }),
+                                        )
+                                    } else {
+                                        element[name] = value
+                                    }
+
+                                    return proxy
+                                })),
                     }),
-                ) =>
-                    proxy,
         },
     )
 )
@@ -152,15 +159,21 @@ export class Builder {
         this.element = element
         for (let name in attributes) {
             let value = attributes[name]
-            /** @param {unknown} value */
-            let setOrRemoveAttribute = (value) =>
-                value == null
-                    ? element.removeAttribute(name)
-                    : element.setAttribute(name, String(value))
 
-            instancesOf(value, Signal)
-                ? element.onConnect(() => value.follow(setOrRemoveAttribute, true))
-                : setOrRemoveAttribute(value)
+            /** @param {unknown} value */
+            let setOrRemoveAttribute = (value) => {
+                if (value == null) {
+                    element.removeAttribute(name)
+                } else {
+                    element.setAttribute(name, String(value))
+                }
+            }
+
+            if (instancesOf(value, Signal)) {
+                element.onConnect(() => value.follow(setOrRemoveAttribute, true))
+            } else {
+                setOrRemoveAttribute(value)
+            }
         }
     }
 

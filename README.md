@@ -17,7 +17,7 @@
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
-| **purify.js**   | 2.0 KB   | 978 bytes  |
+| **purify.js**   | 2.0 KB   | 986 bytes  |
 | Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
 | Solid 1.8.12    | 23 KB    | 8.1 KB     |
 | jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
