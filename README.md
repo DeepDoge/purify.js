@@ -9,7 +9,7 @@
 
 ## What is purify.js
 
-**purify.js** is a lightweight JavaScript UI library that prioritizes transparency and direct access to native browser features.
+**purify.js** is a lightweight JavaScript UI building library that prioritizes transparency and direct access to native browser features.
 
 ## Size ⚡
 
