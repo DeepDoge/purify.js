@@ -56,7 +56,9 @@ export type ChildNodeOf<TParentNode extends ParentNode> =
     | DocumentFragment
     | CharacterData
     | (TParentNode extends SVGElement
-          ? SVGElement
+          ? TParentNode extends SVGForeignObjectElement
+              ? Element
+              : SVGAElement
           : TParentNode extends HTMLElement
             ? Element
             : TParentNode extends MathMLElement
