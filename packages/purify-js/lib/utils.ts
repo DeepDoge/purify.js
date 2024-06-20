@@ -6,12 +6,15 @@ export type IsReadonly<T, K extends keyof T> =
     }
         ? 1
         : 2
-    ? true
-    : false
+        ? true
+        : false
 export type IsFunction<T> = T extends Fn ? true : false
 export type Fn = (...args: any[]) => any
 export type NotEventHandler<T, K extends keyof T> =
     NonNullable<T[K]> extends (this: any, event: infer U) => any
-    ? U extends Event ? K extends `on${any}` ? false : true
-    : true
-    : true
+        ? U extends Event
+            ? K extends `on${any}`
+                ? false
+                : true
+            : true
+        : true
