@@ -3,8 +3,8 @@
     "type": "module",
     "exports": {
         ".": {
-            "default": "./lib/all.js",
-            "types": "./lib/all.d.ts"
+            "default": "./dist/all.js",
+            "types": "./dist/all.d.ts"
         }
     }
 }

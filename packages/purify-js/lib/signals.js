@@ -1,25 +1,63 @@
-/** @type {Set<Signal<*>>[]} */
+/**
+ * @template T
+ * @typedef Signal.State
+ * @type {InstanceType<typeof Signal.State<T>>}
+ */
+
+/**
+ * @template T
+ * @typedef Signal.Compute
+ * @type {InstanceType<typeof Signal.Compute<T>>}
+ */
+
+/** @type {Set<Signal<any>>[]} */
 const trackerStack = []
 
-/**
- * @template [T = unknown]
- * @typedef Signal.State
- * @type {Signal<T> & { val: T }}
- */
-
-/**
- * @template [T = unknown]
- * @typedef Signal.Compute
- * @type {Signal<T>}
- */
-
-/**
- * @template [const T = unknown]
- */
+/** @template [T=unknown] */
 export class Signal {
+    /** @type {T} */
+    #value
+    /** @type {Set<import('./signals.d.ts').Signal.Follower<T>>} */
+    #followers = new Set()
+
+    /** @param {T} initial */
+    constructor(initial) {
+        this.#value = initial
+    }
+
+    /** @param {T} value */
+    #set(value, self = this) {
+        let changed = self.#value !== value
+        self.#value = value
+        if (changed) self.notify()
+    }
+
+    get val() {
+        trackerStack.at(-1)?.add(this)
+        return this.#value
+    }
+
+    /**
+     *
+     * @param {import('./signals.d.ts').Signal.Follower<T>} follower
+     * @param {boolean=} immediate
+     * @returns {import('./signals.d.ts').Signal.Unfollower}
+     */
+    follow(follower, immediate) {
+        if (immediate) follower(this.val)
+        this.#followers.add(follower)
+        return () => this.#followers.delete(follower)
+    }
+
+    notify() {
+        for (let follower of this.#followers) {
+            follower(this.val)
+        }
+    }
+
     static State =
         /**
-         * @template T
+         * @template [T=unknown]
          * @extends {Signal<T>}
          */
         class State extends Signal {
@@ -35,19 +73,19 @@ export class Signal {
 
     static Compute =
         /**
-         * @template T
+         * @template [T=unknown]
          * @extends {Signal<T>}
          */
         class Compute extends Signal {
             #dirty = true
-            /** @type {Map<Signal<unknown>, import("./signals.js").Signal.Unfollower>} */
+            /** @type {Map<Signal<unknown>, import('./signals.d.ts').Signal.Unfollower>} */
             #dependencies = new Map()
-            /** @type {import("./signals.js").Signal.Compute.Callback<T>} */
+            /** @type {import('./signals.d.ts').Signal.Compute.Callback<T>} */
             #callback
 
-            /** @param {import("./signals.js").Signal.Compute.Callback<T>} callback */
+            /** @param {import('./signals.d.ts').Signal.Compute.Callback<T>} callback */
             constructor(callback) {
-                super(/** @type {*} */ (0))
+                super(/** @type {never} */ (0))
                 this.#callback = callback
             }
 
@@ -63,11 +101,10 @@ export class Signal {
             }
 
             /**
-             * @param {import("./signals.js").Signal.Follower<T>} follower
-             * @param {boolean=} immediate
-             * @returns {import("./signals.js").Signal.Unfollower}
+             * @param {import('./signals.d.ts').Signal.Follower<T>} follower
+             * @returns {import('./signals.d.ts').Signal.Unfollower}
              */
-            follow(follower, immediate) {
+            follow(follower, immediate = false) {
                 let self = this
                 if (self.#dirty) {
                     self.#updateAndTrack()
@@ -92,6 +129,7 @@ export class Signal {
             #updateAndTrack(self = this) {
                 let dependencies = self.#dependencies
 
+                /** @type {Set<Signal<any>>} */
                 let trackedSet = new Set()
                 trackerStack.push(trackedSet)
                 let value = self.#callback()
@@ -121,49 +159,6 @@ export class Signal {
                 })
             }
         }
-
-    /** @type {T} */
-    #value
-    /** @type {Set<import("./signals.js").Signal.Follower<T>>} */
-    #followers = new Set()
-
-    /**
-     * @param {T} initial
-     */
-    constructor(initial) {
-        this.#value = initial
-    }
-
-    /**
-     * @param {T} value
-     */
-    #set(value, self = this) {
-        let changed = self.#value !== value
-        self.#value = value
-        if (changed) self.notify()
-    }
-
-    get val() {
-        trackerStack.at(-1)?.add(this)
-        return this.#value
-    }
-
-    /**
-     * @param {import("./signals.js").Signal.Follower<T>} follower
-     * @param {boolean} immediate
-     * @returns {import("./signals.js").Signal.Unfollower}
-     */
-    follow(follower, immediate = false) {
-        if (immediate) follower(this.val)
-        this.#followers.add(follower)
-        return () => this.#followers.delete(follower)
-    }
-
-    notify() {
-        for (let follower of this.#followers) {
-            follower(this.val)
-        }
-    }
 }
 
 /**
@@ -171,10 +166,9 @@ export class Signal {
  * @param {T} value
  */
 export let ref = (value) => new Signal.State(value)
-
 /**
  * @template T
- * @param {import("./signals.js").Signal.Compute.Callback<T>} callback
+ * @param {import('./signals.d.ts').Signal.Compute.Callback<T>} callback
  */
 export let computed = (callback) => new Signal.Compute(callback)
 

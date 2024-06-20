@@ -8,15 +8,15 @@
     ],
     "exports": {
         ".": {
-            "default": "./packages/purify-js/lib/all.js",
-            "types": "./packages/purify-js/lib/all.d.ts"
+            "default": "./packages/purify-js/dist/all.js",
+            "types": "./packages/purify-js/dist/all.d.ts"
         }
     },
     "scripts": {
         "format": "prettier -w ./",
+        "compile": "tsc --project ./packages/purify-js/tsconfig.json && cp ./packages/purify-js/lib/signals.d.ts ./packages/purify-js/dist/signals.d.ts",
         "dev": "npm run dev --prefix ./apps/vite",
-        "build": "npm run build --prefix ./apps/vite",
-        "types": "tsc ./packages/purify-js/lib/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+        "build": "npm run build --prefix ./apps/vite"
     },
     "devDependencies": {
         "@eslint/js": "^9.2.0",

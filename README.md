@@ -17,7 +17,7 @@
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
-| **purify.js**   | 2.2 KB   | 1.0 KB     |
+| **purify.js**   | 2.3 KB   | 1.0 KB     |
 | Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
 | Solid 1.8.12    | 23 KB    | 8.1 KB     |
 | jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
@@ -178,9 +178,7 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 ## What is Next and Caveats
 
--   **JSDoc Support**: Enhancing JSDoc support is crucial for better developer experience. Maintaining both `.js` and `.d.ts` files is cumbersome, and generating `.d.ts` files from JSDoc has its challenges. I aim to explore alternative solutions or wait for more robust JSDoc support.
-
-    Relevant issues: [TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369).
+-   **JSDoc Support**: I moved from JSDoc to TS. There has been some issues with the [TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369). I couldnt generate .d.ts files from JSDoc because it mostly pukes garbage. And I had to maintain .js and .d.ts files seperatly, which made me move to just TS. But TS also has its problems especially with inner classes. That's why I had to use JSDoc and .d.ts for `signals.js` instead of just having `signals.ts`. When JSDoc support is better I would really wanna move to it permanently.
 
 -   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM, wrapping signal renders in Custom Elements with `display: contents` style. This approach has CSS limitations, such as `.parent > *` not selecting all children if some are signals. Similar workarounds are needed for attributes bound with signals.
 
