@@ -13,7 +13,7 @@ import { SearchExample } from "./search"
         const double = computed(() => count.val * 2)
         double.val
         setTimeout(
-            double.follow(() => {}),
+            double.follow(() => { }),
             0,
         )
     }

@@ -52,10 +52,10 @@ let toAppendable = (value) => {
 /**
  * @template {keyof HTMLElementTagNameMap | (string & {})} T
  * @param {T} tagname
- * @returns {import("./tags.js").Enhanced<HTMLElementTagNameMap[T extends keyof HTMLElementTagNameMap ?
+ * @returns {import("./tags.js").Enhanced<T extends keyof HTMLElementTagNameMap ?
  *      HTMLElementTagNameMap[T] :
  *      HTMLElement
- * ]>}
+ * >}
  */
 let enchance = (
     tagname,
@@ -153,10 +153,33 @@ export class Builder {
 
     /**
      * @param {T} element
-     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue | Signal<import('./tags.js').Builder.AttributeValue> }} attributes
+     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue }} attributes
      */
     constructor(element, attributes = {}) {
         this.element = element
+        this.attributes(attributes)
+    }
+
+    /* 
+        Since we access buildier from, BuilderProxy
+        Make sure to only use and override names that already exist in HTMLElement(s)
+        We don't wanna conflict with something that might come in the future.
+    */
+
+    /**
+     * @param {import("./tags.js").MemberOf<T>[]} members
+     */
+    children(...members) {
+        let element = this.element
+        element.append(...members.map(toAppendable))
+        return this
+    }
+
+    /**
+     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue }} attributes
+     */
+    attributes(attributes) {
+        let element = this.element
         for (let name in attributes) {
             let value = attributes[name]
 
@@ -175,14 +198,6 @@ export class Builder {
                 setOrRemoveAttribute(value)
             }
         }
-    }
-
-    /**
-     * @param {import("./tags.js").MemberOf<T>[]} members
-     */
-    children(...members) {
-        let element = this.element
-        element.append(...members.map(toAppendable))
         return this
     }
 }

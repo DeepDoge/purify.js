@@ -3,7 +3,7 @@ import { IsFunction, IsReadonly, NotEventHandler } from "./utils"
 
 export function fragment(...members: MemberOf<DocumentFragment>[]): DocumentFragment
 
-export interface Enhanced<T extends HTMLElement> extends HTMLElement {
+export type Enhanced<T extends HTMLElement> = T & {
     onConnect(callback: Enhanced.ConnectedCallback): void
 }
 export namespace Enhanced {
@@ -40,14 +40,14 @@ export namespace Builder {
 
 export type BuilderProxy<T extends Enhanced<HTMLElement>> = Builder<T> & {
     [K in keyof T as true extends
-        | IsReadonly<T, K>
-        | (IsFunction<T[K]> & NotEventHandler<T[K]>)
-        ? never
-        : K]: (
+    | IsReadonly<T, K>
+    | (IsFunction<T[K]> & NotEventHandler<T, K>)
+    ? never
+    : K]: (
         value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
             ? U extends Event
-                ? (this: X, event: U & { currentTarget: T }) => R
-                : T[K]
+            ? (this: X, event: U & { currentTarget: T }) => R
+            : T[K]
             : T[K] | Signal<T[K]>,
     ) => BuilderProxy<T>
 }
@@ -56,14 +56,14 @@ export type ChildNodeOf<TParentNode extends ParentNode> =
     | DocumentFragment
     | CharacterData
     | (TParentNode extends SVGElement
-          ? TParentNode extends SVGForeignObjectElement
-              ? Element
-              : SVGElement
-          : TParentNode extends HTMLElement
-            ? Element
-            : TParentNode extends MathMLElement
-              ? MathMLElement
-              : Element)
+        ? TParentNode extends SVGForeignObjectElement
+        ? Element
+        : SVGElement
+        : TParentNode extends HTMLElement
+        ? Element
+        : TParentNode extends MathMLElement
+        ? MathMLElement
+        : Element)
 
 export type MemberOf<T extends ParentNode> =
     | string
@@ -72,6 +72,6 @@ export type MemberOf<T extends ParentNode> =
     | bigint
     | null
     | ChildNodeOf<T>
-    | Builder<Enhanced<Extract<ChildNodeOf<T>, HTMLElement>>>
+    | (HTMLElement extends ChildNodeOf<T> ? Builder<Enhanced<HTMLElement>> : never)
     | MemberOf<T>[]
     | Signal<MemberOf<T>>
