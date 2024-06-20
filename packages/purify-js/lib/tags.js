@@ -50,12 +50,9 @@ let toAppendable = (value) => {
 }
 
 /**
- * @template {keyof HTMLElementTagNameMap | (string & {})} T
+ * @template {keyof HTMLElementTagNameMap} T
  * @param {T} tagname
- * @returns {import("./tags.js").Enhanced<T extends keyof HTMLElementTagNameMap ?
- *      HTMLElementTagNameMap[T] :
- *      HTMLElement
- * >}
+ * @returns {import("./tags.js").Enhanced<HTMLElementTagNameMap[T]>}
  */
 let enchance = (
     tagname,
@@ -117,47 +114,55 @@ export let tags = /** @type {import("./tags.js").Tags} */ (
             get:
                 (_, tag) =>
                 /**
-                 * @param {Record<string, import("./tags.js").Builder.AttributeValue>} attributes
-                 * @param {*} element
+                 * @param {Record<string, import("./tags.js").Builder.AttributeValue<import("./tags.js").Enhanced<HTMLElementTagNameMap[T]>>>} attributes
                  */
-                (attributes = {}, element = enchance(tag)) =>
-                    new Proxy(new Builder(element, attributes), {
-                        /** @param {*} target */
-                        get: (target, name, proxy) =>
-                            target[name] ??
-                            (name in element &&
-                                ((/** @type {unknown} */ value) => {
-                                    if (instancesOf(value, Signal)) {
-                                        element.onConnect(() =>
-                                            value.follow((value) => {
-                                                element[name] = value
-                                            }),
-                                        )
-                                    } else {
-                                        element[name] = value
-                                    }
-
-                                    return proxy
-                                })),
-                    }),
+                (attributes = {}) =>
+                    Builder.Proxy(enchance(tag)).attributes(attributes),
         },
     )
 )
 
 /**
- * @template {import("./tags.js").Enhanced<HTMLElement>} T
+ * @template {Element} T
  */
 export class Builder {
+    /**
+     * @template {Element} T
+     * @param {T} element
+     * @returns {import("./tags.js").Builder.Proxy<T>}
+     */
+    static Proxy = (element) =>
+        new Proxy(new Builder(element), {
+            /** @param {*} target */
+            get: (target, name, proxy) =>
+                target[name] ??
+                (name in element &&
+                    ((/** @type {unknown} */ value) => {
+                        if (instancesOf(value, Signal)) {
+                            // @ts-ignore
+                            element.onConnect(() =>
+                                value.follow((value) => {
+                                    // @ts-ignore
+                                    element[name] = value
+                                }),
+                            )
+                        } else {
+                            // @ts-ignore
+                            element[name] = value
+                        }
+
+                        return proxy
+                    })),
+        })
+
     /** @type {T} */
     element
 
     /**
      * @param {T} element
-     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue }} attributes
      */
-    constructor(element, attributes = {}) {
+    constructor(element) {
         this.element = element
-        this.attributes(attributes)
     }
 
     /* 
@@ -176,7 +181,7 @@ export class Builder {
     }
 
     /**
-     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue }} attributes
+     * @param {{ [name: string]: import('./tags.js').Builder.AttributeValue<T> }} attributes
      */
     attributes(attributes) {
         let element = this.element
@@ -193,6 +198,7 @@ export class Builder {
             }
 
             if (instancesOf(value, Signal)) {
+                // @ts-ignore
                 element.onConnect(() => value.follow(setOrRemoveAttribute, true))
             } else {
                 setOrRemoveAttribute(value)
