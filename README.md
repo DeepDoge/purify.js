@@ -162,13 +162,13 @@ const mockDb = [
 ]
 ```
 
-## Motivation 🍣
+### Motivation 🍣
 
 JavaScript frameworks are often large and complex. As your project grows, they can introduce obscure reactivity bugs and force you into their specific ecosystems, restricting your use of native browser APIs (Vanilla JavaScript). Many frameworks prevent direct DOM manipulation and struggle to keep up with new CSS features, resulting in poorly scoped CSS. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
 
 **purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. Here’s how:
 
--   **Simple Reactivity**: By using signals, we maintain straightforward reactivity. Signals are easy to detect in the code using the `instanceof` keyword, and you have control over manually notifying signal followers with the `notify()` function. This eliminates the need to wrap unrelated logic inside functions like `update()`. Getters and setters further improve the developer experience, making it clear when you're working with a signal.
+-   **Simple Reactivity**: By using signals, **purify.js** maintains straightforward reactivity. Signals are easy to detect in the code using the `instanceof` keyword, and you have control over manually notifying signal followers with the `notify()` function. This eliminates the need to wrap unrelated logic inside functions like `update()`. Getters and setters further improve the developer experience, making it clear when you're working with a signal.
 
 -   **Clear DOM Element Creation**: **purify.js** provides a simple and readable way to create DOM elements and templates with full type safety. It ensures a clear separation between element attributes and properties, so you always know what you’re setting.
 
@@ -176,9 +176,15 @@ JavaScript frameworks are often large and complex. As your project grows, they c
 
 By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
-## What is Next and Caveats
+## Future Plans and Caveats
 
--   **JSDoc Support**: I moved from JSDoc to TS. There has been some issues with the JSDoc ([TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369)). I couldnt generate .d.ts files from JSDoc because it mostly pukes garbage. And I had to maintain .js and .d.ts files seperatly, which made me move to just TS. But TS also has its problems especially with inner classes. That's why I had to use JSDoc and .d.ts for `signals.js` instead of just having `signals.ts`. When JSDoc support is better I would really wanna move to it permanently.
+### Future Plans
+
+-   **JSDoc Support**: Initially, I used JSDoc for documentation but encountered issues generating .d.ts files ([TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369)). Maintaining separate .js and .d.ts files was cumbersome, prompting a switch to TypeScript (TS). However, TS has its problems, especially with inner classes. Hence, I had to use JSDoc and .d.ts for `signals.js` instead of just `signals.ts`. When JSDoc support improves, I plan to return to it permanently.
+
+-   **Real-World Application and PWA Template**: I plan to build a project using **purify.js** to test its robustness in a complex environment. This will help identify any gaps and refine the library. Additionally, I aim to create a PWA (Progressive Web App) template or package to enhance the **purify.js** experience for building progressive web apps.
+
+### Current Limitations
 
 -   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM, wrapping signal renders in Custom Elements with `display: contents` style. This approach has CSS limitations, such as `.parent > *` not selecting all children if some are signals. Similar workarounds are needed for attributes bound with signals.
 
@@ -189,8 +195,6 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
     ```
 
     This is currently not feasible ([DOM#533](https://github.com/whatwg/dom/issues/533)), but I will explore other options, including enhancing Custom Elements. MutationObserver is not ideal due to its asynchronous nature and limitations with ShadowDOMs, which would require modifying `HTMLElement.prototype.attachShadow`. Most frameworks avoid allowing developers to directly manipulate the DOM, but I aim to maintain flexibility while seeking future-proof solutions.
-
--   **Real-World Application and PWA Template**: I plan to build a project using **purify.js** to test its robustness in a complex environment. This will help identify any gaps and refine the library. Additionally, I aim to create a PWA template or package to enhance the **purify.js** experience for building progressive web apps.
 
 ## Why Not JSX Templating?
 
@@ -205,3 +209,12 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
     ```
 
 This format clearly separates props and attributes, making it easier to understand and maintain.
+
+## Rules
+
+-   **Strict Bundle Size**: Keep the bundle size strictly under 1.0KB.
+-   **No External Dependencies**: Avoid including any external dependencies.
+-   **Direct DOM Manipulation**: Always allow direct DOM manipulation.
+-   **Encourage Usage of Browser APIs**: Prioritize and optimize the use of native browser APIs. Ensure all functionalities integrate seamlessly with them.
+-   **Type Safety**: Guarantee full type safety. Use type guarding over runtime logic. Types are the only things that doesn't effect the bundle size, use that.
+-   **Simple Abstractions**: Steer clear of unnecessary abstractions that complicate the API.
