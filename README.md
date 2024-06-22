@@ -180,7 +180,7 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
 
 ### Future Plans
 
--   **JSDoc Support**: Initially, I used JSDoc for documentation but encountered issues generating .d.ts files ([TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369)). Maintaining separate .js and .d.ts files was cumbersome, prompting a switch to TypeScript (TS). However, TS has its problems, especially with inner classes. Hence, I had to use JSDoc and .d.ts for `signals.js` instead of just `signals.ts`. When JSDoc support improves, I plan to return to it permanently.
+-   **JSDoc Support**: Initially, I used JSDoc for but encountered issues generating .d.ts files ([TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369)). Maintaining separate .js and .d.ts files was cumbersome, prompting a switch to TypeScript (TS). However, TS has its problems, especially with inner classes. Hence, I had to use JSDoc and .d.ts for `signals.js` instead of just `signals.ts`. When JSDoc support improves, I plan to return to it permanently.
 
 -   **Real-World Application and PWA Template**: I plan to build a project using **purify.js** to test its robustness in a complex environment. This will help identify any gaps and refine the library. Additionally, I aim to create a PWA (Progressive Web App) template or package to enhance the **purify.js** experience for building progressive web apps.
 
