@@ -11,6 +11,8 @@
 
 **purify.js** is a 1.0KB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better dx _(developer-experience)_.
 
+---
+
 ## Size ⚡
 
 **purify.j** stands out with its minimal size:
@@ -42,6 +44,8 @@
 -   **purify.js** allows direct DOM manipulation, because it can.
 -   **purify.js** is small because it's pure and simple.
 -   **purify.js** is simple because it's small and pure.
+
+---
 
 ## Example: purify.js + ShadowRoot 🍤
 
@@ -93,6 +97,8 @@ document.body.append(App().element)
 
 [Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/12/)
 
+---
+
 ## Guide 🥡
 
 Soon
@@ -100,6 +106,8 @@ Soon
 ## Documentation 🍱
 
 Soon
+
+---
 
 ## Motivation 🍣
 
@@ -109,11 +117,15 @@ JavaScript frameworks are often large and complex, force you into their specific
 
 By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
+---
+
 ## Current Limitations 🦀
 
 -   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM. This means:
     -   Every element created by the `tags` proxy, are Custom Elements. But they look like normal `<div>`(s) and `<span>`(s) and etc on the DevTools, because they extend the original element and use the original tag name. This way we can follow the life cycle of every element. And it works amazingly.
     -   But we also have signals, which might return an HTMLElement. So we gotta wrap signals with something in the DOM. So we can follow its lifecycle and know where it starts and ends. Traditionally this is done via `Comment` `Node`(s). But there is no feasible and sync way to follow a `Comment` `Node` on the DOM while also allowing direct DOM manipulation ([DOM#533](https://github.com/whatwg/dom/issues/533)). So instead of `Comment` `Node`(s), I used Custom Elements to wrap signal renders. This way, I can follow the lifecycle of the signal render in the DOM, and decide to follow or unfollow the signal. Since signal render itself is an `Element` this approach has limitations, such as `.parent > *` selector wouldn't select all children if some are inside a signal.
+
+---
 
 ## Why Not JSX Templating? 🍕
 
