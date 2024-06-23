@@ -1,7 +1,7 @@
 # purify.js
 
 <p align="center">
-    <img width="100px" height="auto" alt="**purify.js** logo" src="#" />
+    <img width="100px" height="auto" alt="purify.js logo" src="#" />
 </p>
 <p align="center">
     Purify JavaScript Apps
@@ -9,13 +9,13 @@
 
 ## What is purify.js
 
-**purify.js** is a 1.0KB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better dx _(developer-experience)_.
+**purify.js** is a 1.0KB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
 
 ---
 
 ## Size ⚡
 
-**purify.j** stands out with its minimal size:
+**purify.js** stands out with its minimal size:
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
@@ -31,7 +31,7 @@
 
 ## Installation 🍙
 
-[Install Instructions](https://github.com/DeepDoge/purify.js/releases)
+To install **purify.js**, follow the [installation instructions](https://github.com/DeepDoge/purify.js/releases).
 
 ## Key Features 🍚
 
@@ -101,21 +101,19 @@ document.body.append(App().element)
 
 ## Guide 🥡
 
-Soon
+Coming soon.
 
 ## Documentation 🍱
 
-Soon
+Coming soon.
 
 ---
 
 ## Motivation 🍣
 
-JavaScript frameworks are often large and complex, force you into their specific ecosystems, restricting your use of native browser APIs, prevent direct DOM manipulation. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
+JavaScript frameworks are often large and complex, force you into their specific ecosystems, restrict your use of native browser APIs, and prevent direct DOM manipulation. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
 
-**purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible.
-
-By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
+**purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
 ---
 
