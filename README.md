@@ -9,7 +9,7 @@
 
 ## What is purify.js
 
-**purify.js** is a 1.0KB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
+**purify.js** is a 1.0kB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
 
 ---
 
@@ -17,15 +17,15 @@
 
 **purify.js** stands out with its minimal size:
 
-| Library         | .min.js  | .min.js.gz |
-| --------------- | -------- | ---------- |
-| **purify.js**   | 2.3 KB   | 1.0 KB     |
-| Preact 10.19.3  | 11.2 KB  | 4.5 KB     |
-| Solid 1.8.12    | 23 KB    | 8.1 KB     |
-| jQuery 3.7.1    | 85.1 KB  | 29.7 KB    |
-| Vue 3.4.15      | 110.4 KB | 40 KB      |
-| ReactDOM 18.2.0 | 130.2 KB | 42 KB      |
-| Angular 17.1.0  | 310 KB   | 104 KB     |
+| Library         | .min.js | .min.js.gz |
+| --------------- | ------- | ---------- |
+| **purify.js**   | 2.3kB   | 1.0kB      |
+| Preact 10.19.3  | 11.2kB  | 4.5kB      |
+| Solid 1.8.12    | 23kB    | 8.1kB      |
+| jQuery 3.7.1    | 85.1kB  | 29.7kB     |
+| Vue 3.4.15      | 110.4kB | 40kB       |
+| ReactDOM 18.2.0 | 130.2kB | 42kB       |
+| Angular 17.1.0  | 310kB   | 104kB      |
 
 ---
 
