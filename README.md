@@ -4,16 +4,16 @@
     <img width="100px" height="auto" alt="**purify.js** logo" src="#" />
 </p>
 <p align="center">
-    Simplifying JavaScript UI, Empowering Native Features
+    Purify JavaScript Apps
 </p>
 
 ## What is purify.js
 
-**purify.js** is a lightweight JavaScript UI building library that prioritizes transparency and direct access to native browser features.
+**purify.js** is a 1.0KB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better dx _(developer-experience)_.
 
 ## Size ⚡
 
-**purify.js** boasts an incredibly small footprint without the need for a build step. Here's a size comparison with other popular libraries, highlighting its efficiency:
+**purify.j** stands out with its minimal size:
 
 | Library         | .min.js  | .min.js.gz |
 | --------------- | -------- | ---------- |
@@ -31,23 +31,24 @@
 
 [Install Instructions](https://github.com/DeepDoge/purify.js/releases)
 
-## Guide 🍱
+## Key Features 🍚
 
-Sooner
+-   **purify.js** uses signals.
+-   **purify.js** provides built-in signals and utilities such as:
+    -   **`ref()`** state signal.
+    -   **`computed()`** computed signal.
+    -   **`awaited()`** converts a promise into a signal.
+    -   **`effect()`** follows and reacts to multiple signals.
+-   **purify.js** allows direct DOM manipulation, because it can.
+-   **purify.js** is small because it's pure and simple.
+-   **purify.js** is simple because it's small and pure.
 
-## Documentation 🍱
-
-Soon
-
-## Example: purify.js + ShadowRoot
+## Example: purify.js + ShadowRoot 🍤
 
 ```ts
-import { awaited, computed, css, fragment, ref, sheet, tags } from "purify-js"
+import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 
 const { div, button } = tags
-
-const count = ref(0)
-const double = computed(() => count.val * 2)
 
 function App() {
     return div({ id: "app" }).children(Counter())
@@ -58,9 +59,12 @@ function Counter() {
     const shadow = host.element.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets.push(counterStyle)
 
+    const count = ref(0)
+    const double = computed(() => count.val * 2)
+
     shadow.append(
         fragment(
-            button({ class: "my-button", hello: count })
+            button({ class: "my-button", "data-count": count })
                 .onclick(() => count.val++)
                 .children("Count:", count),
             ["Double:", double],
@@ -73,10 +77,6 @@ const counterStyle = sheet(css`
     :host {
         display: grid;
         place-content: center;
-    }
-
-    .my-button {
-        overflow-wrap: break-word;
     }
 `)
 
@@ -91,114 +91,33 @@ document.adoptedStyleSheets.push(
 document.body.append(App().element)
 ```
 
-[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/6/)
+[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/12/)
 
-## Example: Async Search
+## Guide 🥡
 
-```ts
-import { awaited, computed, css, fragment, ref, sheet, tags } from "purify-js"
+Soon
 
-const { input, div, ul, li } = tags
+## Documentation 🍱
 
-function SearchInput(text = ref("")) {
-    return input({ type: "search" })
-        .value(text)
-        .oninput((event) => (text.val = event.currentTarget.value))
-}
+Soon
 
-function Loading() {
-    return div().children("Loading...")
-}
+## Motivation 🍣
 
-const searchStyle = sheet(css`
-    :host {
-        display: grid;
-        grid-template-columns: minmax(0, 30em);
-        place-content: center;
-        gap: 1em;
-    }
-`)
+JavaScript frameworks are often large and complex, force you into their specific ecosystems, restricting your use of native browser APIs, prevent direct DOM manipulation. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
 
-export function SearchExample() {
-    const host = div()
-    const shadow = host.element.attachShadow({ mode: "open" })
-    shadow.adoptedStyleSheets.push(searchStyle)
-
-    const search = ref("")
-
-    shadow.append(
-        fragment(
-            SearchInput(search),
-            ["Search: ", search],
-            computed(() => awaited(SearchResults(search.val), Loading())),
-        ),
-    )
-
-    return host
-}
-
-async function SearchResults(query: string) {
-    const result = (await fetch(
-        `data:application/json;utf8,${JSON.stringify(
-            mockDb.filter((item) => item.toLowerCase().includes(query.toLowerCase())),
-        )}`,
-    ).then((response) => response.json())) as string[]
-
-    return ul().children(...result.map((item) => li().children(item))).element
-}
-
-const mockDb = [
-    "Egg",
-    "Milk",
-    "Bread",
-    "Butter",
-    "Cheese",
-    "Bacon",
-    "Beef",
-    "Chicken",
-    "Pork",
-    "Fish",
-    "Pasta",
-]
-```
-
-### Motivation 🍣
-
-JavaScript frameworks are often large and complex. As your project grows, they can introduce obscure reactivity bugs and force you into their specific ecosystems, restricting your use of native browser APIs (Vanilla JavaScript). Many frameworks prevent direct DOM manipulation and struggle to keep up with new CSS features, resulting in poorly scoped CSS. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
-
-**purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. Here’s how:
-
--   **Simple Reactivity**: By using signals, **purify.js** maintains straightforward reactivity. Signals are easy to detect in the code using the `instanceof` keyword, and you have control over manually notifying signal followers with the `notify()` function. This eliminates the need to wrap unrelated logic inside functions like `update()`. Getters and setters further improve the developer experience, making it clear when you're working with a signal.
-
--   **Clear DOM Element Creation**: **purify.js** provides a simple and readable way to create DOM elements and templates with full type safety. It ensures a clear separation between element attributes and properties, so you always know what you’re setting.
-
--   **Minimal and Pure**: The library is minimal, focusing on providing signals and templating to enhance the developer experience. This approach reduces complexity and keeps your codebase closer to native JavaScript.
+**purify.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible.
 
 By keeping it pure, **purify.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
-## Future Plans and Caveats
+## Current Limitations 🦀
 
-### Future Plans
+-   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM. This means:
+    -   Every element created by the `tags` proxy, are Custom Elements. But they look like normal `<div>`(s) and `<span>`(s) and etc on the DevTools, because they extend the original element and use the original tag name. This way we can follow the life cycle of every element. And it works amazingly.
+    -   But we also have signals, which might return an HTMLElement. So we gotta wrap signals with something in the DOM. So we can follow its lifecycle and know where it starts and ends. Traditionally this is done via `Comment` `Node`(s). But there is no feasible and sync way to follow a `Comment` `Node` on the DOM while also allowing direct DOM manipulation ([DOM#533](https://github.com/whatwg/dom/issues/533)). So instead of `Comment` `Node`(s), I used Custom Elements to wrap signal renders. This way, I can follow the lifecycle of the signal render in the DOM, and decide to follow or unfollow the signal. Since signal render itself is an `Element` this approach has limitations, such as `.parent > *` selector wouldn't select all children if some are inside a signal.
 
--   **JSDoc Support**: Initially, I used JSDoc for but encountered issues generating .d.ts files ([TypeScript#33136](https://github.com/microsoft/TypeScript/issues/33136), [TypeScript#46369](https://github.com/microsoft/TypeScript/issues/46369)). Maintaining separate .js and .d.ts files was cumbersome, prompting a switch to TypeScript (TS). However, TS has its problems, especially with inner classes. Hence, I had to use JSDoc and .d.ts for `signals.js` instead of just `signals.ts`. When JSDoc support improves, I plan to return to it permanently.
+## Why Not JSX Templating? 🍕
 
--   **Real-World Application and PWA Template**: I plan to build a project using **purify.js** to test its robustness in a complex environment. This will help identify any gaps and refine the library. Additionally, I aim to create a PWA (Progressive Web App) template or package to enhance the **purify.js** experience for building progressive web apps.
-
-### Current Limitations
-
--   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM, wrapping signal renders in Custom Elements with `display: contents` style. This approach has CSS limitations, such as `.parent > *` not selecting all children if some are signals. Similar workarounds are needed for attributes bound with signals.
-
-    Ideally, I would like an API like:
-
-    ```ts
-    onConnected(mountable: CharacterData | Element, callback: () => Cleanup | void)
-    ```
-
-    This is currently not feasible ([DOM#533](https://github.com/whatwg/dom/issues/533)), but I will explore other options, including enhancing Custom Elements. MutationObserver is not ideal due to its asynchronous nature and limitations with ShadowDOMs, which would require modifying `HTMLElement.prototype.attachShadow`. Most frameworks avoid allowing developers to directly manipulate the DOM, but I aim to maintain flexibility while seeking future-proof solutions.
-
-## Why Not JSX Templating?
-
--   **Lack of Type Safety**: JSX does not provide the same level of type safety as **purify.js**. For example, creating an `<img>` element with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This reduces the developer experience and increases the risk of type-related issues.
+-   **Lack of Type Safety**: An `<img>` created element with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This causes issues if you expect a `HTMLImageElement` some where in the code but all JSX returns is `HTMLElement` or something like `JSX.Element`.
 
 -   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purify.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
 
@@ -208,13 +127,4 @@ By keeping it pure, **purify.js** adds necessary functionality while avoiding th
     <MyComponent("Hello", { World: "!" }) class="my-component" aria-busy="true" />
     ```
 
-This format clearly separates props and attributes, making it easier to understand and maintain.
-
-## Rules
-
--   **Strict Bundle Size**: Keep the bundle size strictly under 1.0KB.
--   **No External Dependencies**: Avoid including any external dependencies.
--   **Direct DOM Manipulation**: Always allow direct DOM manipulation.
--   **Encourage Usage of Browser APIs**: Prioritize and optimize the use of native browser APIs. Ensure all functionalities integrate seamlessly with them.
--   **Type Safety**: Guarantee full type safety. Use type guarding over runtime logic. Types are the only things that doesn't effect the bundle size, use that.
--   **Simple Abstractions**: Steer clear of unnecessary abstractions that complicate the API.
+    This format clearly separates props and attributes, making it easier to understand and maintain.
