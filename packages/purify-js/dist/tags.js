@@ -163,7 +163,7 @@ export class Builder {
                         element.onConnect(() => value.follow((value) => {
                             ;
                             element[name] = value;
-                        }));
+                        }, true));
                     }
                     else {
                         ;
