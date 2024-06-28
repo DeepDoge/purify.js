@@ -224,7 +224,7 @@ export class Builder<T extends Element> {
                             ;(element as never as Enhanced).onConnect(() =>
                                 value.follow((value) => {
                                     ;(element as any)[name] = value
-                                }),
+                                }, true),
                             )
                         } else {
                             ;(element as any)[name] = value
