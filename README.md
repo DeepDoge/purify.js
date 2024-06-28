@@ -1,7 +1,7 @@
 # purify.js
 
 <p align="center">
-    <img width="100px" height="auto" alt="purify.js logo" src="#" />
+    <img width="100px" height="auto" alt="purify.js logo" src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/1f343.svg" />
 </p>
 <p align="center">
     Purify JavaScript Apps
@@ -140,3 +140,10 @@ JavaScript frameworks are often large and complex, force you into their specific
     ```
 
     This format clearly separates props and attributes, making it easier to understand and maintain.
+
+---
+
+## Logo
+
+This project uses emoji artwork provided by [Twemoji]([https://twemoji.twitter.com](https://github.com/twitter/twemoji)) under the [CC BY 4.0 License](https://creativecommons.org/licenses/by/4.0/).
+
