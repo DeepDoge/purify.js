@@ -2,10 +2,11 @@
     "compilerOptions": {
         "lib": ["ESNext", "DOM"],
 
-        "module": "ESNext",
+        "module": "NodeNext",
         "target": "ESNext",
 
         "moduleDetection": "force",
+        "moduleResolution": "NodeNext",
 
         "outDir": "dist",
         "declaration": true,

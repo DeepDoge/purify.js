@@ -1,5 +1,5 @@
-import { Signal } from "./signals";
-import { IsFunction, IsReadonly, NotEventHandler } from "./utils";
+import { Signal } from "./signals.js";
+import { IsFunction, IsReadonly, NotEventHandler } from "./utils.js";
 /**
  * Creates a DocumentFragment containing the provided members.
  *

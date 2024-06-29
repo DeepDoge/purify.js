@@ -1,4 +1,4 @@
-import { Signal } from "./signals";
+import { Signal } from "./signals.js";
 let instancesOf = (target, ...constructors) => constructors.some((constructor) => target instanceof constructor);
 /**
  * Creates a DocumentFragment containing the provided members.
