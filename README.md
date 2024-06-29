@@ -27,6 +27,8 @@
 | ReactDOM 18.2.0 | 130.2kB | 42kB       |
 | Angular 17.1.0  | 310kB   | 104kB      |
 
+[Compare Syntax](https://ipfs.io/ipfs/Qmaoph2BsKoz1GXvUd6GanZm1TQZ3vCntwBpKFiXvnjwkf)
+
 ---
 
 ## Installation 🍙
