@@ -97,7 +97,7 @@ document.adoptedStyleSheets.push(
 document.body.append(App().element)
 ```
 
-[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/12/)
+[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/32/)
 
 ---
 
