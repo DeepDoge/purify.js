@@ -126,7 +126,8 @@ JavaScript frameworks are often large and complex, force you into their specific
     -   But we also have signals, which might not return an HTMLElement. So we gotta wrap signals with something in the DOM. So we can follow its lifecycle and know where it starts and ends. Traditionally this is done via `Comment` `Node`(s). But there is no feasible and sync way to follow a `Comment` `Node` on the DOM while also allowing direct DOM manipulation ([DOM#533](https://github.com/whatwg/dom/issues/533)). So instead of `Comment` `Node`(s), I used Custom Elements to wrap signal renders. This way, I can follow the lifecycle of the signal render in the DOM, and decide to follow or unfollow the signal. Since signal render itself is an `Element` this approach has limitations, such as `.parent > *` selector wouldn't select all children if some are inside a signal.
 
         As another solution to this, a `HTMLElement` or `Element` attribute similar to `inert` that hides the element from the query selector both in JS and CSS would also be useful.
-
+        
+       But as long as the developer is aware of this limitation or difference, it shouldn't cause any issues.
 ---
 
 ## Why Not JSX Templating? 🍕
