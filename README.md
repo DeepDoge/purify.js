@@ -27,7 +27,7 @@
 | ReactDOM 18.2.0 | 130.2kB | 42kB       |
 | Angular 17.1.0  | 310kB   | 104kB      |
 
-[Compare Syntax](https://bafybeiehmpktbwulqg6br23pw7vnynlej3mgb4xwiw54z3h2cm7shyqmnq.ipfs.dweb.link)
+[Compare Syntax](https://bafybeib32e7wggz53xdzuhykevx5lquwny3lzsqm7entfe7zu7gnncn5o4.ipfs.dweb.link)
 
 ---
 
