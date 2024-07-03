@@ -1,4 +1,4 @@
-import { Signal, css, sheet, tags } from "purify-js"
+import { Signal, css, sheet, tags } from "purified-js"
 
 const { div, button } = tags
 

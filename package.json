@@ -1,6 +1,6 @@
 {
     "type": "module",
-    "name": "purify-js",
+    "name": "purified-js",
     "version": "0.0.0",
     "workspaces": [
         "./apps/*",
@@ -8,13 +8,13 @@
     ],
     "exports": {
         ".": {
-            "default": "./packages/purify-js/dist/all.js",
-            "types": "./packages/purify-js/dist/all.d.ts"
+            "default": "./packages/purified-js/dist/all.js",
+            "types": "./packages/purified-js/dist/all.d.ts"
         }
     },
     "scripts": {
         "format": "prettier -w ./",
-        "compile": "tsc --project ./packages/purify-js/tsconfig.json && cp ./packages/purify-js/lib/signals.d.ts ./packages/purify-js/dist/signals.d.ts",
+        "compile": "tsc --project ./packages/purified-js/tsconfig.json && cp ./packages/purified-js/lib/signals.d.ts ./packages/purified-js/dist/signals.d.ts",
         "dev": "npm run dev --prefix ./apps/vite",
         "build": "npm run build --prefix ./apps/vite"
     },
