@@ -1,10 +1,10 @@
-# purified.js
+<h1 align="center"> purified.js </h1>
 
 <p align="center">
     <img width="100px" height="auto" alt="purified.js logo" src="https://ipfs.io/ipfs/QmPmZkHS66TTFiVpRQiyM7FbDZ3sKzkQEtWVeXuRp8cs9V" />
 </p>
 <p align="center">
-    Purify JavaScript Apps
+    Don't limit your potential
 </p>
 
 ## What is purified.js
