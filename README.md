@@ -133,7 +133,7 @@ JavaScript frameworks are often large and complex, force you into their specific
 
 ## Why Not JSX Templating? 🍕
 
--   **Lack of Type Safety**: An `<img>` element created with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This causes issues if you expect a `HTMLImageElement` some where in the code but all JSX returns is `HTMLElement` or something like `JSX.Element`.
+-   **Lack of Type Safety**: An `<img>` element created with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This causes issues if you expect a `HTMLImageElement` some where in the code but all JSX returns is `HTMLElement` or something like `JSX.Element`. Also, it has some other issues related to the generics, discriminated unions and more.
 
 -   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purified.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
 
