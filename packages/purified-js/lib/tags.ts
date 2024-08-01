@@ -80,11 +80,16 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                 #connectedCallbacks = new Set<Enhanced.ConnectedCallback>()
                 #disconnectedCallbacks = new Set<Enhanced.DisconnectedCallback>()
 
+                #call(callback: Enhanced.ConnectedCallback) {
+                    let disconnectedCallback = callback()
+                    if (disconnectedCallback) {
+                        this.#disconnectedCallbacks.add(disconnectedCallback)
+                    }
+                }
+
                 connectedCallback() {
                     for (let callback of this.#connectedCallbacks) {
-                        let disconnectedCallback = callback()
-                        if (disconnectedCallback)
-                            this.#disconnectedCallbacks.add(disconnectedCallback)
+                        this.#call(callback)
                     }
                 }
 
@@ -94,8 +99,11 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                     }
                 }
 
-                onConnect(connectedCallback: Enhanced.ConnectedCallback) {
-                    this.#connectedCallbacks.add(connectedCallback)
+                onConnect(callback: Enhanced.ConnectedCallback) {
+                    this.#connectedCallbacks.add(callback)
+                    if (this.isConnected) {
+                        this.#call(callback)
+                    }
                 }
             }),
             { extends: tagname },
