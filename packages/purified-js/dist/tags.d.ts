@@ -1,5 +1,12 @@
 import { Signal } from "./signals.js";
-import { IsFunction, IsReadonly, NotEventHandler } from "./utils.js";
+type IsReadonly<T, K extends keyof T> = (<T_1>() => T_1 extends {
+    [Q in K]: T[K];
+} ? 1 : 2) extends <T_2>() => T_2 extends {
+    readonly [Q_1 in K]: T[K];
+} ? 1 : 2 ? true : false;
+type IsFunction<T> = T extends Fn ? true : false;
+type Fn = (...args: any[]) => any;
+type NotEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: any, event: infer U) => any ? U extends Event ? K extends `on${any}` ? false : true : true : true;
 /**
  * Creates a DocumentFragment containing the provided members.
  *
@@ -94,3 +101,4 @@ export declare namespace Builder {
 }
 export type ChildNodeOf<TParentNode extends ParentNode> = DocumentFragment | CharacterData | (TParentNode extends SVGElement ? TParentNode extends SVGForeignObjectElement ? Element : SVGElement : TParentNode extends HTMLElement ? Element : TParentNode extends MathMLElement ? MathMLElement : Element);
 export type MemberOf<T extends ParentNode> = string | number | boolean | bigint | null | ChildNodeOf<T> | (HTMLElement extends ChildNodeOf<T> ? Builder<Enhanced> : never) | MemberOf<T>[] | Signal<MemberOf<T>>;
+export {};

@@ -1,175 +1,167 @@
+let trackerStack = [];
 /**
- * @template T
- * @typedef Signal.State
- * @type {InstanceType<typeof Signal.State<T>>}
+ * A Signal class that represents a reactive value.
+ * @template T - The type of the signal's value.
  */
-/**
- * @template T
- * @typedef Signal.Compute
- * @type {InstanceType<typeof Signal.Compute<T>>}
- */
-/** @type {Set<Signal<any>>[]} */
-const trackerStack = [];
-/** @template [T=unknown] */
 export class Signal {
-    /** @type {T} */
     #value;
-    /** @type {Set<import('./signals.d.ts').Signal.Follower<T>>} */
     #followers = new Set();
-    /** @param {T} initial */
-    constructor(initial) {
+    #starter;
+    #cleanup;
+    /**
+     * Constructs a new Signal instance.
+     * @param initial - The initial value of the signal.
+     */
+    constructor(initial, starter) {
         this.#value = initial;
+        this.#starter = starter;
     }
-    /** @param {T} value */
-    #set(value, self = this) {
+    set(value, self = this) {
         let changed = self.#value !== value;
         self.#value = value;
         if (changed)
             self.notify();
     }
+    /**
+     * Gets the current value of the signal.
+     * @returns The current value of the signal.
+     */
     get val() {
         trackerStack.at(-1)?.add(this);
         return this.#value;
     }
-    /**
-     *
-     * @param {import('./signals.d.ts').Signal.Follower<T>} follower
-     * @param {boolean=} immediate
-     * @returns {import('./signals.d.ts').Signal.Unfollower}
-     */
-    follow(follower, immediate) {
+    follow(follower, immediate, self = this) {
         if (immediate)
-            follower(this.val);
-        this.#followers.add(follower);
-        return () => this.#followers.delete(follower);
+            follower(self.val);
+        self.#followers.add(follower);
+        if (self.#followers.size == 1) {
+            self.#cleanup = self.#starter?.(self.set.bind(self));
+        }
+        return () => {
+            self.#followers.delete(follower);
+            if (!self.#followers.size) {
+                self.#cleanup?.();
+                self.#cleanup = null;
+            }
+        };
     }
-    notify() {
-        for (let follower of this.#followers) {
-            follower(this.val);
+    notify(self = this) {
+        for (let follower of self.#followers) {
+            follower(self.val);
         }
     }
-    static State = 
+}
+(function (Signal) {
     /**
-     * @template [T=unknown]
-     * @extends {Signal<T>}
+     * A Signal subclass that represents a mutable reactive value.
+     * @template T - The type of the signal's value.
      */
     class State extends Signal {
-        /** @param {T} value */
-        set val(value) {
-            this.#set(value);
-        }
+        /**
+         * Gets the current value of the signal.
+         * @returns The current value of the signal.
+         */
         get val() {
-            return super.val;
-        }
-    };
-    static Compute = 
-    /**
-     * @template [T=unknown]
-     * @extends {Signal<T>}
-     */
-    class Compute extends Signal {
-        #dirty = true;
-        /** @type {Map<Signal<unknown>, import('./signals.d.ts').Signal.Unfollower>} */
-        #dependencies = new Map();
-        /** @type {import('./signals.d.ts').Signal.Compute.Callback<T>} */
-        #callback;
-        /** @param {import('./signals.d.ts').Signal.Compute.Callback<T>} callback */
-        constructor(callback) {
-            super(/** @type {never} */ (0));
-            this.#callback = callback;
-        }
-        get val() {
-            let self = this;
-            if (self.#dirty) {
-                if (!self.#followers.size) {
-                    return self.#callback();
-                }
-                self.#updateAndTrack();
-            }
             return super.val;
         }
         /**
-         * @param {import('./signals.d.ts').Signal.Follower<T>} follower
-         * @returns {import('./signals.d.ts').Signal.Unfollower}
+         * Sets the current value of the signal.
+         * @param value - The new value of the signal.
          */
-        follow(follower, immediate = false) {
-            let self = this;
-            if (self.#dirty) {
-                self.#updateAndTrack();
-            }
-            let unfollow = super.follow(follower, immediate);
-            return () => {
-                unfollow();
-                if (!self.#followers.size) {
-                    self.#unfollowDependencies();
-                }
-            };
+        set val(value) {
+            super.set(value);
         }
-        #unfollowDependencies(self = this) {
-            self.#dependencies.forEach((unfollow, dependency) => {
-                unfollow();
-                self.#dependencies.delete(dependency);
-            });
-            self.#dirty = true;
-        }
-        #updateAndTrack(self = this) {
-            let dependencies = self.#dependencies;
-            /** @type {Set<Signal<any>>} */
-            let trackedSet = new Set();
-            trackerStack.push(trackedSet);
-            let value = self.#callback();
-            trackerStack.pop();
-            trackedSet.delete(self);
-            self.#dirty = false;
-            self.#set(value);
-            // Unfollow and remove dependencies that are no longer being tracked
-            dependencies.forEach((unfollow, dependency) => {
-                if (trackedSet.has(dependency))
-                    return;
-                unfollow();
-                dependencies.delete(dependency);
-            });
-            // Follow new dependencies
-            trackedSet.forEach((dependency) => {
-                if (dependencies.has(dependency))
-                    return;
-                let unfollow = dependency.follow(() => {
-                    if (self.#followers.size) {
-                        self.#updateAndTrack();
-                    }
-                    else {
-                        self.#unfollowDependencies();
-                    }
+    }
+    Signal.State = State;
+    /**
+     * A Signal subclass that represents a computed value.
+     * @template T - The type of the signal's value.
+     */
+    class Compute extends Signal {
+        #fresh = false;
+        constructor(callback) {
+            let dependencies = new Map(), updateAndTrack = (set) => {
+                let trackedSet = new Set();
+                trackerStack.push(trackedSet);
+                let value = callback();
+                trackerStack.pop();
+                trackedSet.delete(this);
+                set(value);
+                // Unfollow and remove dependencies that are no longer being tracked
+                dependencies.forEach((unfollow, dependency) => {
+                    if (trackedSet.has(dependency))
+                        return;
+                    unfollow();
+                    dependencies.delete(dependency);
                 });
-                dependencies.set(dependency, unfollow);
+                // Follow new dependencies
+                trackedSet.forEach((dependency) => {
+                    if (dependencies.has(dependency))
+                        return;
+                    dependencies.set(dependency, dependency.follow(() => updateAndTrack(set)));
+                });
+            };
+            super(0, (set) => {
+                this.#fresh = true;
+                updateAndTrack(set);
+                return () => {
+                    this.#fresh = false;
+                    // Unfollow all dependencies on cleanup when we have no followers
+                    dependencies.forEach((unfollow, dependency) => {
+                        unfollow();
+                        dependencies.delete(dependency);
+                    });
+                };
             });
         }
-    };
-}
+        get val() {
+            if (!this.#fresh) {
+                setTimeout(this.follow(() => { }), 5000);
+            }
+            return super.val;
+        }
+    }
+    Signal.Compute = Compute;
+})(Signal || (Signal = {}));
 /**
- * @template T
- * @param {T} value
+ * Creates a new State signal with the provided initial value.
+ * @template T - The type of the signal's value.
+ * @param value - The initial value of the signal.
+ * @returns A new State signal.
+ * @example
+ * const count = ref(0);
  */
 export let ref = (value) => new Signal.State(value);
 /**
- * @template T
- * @param {import('./signals.d.ts').Signal.Compute.Callback<T>} callback
+ * Creates a new Compute signal that computes its value using the provided callback function.
+ * @template T - The type of the signal's value.
+ * @param callback - The function to compute the signal's value.
+ * @returns A new Compute signal.
+ * @example
+ * const doubleCount = computed(() => count.val * 2);
  */
 export let computed = (callback) => new Signal.Compute(callback);
 /**
- * @template T
- * @template [const U = null]
- * @param {Promise<T>} promise
- * @param {U?} until
- * @returns {Signal<T | U>}
+ * Creates a new Signal that resolves its value when the provided promise resolves.
+ * @template T - The type of the promise's resolved value.
+ * @template U - The type of the until value.
+ * @param promise - The promise to await.
+ * @param until - The value to resolve the signal with when the promise is not yet resolved.
+ * @returns A new Signal that resolves its value when the provided promise resolves.
+ * @example
+ * const data = awaited(fetchData());
  */
 export let awaited = (promise, until = null) => {
-    let signal = /** @type {Signal.State<T | U>} */ (ref(until));
+    let signal = ref(until);
     promise.then((value) => (signal.val = value));
     return signal;
 };
 /**
- * @template T
- * @param {import("./signals.js").Signal.Compute.Callback<T>} callback
+ * Creates an effect that reactively calls the provided callback function.
+ * @template T - The type of the signal's value.
+ * @param callback - The function to call when the signal's value changes.
+ * @returns An object that can be used to stop the effect.
+ * @example
+ * effect(() => console.log(count.val));
  */
-export let effect = (callback) => computed(callback).follow(() => { });
+export let effect = (callback) => computed(callback).follow(() => 0);

@@ -14,9 +14,11 @@
     },
     "scripts": {
         "format": "prettier -w ./",
-        "compile": "tsc --project ./packages/purified-js/tsconfig.json && cp ./packages/purified-js/lib/signals.d.ts ./packages/purified-js/dist/signals.d.ts",
-        "dev": "npm run dev --prefix ./apps/vite",
-        "build": "npm run build --prefix ./apps/vite"
+        "compile": "tsc --project ./packages/purified-js/tsconfig.json",
+        "vite:dev": "npm run dev --prefix ./apps/vite",
+        "vite:build": "npm run build --prefix ./apps/vite",
+        "compare:dev": "npm run dev --prefix ./apps/compare",
+        "compare:build": "npm run build --prefix ./apps/compare"
     },
     "devDependencies": {
         "@eslint/js": "^9.2.0",

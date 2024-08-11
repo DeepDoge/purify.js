@@ -1,5 +1,23 @@
 import { Signal } from "./signals.js"
-import { IsFunction, IsReadonly, NotEventHandler } from "./utils.js"
+
+type IsReadonly<T, K extends keyof T> =
+    (<T_1>() => T_1 extends { [Q in K]: T[K] } ? 1 : 2) extends <T_2>() => T_2 extends {
+        readonly [Q_1 in K]: T[K]
+    }
+        ? 1
+        : 2
+        ? true
+        : false
+type IsFunction<T> = T extends Fn ? true : false
+type Fn = (...args: any[]) => any
+type NotEventHandler<T, K extends keyof T> =
+    NonNullable<T[K]> extends (this: any, event: infer U) => any
+        ? U extends Event
+            ? K extends `on${any}`
+                ? false
+                : true
+            : true
+        : true
 
 let instancesOf = <T extends (abstract new (...args: any[]) => any)[]>(
     target: unknown,

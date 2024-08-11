@@ -2,57 +2,65 @@
  * A Signal class that represents a reactive value.
  * @template T - The type of the signal's value.
  */
-export class Signal<T = unknown> {
+export declare class Signal<T = unknown> {
+    #private;
     /**
      * Constructs a new Signal instance.
      * @param initial - The initial value of the signal.
      */
-    constructor(initial: T)
-
+    constructor(initial: T, starter?: Signal.Starter<T>);
+    protected set(value: T, self?: this): void;
     /**
      * Gets the current value of the signal.
      * @returns The current value of the signal.
      */
-    get val(): T
-
+    get val(): T;
     /**
      * Follows the signal's value changes and calls the provided follower function.
      * @param follower - The function to be called when the signal's value changes.
      * @param immediate - If true, the follower function will be called immediately with the initial value.
      * @returns An object that can be used to unfollow the signal.
      */
-    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower
-
+    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower;
     /**
      * Notifies all followers of the signal to update their values.
      */
-    notify(): void
+    notify(): void;
 }
-
-export namespace Signal {
+export declare namespace Signal {
+    type Cleanup = {
+        (): unknown;
+    };
+    type Starter<T> = {
+        (set: Setter<T>): void | Cleanup;
+    };
     /**
      * A type representing a function that sets a value.
      * @template T - The type of the value to be set.
      */
-    type Setter<T> = { (value: T): void }
-
+    type Setter<T> = {
+        (value: T): void;
+    };
     /**
      * A type representing a function that gets a value.
      * @template T - The type of the value to be retrieved.
      */
-    type Getter<T> = { (): T }
-
+    type Getter<T> = {
+        (): T;
+    };
     /**
      * A type representing a function that follows a signal's value changes.
      * @template T - The type of the signal's value.
      */
-    type Follower<T> = { (value: T): unknown }
-
+    type Follower<T> = {
+        (value: T): unknown;
+    };
     /**
      * A type representing an object that can be used to unfollow a signal.
      */
-    type Unfollower = { (): void }
-
+    type Unfollower = {
+        (): void;
+    };
     /**
      * A Signal subclass that represents a mutable reactive value.
      * @template T - The type of the signal's value.
@@ -62,30 +70,32 @@ export namespace Signal {
          * Gets the current value of the signal.
          * @returns The current value of the signal.
          */
-        get val(): T
-
+        get val(): T;
         /**
          * Sets the current value of the signal.
          * @param value - The new value of the signal.
          */
-        set val(value: T)
+        set val(value: T);
     }
-
     /**
      * A Signal subclass that represents a computed value.
      * @template T - The type of the signal's value.
      */
-    class Compute<T> extends Signal<T> {}
-
-    export namespace Compute {
+    class Compute<T> extends Signal<T> {
+        #private;
+        constructor(callback: Signal.Compute.Callback<T>);
+        get val(): T;
+    }
+    namespace Compute {
         /**
          * A type representing a function that computes a value.
          * @template T - The type of the computed value.
          */
-        type Callback<T> = { (): T }
+        type Callback<T> = {
+            (): T;
+        };
     }
 }
-
 /**
  * Creates a new State signal with the provided initial value.
  * @template T - The type of the signal's value.
@@ -94,8 +104,7 @@ export namespace Signal {
  * @example
  * const count = ref(0);
  */
-export function ref<T>(value: T): Signal.State<T>
-
+export declare let ref: <T>(value: T) => Signal.State<T>;
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
  * @template T - The type of the signal's value.
@@ -104,8 +113,7 @@ export function ref<T>(value: T): Signal.State<T>
  * @example
  * const doubleCount = computed(() => count.val * 2);
  */
-export function computed<T>(callback: Signal.Compute.Callback<T>): Signal.Compute<T>
-
+export declare let computed: <T>(callback: Signal.Compute.Callback<T>) => Signal.Compute<T>;
 /**
  * Creates a new Signal that resolves its value when the provided promise resolves.
  * @template T - The type of the promise's resolved value.
@@ -116,8 +124,7 @@ export function computed<T>(callback: Signal.Compute.Callback<T>): Signal.Comput
  * @example
  * const data = awaited(fetchData());
  */
-export function awaited<T, const U = null>(promise: Promise<T>, until?: U): Signal<T | U>
-
+export declare let awaited: <T, const U = null>(promise: Promise<T>, until?: U) => Signal<T | U>;
 /**
  * Creates an effect that reactively calls the provided callback function.
  * @template T - The type of the signal's value.
@@ -126,4 +133,4 @@ export function awaited<T, const U = null>(promise: Promise<T>, until?: U): Sign
  * @example
  * effect(() => console.log(count.val));
  */
-export function effect<T>(callback: Signal.Compute.Callback<T>): Signal.Unfollower
+export declare let effect: <T>(callback: Signal.Compute.Callback<T>) => Signal.Unfollower;
