@@ -44,8 +44,6 @@ To install **purified.js**, follow the [installation instructions](https://githu
     -   **`awaited()`** converts a promise into a signal.
     -   **`effect()`** follows and reacts to multiple signals.
 -   **purified.js** allows direct DOM manipulation, because it can.
--   **purified.js** is small because it's pure and simple.
--   **purified.js** is simple because it's small and pure.
 
 ---
 
