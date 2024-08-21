@@ -7,11 +7,14 @@
     Don't limit your potential
 </p>
 
-## What is purified.js
+---
 
-**purified.js** is a 1.0kB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
+<p align="center">
+    **purified.js** is a 1.0kB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
+</p>
 
 ---
+
 ## Compare
 
 ### Size ⚡
@@ -30,7 +33,6 @@
 
 [Compare Syntax](https://bafybeib32e7wggz53xdzuhykevx5lquwny3lzsqm7entfe7zu7gnncn5o4.ipfs.dweb.link)
 
----
 
 ## Installation 🍙
 
@@ -46,7 +48,7 @@ To install **purified.js**, follow the [installation instructions](https://githu
     -   **`effect()`** follows and reacts to multiple signals.
 -   **purified.js** allows direct DOM manipulation, because it can.
 
----
+
 
 ## Examples
 
@@ -82,15 +84,12 @@ function Counter() {
 document.body.append(App().element)
 ```
 
-[Play on JSFiddle](https://jsfiddle.net/nomadshiba/p5t8o0zL/34/)
-
----
 
 ## Guide 🥡
 
 Coming soon.
 
----
+
 
 ## Current Limitations 🦀
 
@@ -102,8 +101,6 @@ Coming soon.
         As another solution to this, a `HTMLElement` or `Element` attribute similar to `inert` that hides the element from the query selector both in JS and CSS would also be useful.
 
     But as long as the developer is aware of this limitation or difference, it shouldn't cause any issues.
-
----
 
 ## Why Not JSX Templating? 🍕
 
