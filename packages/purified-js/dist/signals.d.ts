@@ -104,7 +104,7 @@ export declare namespace Signal {
  * @example
  * const count = ref(0);
  */
-export declare let ref: <T>(value: T) => Signal.State<T>;
+export declare let ref: <T>(initial: T, starter?: Signal.Starter<T> | undefined) => Signal.State<T>;
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
  * @template T - The type of the signal's value.

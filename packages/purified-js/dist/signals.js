@@ -131,7 +131,7 @@ export class Signal {
  * @example
  * const count = ref(0);
  */
-export let ref = (value) => new Signal.State(value);
+export let ref = (...params) => new Signal.State(...params);
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
  * @template T - The type of the signal's value.

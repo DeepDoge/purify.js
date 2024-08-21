@@ -196,7 +196,9 @@ export namespace Signal {
  * @example
  * const count = ref(0);
  */
-export let ref = <T>(value: T): Signal.State<T> => new Signal.State<T>(value)
+export let ref = <T>(
+    ...params: ConstructorParameters<typeof Signal.State<T>>
+): Signal.State<T> => new Signal.State<T>(...params)
 
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
