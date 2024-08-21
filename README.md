@@ -12,10 +12,9 @@
 **purified.js** is a 1.0kB _(minified, gzipped)_ JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX _(developer experience)_.
 
 ---
+## Compare
 
-## Size ⚡
-
-**purified.js** stands out with its minimal size:
+### Size ⚡
 
 | Library         | .min.js | .min.js.gz |
 | --------------- | ------- | ---------- |
@@ -26,6 +25,8 @@
 | Vue 3.4.15      | 110.4kB | 40kB       |
 | ReactDOM 18.2.0 | 130.2kB | 42kB       |
 | Angular 17.1.0  | 310kB   | 104kB      |
+
+### Syntax
 
 [Compare Syntax](https://bafybeib32e7wggz53xdzuhykevx5lquwny3lzsqm7entfe7zu7gnncn5o4.ipfs.dweb.link)
 
