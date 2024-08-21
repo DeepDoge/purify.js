@@ -49,7 +49,9 @@ To install **purified.js**, follow the [installation instructions](https://githu
 
 ---
 
-## Example: purified.js + ShadowRoot 🍤
+## Examples
+
+### purified.js + ShadowRoot 🍤
 
 ```ts
 import { computed, css, fragment, ref, sheet, tags } from "purified-js"
@@ -89,17 +91,7 @@ document.body.append(App().element)
 
 Coming soon.
 
-## Documentation 🍱
-
-Coming soon.
-
 ---
-
-## Motivation 🍣
-
-JavaScript frameworks are often large and complex, force you into their specific ecosystems, restrict your use of native browser APIs, and prevent direct DOM manipulation. Additionally, their reliance on custom file extensions and build steps can complicate the use of regular JavaScript or TypeScript files, leading to type-related issues.
-
-**purified.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. By keeping it pure, **purified.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
 ## Current Limitations 🦀
 
@@ -121,11 +113,5 @@ JavaScript frameworks are often large and complex, force you into their specific
 -   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purified.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
 
 -   **Attributes vs. Properties**: In **purified.js**, I can differentiate between attributes and properties of an element while building it, which is not currently possible with JSX. This distinction enhances clarity and control when defining element characteristics. Additionally, if I were to use JSX, I would prefer a syntax like this:
-
-    ```js
-    <MyComponent("Hello", { World: "!" }) class="my-component" aria-busy="true" />
-    ```
-
-    This format clearly separates props and attributes, making it easier to understand and maintain.
 
 ---
