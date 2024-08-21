@@ -101,17 +101,6 @@ JavaScript frameworks are often large and complex, force you into their specific
 
 **purified.js** aims to enhance the developer experience while keeping you as close to pure JavaScript as possible. By keeping it pure, **purified.js** adds necessary functionality while avoiding the limitations and intricate bugs of modern JavaScript frameworks.
 
-### Personal
-
--   I'm tired of frameworks over-engineering and hiding reactivity from the developers. I'm tired of guessing what will re-render or update while writing the code. That's why I used signals.
--   I'm tired of frameworks sacrificing SPA related ergonomics, so they can also support SSR too.
--   I'm tired of writing code for a specific framework instead of just writing TS/JS.
--   I'm tired of being away from the DOM.
--   I'm tired of SSR and how complex it can be.
--   I'm tired of writing everything around SSR.
-
----
-
 ## Current Limitations 🦀
 
 -   **Lifecycle and Reactivity**: Currently, I use Custom Elements to detect if an element is connected to the DOM. This means:
