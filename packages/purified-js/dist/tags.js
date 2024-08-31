@@ -40,7 +40,7 @@ export let toAppendable = (value) => {
     }
     return String(value);
 };
-let enchance = (tagname, newTagName = `--${tagname}`, custom = customElements, constructor = custom.get(newTagName)) => {
+let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, constructor = custom.get(newTagName)) => {
     if (!constructor) {
         custom.define(newTagName, (constructor = class extends document.createElement(tagname).constructor {
             #connectedCallbacks = new Set();
