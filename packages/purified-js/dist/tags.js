@@ -19,7 +19,7 @@ export let fragment = (...members) => {
         fragment.append(...members.map(toAppendable));
     return fragment;
 };
-let toAppendable = (value) => {
+export let toAppendable = (value) => {
     if (value == null) {
         return "";
     }

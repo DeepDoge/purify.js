@@ -44,7 +44,7 @@ export let fragment = (...members: MemberOf<DocumentFragment>[]) => {
     return fragment
 }
 
-let toAppendable = (
+export let toAppendable = (
     value: unknown,
 ): string | CharacterData | Element | DocumentFragment => {
     if (value == null) {

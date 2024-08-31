@@ -21,6 +21,7 @@ type NotEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: an
  * );
  */
 export declare let fragment: (...members: MemberOf<DocumentFragment>[]) => DocumentFragment;
+export declare let toAppendable: (value: unknown) => string | CharacterData | Element | DocumentFragment;
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
     onConnect(callback: Enhanced.ConnectedCallback): void;
 };
