@@ -85,7 +85,7 @@ export namespace Enhanced {
 
 let enchance = <T extends keyof HTMLElementTagNameMap>(
     tagname: T,
-    newTagName = `--${tagname}`,
+    newTagName = `x-${tagname}`,
     custom = customElements,
     constructor = custom.get(newTagName) as any,
 ): Enhanced<HTMLElementTagNameMap[T]> => {
