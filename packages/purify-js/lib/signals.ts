@@ -136,7 +136,13 @@ export namespace Signal {
         get val() {
             let self = this
             self.track()
-            return self.#cache === Outdated ? self.getter() : self.#cache
+            if (self.#cache === Outdated) {
+                setTimeout(
+                    self.follow(() => 0),
+                    5000,
+                )
+            }
+            return self.#cache as T
         }
     }
 }

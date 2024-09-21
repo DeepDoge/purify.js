@@ -94,7 +94,12 @@ Signal.Compute = class extends Signal {
     get val() {
         let self = this
         self.track()
-        return self.#cache === Outdated ? self.getter() : self.#cache
+        self.#cache === Outdated &&
+            setTimeout(
+                self.follow(() => 0),
+                5000,
+            )
+        return self.#cache
     }
 }
 /**
