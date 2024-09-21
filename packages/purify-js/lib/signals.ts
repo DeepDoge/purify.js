@@ -1,6 +1,8 @@
 let trackerStack: Set<Signal<any>>[] = []
 
 export namespace Signal {
+    export type Cleanup = { (): unknown }
+
     /**
      * A type representing a function that follows a signal's value changes.
      * @template T - The type of the signal's value.
@@ -14,10 +16,11 @@ export namespace Signal {
 }
 
 export abstract class Signal<T> {
-    start() {}
-    stop() {}
-
     abstract get val(): T
+
+    protected start(): Signal.Cleanup | void {}
+    #stop?: (() => void) | void
+
     protected track() {
         trackerStack.at(-1)?.add(this)
     }
@@ -33,18 +36,17 @@ export abstract class Signal<T> {
 
         followers.add(follower)
         if (followers.size === 1) {
-            self.start()
+            this.#stop = self.start()
         }
 
         return () => {
             if (followers.delete(follower) && !followers.size) {
-                self.stop()
+                self.#stop?.()
             }
         }
     }
 
-    trigger() {
-        let value = this.val
+    emit(value = this.val) {
         for (let follower of this.#followers) {
             follower(value)
         }
@@ -68,7 +70,7 @@ export namespace Signal {
 
             // Updates value and checks if it has changed
             if (self.value !== (self.value = value)) {
-                self.trigger()
+                self.emit()
             }
         }
     }
@@ -89,7 +91,7 @@ export namespace Signal {
 
         #dependencies = new Map<Signal<unknown>, Signal.Unfollower>()
         #cache: T | Outdated = Outdated
-        updateAndTrack() {
+        #updateAndTrack() {
             let self = this
             let dependencies = self.#dependencies
             let trackedSet = new Set<Signal<any>>()
@@ -100,7 +102,7 @@ export namespace Signal {
 
             // Updates value and checks if it has changed
             if (self.#cache !== (self.#cache = value)) {
-                self.trigger()
+                self.emit()
             }
 
             // Unfollow and remove dependencies that are no longer being tracked
@@ -115,20 +117,20 @@ export namespace Signal {
                 if (dependencies.has(dependency)) return
                 dependencies.set(
                     dependency,
-                    dependency.follow(() => self.updateAndTrack()),
+                    dependency.follow(() => self.#updateAndTrack()),
                 )
             })
         }
 
-        start() {
-            this.updateAndTrack()
-        }
+        protected override start(self = this) {
+            self.#updateAndTrack()
 
-        stop() {
-            this.#cache = Outdated
-            let dependencies = this.#dependencies
-            dependencies.forEach((unfollow) => unfollow())
-            dependencies.clear()
+            return () => {
+                self.#cache = Outdated
+                let dependencies = self.#dependencies
+                dependencies.forEach((unfollow) => unfollow())
+                dependencies.clear()
+            }
         }
 
         get val() {

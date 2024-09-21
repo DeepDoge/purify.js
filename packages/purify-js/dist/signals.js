@@ -1,7 +1,7 @@
 let trackerStack = []
 export class Signal {
     start() {}
-    stop() {}
+    #stop
     track() {
         trackerStack.at(-1)?.add(this)
     }
@@ -14,16 +14,15 @@ export class Signal {
         }
         followers.add(follower)
         if (followers.size === 1) {
-            self.start()
+            this.#stop = self.start()
         }
         return () => {
             if (followers.delete(follower) && !followers.size) {
-                self.stop()
+                self.#stop?.()
             }
         }
     }
-    trigger() {
-        let value = this.val
+    emit(value = this.val) {
         for (let follower of this.#followers) {
             follower(value)
         }
@@ -43,7 +42,7 @@ Signal.State = class extends Signal {
         let self = this
         // Updates value and checks if it has changed
         if (self.value !== (self.value = value)) {
-            self.trigger()
+            self.emit()
         }
     }
 }
@@ -56,7 +55,7 @@ Signal.Compute = class extends Signal {
     }
     #dependencies = new Map()
     #cache = Outdated
-    updateAndTrack() {
+    #updateAndTrack() {
         let self = this
         let dependencies = self.#dependencies
         let trackedSet = new Set()
@@ -66,7 +65,7 @@ Signal.Compute = class extends Signal {
         trackedSet.delete(self)
         // Updates value and checks if it has changed
         if (self.#cache !== (self.#cache = value)) {
-            self.trigger()
+            self.emit()
         }
         // Unfollow and remove dependencies that are no longer being tracked
         dependencies.forEach((unfollow, dependency) => {
@@ -79,18 +78,18 @@ Signal.Compute = class extends Signal {
             if (dependencies.has(dependency)) return
             dependencies.set(
                 dependency,
-                dependency.follow(() => self.updateAndTrack()),
+                dependency.follow(() => self.#updateAndTrack()),
             )
         })
     }
-    start() {
-        this.updateAndTrack()
-    }
-    stop() {
-        this.#cache = Outdated
-        let dependencies = this.#dependencies
-        dependencies.forEach((unfollow) => unfollow())
-        dependencies.clear()
+    start(self = this) {
+        self.#updateAndTrack()
+        return () => {
+            self.#cache = Outdated
+            let dependencies = self.#dependencies
+            dependencies.forEach((unfollow) => unfollow())
+            dependencies.clear()
+        }
     }
     get val() {
         let self = this

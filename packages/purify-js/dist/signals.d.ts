@@ -1,4 +1,7 @@
 export declare namespace Signal {
+    type Cleanup = {
+        (): unknown;
+    };
     /**
      * A type representing a function that follows a signal's value changes.
      * @template T - The type of the signal's value.
@@ -15,12 +18,11 @@ export declare namespace Signal {
 }
 export declare abstract class Signal<T> {
     #private;
-    start(): void;
-    stop(): void;
     abstract get val(): T;
+    protected start(): Signal.Cleanup | void;
     protected track(): void;
     follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower;
-    trigger(): void;
+    emit(value?: T): void;
 }
 export declare namespace Signal {
     class State<T> extends Signal<T> {
@@ -42,9 +44,7 @@ export declare namespace Signal {
         #private;
         private getter;
         constructor(getter: Compute.Getter<T>);
-        updateAndTrack(): void;
-        start(): void;
-        stop(): void;
+        protected start(self?: this): () => void;
         get val(): T;
     }
 }
