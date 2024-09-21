@@ -21,7 +21,7 @@
 
 | Library         | .min.js | .min.js.gz |
 | --------------- | ------- | ---------- |
-| **purified.js** | 2.1kB   | 1.0kB      |
+| **purified.js** | 2.3kB   | 1.0kB      |
 | Preact 10.19.3  | 11.2kB  | 4.5kB      |
 | Solid 1.8.12    | 23kB    | 8.1kB      |
 | jQuery 3.7.1    | 85.1kB  | 29.7kB     |
@@ -32,7 +32,6 @@
 ### Syntax
 
 [Compare Syntax](https://bafybeib32e7wggz53xdzuhykevx5lquwny3lzsqm7entfe7zu7gnncn5o4.ipfs.dweb.link)
-
 
 ## Installation 🍙
 
@@ -47,8 +46,6 @@ To install **purified.js**, follow the [installation instructions](https://githu
     -   **`awaited()`** converts a promise into a signal.
     -   **`effect()`** follows and reacts to multiple signals.
 -   **purified.js** allows direct DOM manipulation, because it can.
-
-
 
 ## Examples
 
@@ -84,12 +81,9 @@ function Counter() {
 document.body.append(App().element)
 ```
 
-
 ## Guide 🥡
 
 Coming soon.
-
-
 
 ## Current Limitations 🦀
 

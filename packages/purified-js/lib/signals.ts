@@ -1,94 +1,6 @@
 let trackerStack: Set<Signal<any>>[] = []
 
-/**
- * A Signal class that represents a reactive value.
- * @template T - The type of the signal's value.
- */
-export class Signal<T = unknown> {
-    #value: T
-    #followers = new Set<Signal.Follower<T>>()
-    #starter: Signal.Starter<T> | undefined
-    #cleanup: Signal.Cleanup | undefined | null | void
-
-    /**
-     * Constructs a new Signal instance.
-     * @param initial - The initial value of the signal.
-     */
-    constructor(initial: T, starter?: Signal.Starter<T>) {
-        this.#value = initial
-        this.#starter = starter
-    }
-
-    protected set(value: T, self = this) {
-        let changed = self.#value !== value
-        self.#value = value
-        if (changed) self.notify()
-    }
-
-    /**
-     * Gets the current value of the signal.
-     * @returns The current value of the signal.
-     */
-    get val(): T {
-        trackerStack.at(-1)?.add(this)
-        return this.#value
-    }
-
-    /**
-     * Follows the signal's value changes and calls the provided follower function.
-     * @param follower - The function to be called when the signal's value changes.
-     * @param immediate - If true, the follower function will be called immediately with the initial value.
-     * @returns An object that can be used to unfollow the signal.
-     */
-    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower
-    follow(
-        follower: Signal.Follower<T>,
-        immediate?: boolean,
-        self = this,
-    ): Signal.Unfollower {
-        if (immediate) follower(self.val)
-        self.#followers.add(follower)
-
-        if (self.#followers.size == 1) {
-            self.#cleanup = self.#starter?.(self.set.bind(self))
-        }
-
-        return () => {
-            self.#followers.delete(follower)
-            if (!self.#followers.size) {
-                self.#cleanup?.()
-                self.#cleanup = null
-            }
-        }
-    }
-
-    /**
-     * Notifies all followers of the signal to update their values.
-     */
-    notify(): void
-    notify(self = this): void {
-        for (let follower of self.#followers) {
-            follower(self.val)
-        }
-    }
-}
-
 export namespace Signal {
-    export type Cleanup = { (): unknown }
-    export type Starter<T> = { (set: Setter<T>): void | Cleanup }
-
-    /**
-     * A type representing a function that sets a value.
-     * @template T - The type of the value to be set.
-     */
-    export type Setter<T> = { (value: T): void }
-
-    /**
-     * A type representing a function that gets a value.
-     * @template T - The type of the value to be retrieved.
-     */
-    export type Getter<T> = { (): T }
-
     /**
      * A type representing a function that follows a signal's value changes.
      * @template T - The type of the signal's value.
@@ -99,106 +11,143 @@ export namespace Signal {
      * A type representing an object that can be used to unfollow a signal.
      */
     export type Unfollower = { (): void }
+}
 
-    /**
-     * A Signal subclass that represents a mutable reactive value.
-     * @template T - The type of the signal's value.
-     */
-    export class State<T> extends Signal<T> {
-        /**
-         * Gets the current value of the signal.
-         * @returns The current value of the signal.
-         */
-        get val(): T {
-            return super.val
+export abstract class Signal<T> {
+    start() {}
+    stop() {}
+
+    abstract get val(): T
+    protected track() {
+        trackerStack.at(-1)?.add(this)
+    }
+
+    #followers = new Set<Signal.Follower<T>>()
+    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower {
+        let self = this
+        let followers = self.#followers
+
+        if (immediate) {
+            follower(self.val)
         }
 
-        /**
-         * Sets the current value of the signal.
-         * @param value - The new value of the signal.
-         */
-        set val(value: T) {
-            super.set(value)
+        followers.add(follower)
+        if (followers.size === 1) {
+            self.start()
+        }
+
+        return () => {
+            if (followers.delete(follower) && !followers.size) {
+                self.stop()
+            }
         }
     }
 
-    /**
-     * A Signal subclass that represents a computed value.
-     * @template T - The type of the signal's value.
-     */
-    export class Compute<T> extends Signal<T> {
-        #fresh = false
-        constructor(callback: Signal.Compute.Callback<T>) {
-            let dependencies = new Map<Signal<unknown>, Signal.Unfollower>(),
-                updateAndTrack = (set: Setter<T>) => {
-                    let trackedSet = new Set<Signal<any>>()
-                    trackerStack.push(trackedSet)
-                    let value = callback()
-                    trackerStack.pop()
-                    trackedSet.delete(this)
-                    set(value)
+    trigger() {
+        let value = this.val
+        for (let follower of this.#followers) {
+            follower(value)
+        }
+    }
+}
 
-                    // Unfollow and remove dependencies that are no longer being tracked
-                    dependencies.forEach((unfollow, dependency) => {
-                        if (trackedSet.has(dependency)) return
-                        unfollow()
-                        dependencies.delete(dependency)
-                    })
-
-                    // Follow new dependencies
-                    trackedSet.forEach((dependency) => {
-                        if (dependencies.has(dependency)) return
-                        dependencies.set(
-                            dependency,
-                            dependency.follow(() => updateAndTrack(set)),
-                        )
-                    })
-                }
-            super(0 as never, (set) => {
-                this.#fresh = true
-                updateAndTrack(set)
-                return () => {
-                    this.#fresh = false
-                    // Unfollow all dependencies on cleanup when we have no followers
-                    dependencies.forEach((unfollow, dependency) => {
-                        unfollow()
-                        dependencies.delete(dependency)
-                    })
-                }
-            })
+export namespace Signal {
+    export class State<T> extends Signal<T> {
+        constructor(initial: T)
+        constructor(private value: T) {
+            super()
         }
 
         get val() {
-            if (!this.#fresh) {
-                setTimeout(
-                    this.follow(() => {}),
-                    5000,
-                )
+            this.track()
+            return this.value
+        }
+
+        set val(value: T) {
+            let self = this
+
+            // Updates value and checks if it has changed
+            if (self.value !== (self.value = value)) {
+                self.trigger()
             }
-            return super.val
         }
     }
 
+    const Outdated = Symbol()
+    type Outdated = typeof Outdated
     export namespace Compute {
         /**
-         * A type representing a function that computes a value.
-         * @template T - The type of the computed value.
+         * A type representing a function that gets a value.
+         * @template T - The type of the value to be retrieved.
          */
-        export type Callback<T> = { (): T }
+        export type Getter<T> = { (): T }
+    }
+    export class Compute<T> extends Signal<T> {
+        constructor(private getter: Compute.Getter<T>) {
+            super()
+        }
+
+        #dependencies = new Map<Signal<unknown>, Signal.Unfollower>()
+        #cache: T | Outdated = Outdated
+        updateAndTrack() {
+            let self = this
+            let dependencies = self.#dependencies
+            let trackedSet = new Set<Signal<any>>()
+            trackerStack.push(trackedSet)
+            let value = self.getter()
+            trackerStack.pop()
+            trackedSet.delete(self)
+
+            // Updates value and checks if it has changed
+            if (self.#cache !== (self.#cache = value)) {
+                self.trigger()
+            }
+
+            // Unfollow and remove dependencies that are no longer being tracked
+            dependencies.forEach((unfollow, dependency) => {
+                if (trackedSet.has(dependency)) return
+                unfollow()
+                dependencies.delete(dependency)
+            })
+
+            // Follow new dependencies
+            trackedSet.forEach((dependency) => {
+                if (dependencies.has(dependency)) return
+                dependencies.set(
+                    dependency,
+                    dependency.follow(() => self.updateAndTrack()),
+                )
+            })
+        }
+
+        start() {
+            this.updateAndTrack()
+        }
+
+        stop() {
+            this.#cache = Outdated
+            let dependencies = this.#dependencies
+            dependencies.forEach((unfollow) => unfollow())
+            dependencies.clear()
+        }
+
+        get val() {
+            let self = this
+            self.track()
+            return self.#cache === Outdated ? self.getter() : self.#cache
+        }
     }
 }
 
 /**
  * Creates a new State signal with the provided initial value.
  * @template T - The type of the signal's value.
- * @param value - The initial value of the signal.
+ * @param initial - The initial value of the signal.
  * @returns A new State signal.
  * @example
  * const count = ref(0);
  */
-export let ref = <T>(
-    ...params: ConstructorParameters<typeof Signal.State<T>>
-): Signal.State<T> => new Signal.State<T>(...params)
+export let ref = <T>(initial: T): Signal.State<T> => new Signal.State<T>(initial)
 
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
@@ -208,7 +157,7 @@ export let ref = <T>(
  * @example
  * const doubleCount = computed(() => count.val * 2);
  */
-export let computed = <T>(callback: Signal.Compute.Callback<T>): Signal.Compute<T> =>
+export let computed = <T>(callback: Signal.Compute.Getter<T>): Signal.Compute<T> =>
     new Signal.Compute<T>(callback)
 
 /**
@@ -238,5 +187,5 @@ export let awaited = <T, const U = null>(
  * @example
  * effect(() => console.log(count.val));
  */
-export let effect = <T>(callback: Signal.Compute.Callback<T>): Signal.Unfollower =>
+export let effect = <T>(callback: Signal.Compute.Getter<T>): Signal.Unfollower =>
     computed(callback).follow(() => 0)

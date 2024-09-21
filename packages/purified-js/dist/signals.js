@@ -1,137 +1,112 @@
-let trackerStack = [];
-/**
- * A Signal class that represents a reactive value.
- * @template T - The type of the signal's value.
- */
+let trackerStack = []
 export class Signal {
-    #value;
-    #followers = new Set();
-    #starter;
-    #cleanup;
-    /**
-     * Constructs a new Signal instance.
-     * @param initial - The initial value of the signal.
-     */
-    constructor(initial, starter) {
-        this.#value = initial;
-        this.#starter = starter;
+    start() {}
+    stop() {}
+    track() {
+        trackerStack.at(-1)?.add(this)
     }
-    set(value, self = this) {
-        let changed = self.#value !== value;
-        self.#value = value;
-        if (changed)
-            self.notify();
-    }
-    /**
-     * Gets the current value of the signal.
-     * @returns The current value of the signal.
-     */
-    get val() {
-        trackerStack.at(-1)?.add(this);
-        return this.#value;
-    }
-    follow(follower, immediate, self = this) {
-        if (immediate)
-            follower(self.val);
-        self.#followers.add(follower);
-        if (self.#followers.size == 1) {
-            self.#cleanup = self.#starter?.(self.set.bind(self));
+    #followers = new Set()
+    follow(follower, immediate) {
+        let self = this
+        let followers = self.#followers
+        if (immediate) {
+            follower(self.val)
+        }
+        followers.add(follower)
+        if (followers.size === 1) {
+            self.start()
         }
         return () => {
-            self.#followers.delete(follower);
-            if (!self.#followers.size) {
-                self.#cleanup?.();
-                self.#cleanup = null;
+            if (followers.delete(follower) && !followers.size) {
+                self.stop()
             }
-        };
+        }
     }
-    notify(self = this) {
-        for (let follower of self.#followers) {
-            follower(self.val);
+    trigger() {
+        let value = this.val
+        for (let follower of this.#followers) {
+            follower(value)
         }
     }
 }
-(function (Signal) {
-    /**
-     * A Signal subclass that represents a mutable reactive value.
-     * @template T - The type of the signal's value.
-     */
-    class State extends Signal {
-        /**
-         * Gets the current value of the signal.
-         * @returns The current value of the signal.
-         */
-        get val() {
-            return super.val;
-        }
-        /**
-         * Sets the current value of the signal.
-         * @param value - The new value of the signal.
-         */
-        set val(value) {
-            super.set(value);
+Signal.State = class extends Signal {
+    value
+    constructor(value) {
+        super()
+        this.value = value
+    }
+    get val() {
+        this.track()
+        return this.value
+    }
+    set val(value) {
+        let self = this
+        // Updates value and checks if it has changed
+        if (self.value !== (self.value = value)) {
+            self.trigger()
         }
     }
-    Signal.State = State;
-    /**
-     * A Signal subclass that represents a computed value.
-     * @template T - The type of the signal's value.
-     */
-    class Compute extends Signal {
-        #fresh = false;
-        constructor(callback) {
-            let dependencies = new Map(), updateAndTrack = (set) => {
-                let trackedSet = new Set();
-                trackerStack.push(trackedSet);
-                let value = callback();
-                trackerStack.pop();
-                trackedSet.delete(this);
-                set(value);
-                // Unfollow and remove dependencies that are no longer being tracked
-                dependencies.forEach((unfollow, dependency) => {
-                    if (trackedSet.has(dependency))
-                        return;
-                    unfollow();
-                    dependencies.delete(dependency);
-                });
-                // Follow new dependencies
-                trackedSet.forEach((dependency) => {
-                    if (dependencies.has(dependency))
-                        return;
-                    dependencies.set(dependency, dependency.follow(() => updateAndTrack(set)));
-                });
-            };
-            super(0, (set) => {
-                this.#fresh = true;
-                updateAndTrack(set);
-                return () => {
-                    this.#fresh = false;
-                    // Unfollow all dependencies on cleanup when we have no followers
-                    dependencies.forEach((unfollow, dependency) => {
-                        unfollow();
-                        dependencies.delete(dependency);
-                    });
-                };
-            });
-        }
-        get val() {
-            if (!this.#fresh) {
-                setTimeout(this.follow(() => { }), 5000);
-            }
-            return super.val;
-        }
+}
+let Outdated = Symbol()
+Signal.Compute = class extends Signal {
+    getter
+    constructor(getter) {
+        super()
+        this.getter = getter
     }
-    Signal.Compute = Compute;
-})(Signal || (Signal = {}));
+    #dependencies = new Map()
+    #cache = Outdated
+    updateAndTrack() {
+        let self = this
+        let dependencies = self.#dependencies
+        let trackedSet = new Set()
+        trackerStack.push(trackedSet)
+        let value = self.getter()
+        trackerStack.pop()
+        trackedSet.delete(self)
+        // Updates value and checks if it has changed
+        if (self.#cache !== (self.#cache = value)) {
+            self.trigger()
+        }
+        // Unfollow and remove dependencies that are no longer being tracked
+        dependencies.forEach((unfollow, dependency) => {
+            if (trackedSet.has(dependency)) return
+            unfollow()
+            dependencies.delete(dependency)
+        })
+        // Follow new dependencies
+        trackedSet.forEach((dependency) => {
+            if (dependencies.has(dependency)) return
+            dependencies.set(
+                dependency,
+                dependency.follow(() => self.updateAndTrack()),
+            )
+        })
+    }
+    start() {
+        this.updateAndTrack()
+    }
+    stop() {
+        this.#cache = Outdated
+        let dependencies = this.#dependencies
+        dependencies.forEach((unfollow) => unfollow())
+        dependencies.clear()
+    }
+    get val() {
+        let self = this
+        self.track()
+        return self.#cache === Outdated ? self.getter() : self.#cache
+    }
+}
 /**
  * Creates a new State signal with the provided initial value.
  * @template T - The type of the signal's value.
- * @param value - The initial value of the signal.
+ * @param initial - The initial value of the signal.
  * @returns A new State signal.
  * @example
  * const count = ref(0);
  */
-export let ref = (...params) => new Signal.State(...params);
+export let ref = (initial) => new Signal.State(initial)
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
  * @template T - The type of the signal's value.
@@ -140,7 +115,7 @@ export let ref = (...params) => new Signal.State(...params);
  * @example
  * const doubleCount = computed(() => count.val * 2);
  */
-export let computed = (callback) => new Signal.Compute(callback);
+export let computed = (callback) => new Signal.Compute(callback)
 /**
  * Creates a new Signal that resolves its value when the provided promise resolves.
  * @template T - The type of the promise's resolved value.
@@ -152,10 +127,10 @@ export let computed = (callback) => new Signal.Compute(callback);
  * const data = awaited(fetchData());
  */
 export let awaited = (promise, until = null) => {
-    let signal = ref(until);
-    promise.then((value) => (signal.val = value));
-    return signal;
-};
+    let signal = ref(until)
+    promise.then((value) => (signal.val = value))
+    return signal
+}
 /**
  * Creates an effect that reactively calls the provided callback function.
  * @template T - The type of the signal's value.
@@ -164,4 +139,4 @@ export let awaited = (promise, until = null) => {
  * @example
  * effect(() => console.log(count.val));
  */
-export let effect = (callback) => computed(callback).follow(() => 0);
+export let effect = (callback) => computed(callback).follow(() => 0)

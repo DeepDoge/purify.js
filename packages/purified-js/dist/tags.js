@@ -79,14 +79,16 @@ let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, c
  * @example
  * let { div, span } = tags;
  *
+ * ```ts
  * div({ class: 'hello', 'aria-hidden': 'false' })
  *  .id("my-div")
  *  .ariaLabel("Hello, World!")
  *  .onclick(() => console.log('clicked!'))
  *  .children(span('Hello, World!'));
+ * ```
  *
- * // Also allows signals as properties or attributes.
- *
+ * Also allows signals as properties or attributes:
+ * ```ts
  * div({ class: computed(() => count.val & 1 ? 'odd' : 'even') })
  *  .onclick(computed(() =>
  *      count.val & 1 ?
@@ -94,6 +96,7 @@ let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, c
  *          () => alert('even')
  *  ))
  *  .children("Click me!");
+ * ```
  */
 export let tags = new Proxy({}, {
     get: (_, tag) => (attributes = {}) => Builder.Proxy(enchance(tag)).attributes(attributes),
