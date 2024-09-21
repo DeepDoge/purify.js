@@ -8,5 +8,5 @@ import {
     ref,
     tags,
     toAppendable,
-} from "purified-js"
+} from "purify-js"
 console.log(Builder, Signal, awaited, computed, fragment, ref, tags, toAppendable, effect)

@@ -1,5 +1,5 @@
 {
-    "name": "purified-js",
+    "name": "purify-js",
     "type": "module",
     "exports": {
         ".": {

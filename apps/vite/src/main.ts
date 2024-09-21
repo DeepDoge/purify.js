@@ -1,4 +1,4 @@
-import { computed, fragment, ref, tags } from "purified-js"
+import { computed, fragment, ref, tags } from "purify-js"
 import { css, sheet } from "./css"
 import { PortalExample } from "./portal"
 import { SearchExample } from "./search"

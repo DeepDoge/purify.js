@@ -1,4 +1,4 @@
-import { awaited, computed, fragment, ref, tags } from "purified-js"
+import { awaited, computed, fragment, ref, tags } from "purify-js"
 import { css, sheet } from "./css"
 
 const { input, div, ul, li } = tags

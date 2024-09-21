@@ -1,7 +1,7 @@
-<h1 align="center"> purified.js </h1>
+<h1 align="center"> purify.js </h1>
 
 <p align="center">
-    <img width="100px" height="auto" alt="purified.js logo" src="https://ipfs.io/ipfs/QmPmZkHS66TTFiVpRQiyM7FbDZ3sKzkQEtWVeXuRp8cs9V" />
+    <img width="100px" height="auto" alt="purify.js logo" src="https://ipfs.io/ipfs/QmPmZkHS66TTFiVpRQiyM7FbDZ3sKzkQEtWVeXuRp8cs9V" />
 </p>
 <p align="center">
     Don't limit your potential
@@ -10,7 +10,7 @@
 ---
 
 <p align="center">
-    <b>purified.js</b> is a 1.0kB <i>(minified, gzipped)</i> JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX <i>(developer experience)</i>.
+    <b>purify.js</b> is a 1.0kB <i>(minified, gzipped)</i> JavaScript UI building library that encourages the usage of pure JavaScript and DOM, while providing a thin layer of abstraction for the annoying parts for better DX <i>(developer experience)</i>.
 </p>
 
 ---
@@ -21,7 +21,7 @@
 
 | Library         | .min.js | .min.js.gz |
 | --------------- | ------- | ---------- |
-| **purified.js** | 2.3kB   | 1.0kB      |
+| **purify.js**   | 2.3kB   | 1.0kB      |
 | Preact 10.19.3  | 11.2kB  | 4.5kB      |
 | Solid 1.8.12    | 23kB    | 8.1kB      |
 | jQuery 3.7.1    | 85.1kB  | 29.7kB     |
@@ -31,28 +31,28 @@
 
 ### Syntax
 
-[Compare Syntax](https://bafybeib32e7wggz53xdzuhykevx5lquwny3lzsqm7entfe7zu7gnncn5o4.ipfs.dweb.link)
+[Compare Syntax](https://bafybeicggtmrz4he5r3npbyuswgv5rykjd45f5fj274u7hb6usi7ic64jq.ipfs.dweb.link)
 
 ## Installation 🍙
 
-To install **purified.js**, follow the [installation instructions](https://github.com/DeepDoge/purified.js/releases).
+To install **purify.js**, follow the [installation instructions](https://github.com/DeepDoge/purify.js/releases).
 
 ## Key Features 🍚
 
--   **purified.js** uses signals.
--   **purified.js** provides built-in signals and utilities such as:
+-   **purify.js** uses signals.
+-   **purify.js** provides built-in signals and utilities such as:
     -   **`ref()`** state signal.
     -   **`computed()`** computed signal.
     -   **`awaited()`** converts a promise into a signal.
     -   **`effect()`** follows and reacts to multiple signals.
--   **purified.js** allows direct DOM manipulation, because it can.
+-   **purify.js** allows direct DOM manipulation, because it can.
 
 ## Examples
 
-### purified.js + ShadowRoot 🍤
+### purify.js + ShadowRoot 🍤
 
 ```ts
-import { computed, css, fragment, ref, sheet, tags } from "purified-js"
+import { computed, css, fragment, ref, sheet, tags } from "purify-js"
 
 const { div, button } = tags
 
@@ -100,8 +100,8 @@ Coming soon.
 
 -   **Lack of Type Safety**: An `<img>` element created with JSX cannot have the `HTMLImageElement` type because all JSX elements must return the same type. This causes issues if you expect a `HTMLImageElement` some where in the code but all JSX returns is `HTMLElement` or something like `JSX.Element`. Also, it has some other issues related to the generics, discriminated unions and more.
 
--   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purified.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
+-   **Build Step Required**: JSX necessitates a build step, adding complexity to the development workflow. In contrast, **purify.js** avoids this, enabling a simpler and more streamlined development process by working directly with native JavaScript and TypeScript.
 
--   **Attributes vs. Properties**: In **purified.js**, I can differentiate between attributes and properties of an element while building it, which is not currently possible with JSX. This distinction enhances clarity and control when defining element characteristics. Additionally, if I were to use JSX, I would prefer a syntax like this:
+-   **Attributes vs. Properties**: In **purify.js**, I can differentiate between attributes and properties of an element while building it, which is not currently possible with JSX. This distinction enhances clarity and control when defining element characteristics. Additionally, if I were to use JSX, I would prefer a syntax like this:
 
 ---
