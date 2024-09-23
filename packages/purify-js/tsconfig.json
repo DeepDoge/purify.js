@@ -16,6 +16,7 @@
         "noUncheckedIndexedAccess": true,
         "noPropertyAccessFromIndexSignature": true,
         "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
         "checkJs": true
     },
     "include": ["./lib"]

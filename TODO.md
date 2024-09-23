@@ -1,4 +1,4 @@
- ok this is my plans for the purify.js
+ok this is my plans for the purify.js
 because i might forget them
 
 so our first goal is rethinking signals again
@@ -50,39 +50,58 @@ maybe each signal doesnt need its own whole follow system
 maybe only state needs it
 
 here some starting point for the new signals:
+
 ```ts
-
 abstract class Signal<T> {
-	public abstract follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower;
+    public abstract follow(
+        follower: Signal.Follower<T>,
+        immediate?: boolean,
+    ): Signal.Unfollower
 
-	get val() {
-		let returns: T;
-		this.follow((value) => (returns = value), true)();
-		/// @ts-ignore // We know `follow` for will sure assign `returns` so ignore the error
-		return returns;
-	}
+    get val() {
+        let returns: T
+        this.follow((value) => (returns = value), true)()
+        /// @ts-ignore // We know `follow` for will sure assign `returns` so ignore the error
+        return returns
+    }
 }
 
 namespace Signal {
-	export class Readonly<T> extends Signal<T> {
-		constructor(followHandler: Signal<T>['follow']);
-		constructor(public follow: Signal<T>['follow']) {
-			super();
-		}
-	}
+    export class Readonly<T> extends Signal<T> {
+        constructor(followHandler: Signal<T>["follow"])
+        constructor(public follow: Signal<T>["follow"]) {
+            super()
+        }
+    }
 
-	export class State<T> extends Signal<T> {
-		constructor(initial: T);
-		constructor(private value: T) {
-			super();
-		}
-	}
+    export class State<T> extends Signal<T> {
+        constructor(initial: T)
+        constructor(private value: T) {
+            super()
+        }
+    }
 }
 
 const documentVisibleSignal = new Signal.Readonly<boolean>((follower, immediate) => {
-	let listener = () => follower(document.visibilityState === 'visible');
-	if (immediate) listener();
-	document.addEventListener('visibilitychange', listener);
-	return () => document.removeEventListener('visibilitychange', listener);
-});
+    let listener = () => follower(document.visibilityState === "visible")
+    if (immediate) listener()
+    document.addEventListener("visibilitychange", listener)
+    return () => document.removeEventListener("visibilitychange", listener)
+})
 ```
+
+but this has one problem
+how does any Computed signal knows Readonly is used.
+well one solution is throwing away call stack based detection completely and using a list
+also having derive function for quick dervations from one or ~~multiple~~(maybe) sources
+computed can also give the values in the function so this would optimize stuff more
+so instead of detecting manually we detect on the fly
+or in the base constructor i can wrap the follow function to include stack tracing
+i mean many projects use stack tracing, is it even that good of an idea?
+what if we just you know list the dependencies, and also have a quick derive function in each signal.
+just because everyone is tracing the stack call doesnt mean we should too.
+i mean it causes the most of the issues, being aware of what triggers and update is better.
+being in the dark was my problem with mainstream frameworks anyway
+it also simplifies code. i have this weird feeling that if i bare bone simplify everything without limitations
+everything will be a breeze some how by itself
+not familiar, but simple without limitations
