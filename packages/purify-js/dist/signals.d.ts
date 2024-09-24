@@ -43,7 +43,7 @@ export declare namespace Signal {
         get val(): T;
         set val(value: T);
         private followers;
-        follow(follower: Signal.Follower<T>, immediate: boolean): Signal.Unfollower;
+        follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower;
     }
     class Readonly<T> extends Signal<T> {
         follow: Signal<T>["follow"];

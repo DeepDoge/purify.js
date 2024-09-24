@@ -70,7 +70,7 @@ export namespace Signal {
         private followers = new Set<Signal.Follower<T>>()
         public override follow(
             follower: Signal.Follower<T>,
-            immediate: boolean,
+            immediate?: boolean,
         ): Signal.Unfollower {
             if (immediate) {
                 follower(this.value)
