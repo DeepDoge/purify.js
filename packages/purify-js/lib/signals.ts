@@ -2,37 +2,46 @@ export namespace Signal {
     export type Cleanup = { (): unknown }
 
     /**
-     * A type representing a function that follows a signal's value changes.
+     * A function type that receives updates when a signal's value changes.
      * @template T - The type of the signal's value.
      */
     export type Follower<T> = { (value: T): unknown }
 
     /**
-     * A type representing an object that can be used to unfollow a signal.
+     * A function type that allows for the unsubscription from a signal's updates.
      */
     export type Unfollower = { (): void }
 }
 
 export abstract class Signal<T> {
+    /**
+     * Subscribes to updates from the signal. The provided follower function is called with the current signal value whenever it changes.
+     * @param follower - A function that receives the updated value.
+     * @param immediate - If true, the follower is called immediately with the current value.
+     * @returns A function to unsubscribe from the signal updates.
+     */
     public abstract follow(
         follower: Signal.Follower<T>,
         immediate?: boolean,
     ): Signal.Unfollower
 
+    /**
+     * Gets the current value of the signal. This triggers the follower to ensure the latest value is fetched.
+     * @returns The current value of the signal.
+     */
     public get val() {
         let returns: T
         this.follow((value) => (returns = value), true)()
-        /// @ts-ignore // We know `follow` for will sure assign `returns` so ignore the error
+        /// @ts-ignore // `follow` guarantees assignment of `returns`
         return returns
     }
 
     /**
-     * Creates a new computed Signal derived from the current Signal's value using the provided getter function.
-     * This allows for more complex transformations of the signal's value.
+     * Creates a new computed Signal that derives its value based on the current signal's value using the provided getter function.
      *
      * @template U - The type of the derived signal's value.
      * @param getter - A function that receives the current value of the signal and returns the derived value.
-     * @returns A new Compute signal that reflects changes in the source signal.
+     * @returns A new Computed signal that reflects changes in the source signal.
      *
      * @example
      * ```ts
@@ -49,16 +58,29 @@ export abstract class Signal<T> {
 export namespace Signal {
     export class State<T> extends Signal<T> {
         private value: T
+        private followers = new Set<Signal.Follower<T>>()
 
+        /**
+         * Initializes a new State signal with the provided initial value.
+         * @param initial - The initial value of the signal.
+         */
         constructor(initial: T) {
             super()
             this.value = initial
         }
 
+        /**
+         * Gets the current value of the State signal.
+         * @returns The current value.
+         */
         public override get val() {
             return this.value
         }
 
+        /**
+         * Sets the value of the State signal. Notifies followers of the change if the value is different.
+         * @param value - The new value to set.
+         */
         public override set val(value: T) {
             if (this.value !== (this.value = value)) {
                 for (let follower of this.followers) {
@@ -67,7 +89,12 @@ export namespace Signal {
             }
         }
 
-        private followers = new Set<Signal.Follower<T>>()
+        /**
+         * Subscribes to updates from the State signal.
+         * @param follower - A function that receives the updated value.
+         * @param immediate - If true, the follower is called immediately with the current value.
+         * @returns A function to unsubscribe from the signal updates.
+         */
         public override follow(
             follower: Signal.Follower<T>,
             immediate?: boolean,
@@ -87,23 +114,24 @@ export namespace Signal {
     export class Readonly<T> extends Signal<T> {
         public follow: Signal<T>["follow"]
 
+        /**
+         * Initializes a new Readonly signal with the provided follow handler.
+         * @param followHandler - A function defining how the readonly signal is followed.
+         */
         constructor(followHandler: Signal<T>["follow"]) {
             super()
             this.follow = followHandler
         }
     }
 
-    export namespace Computed {
-        /**
-         * A type representing a function that gets a value.
-         * @template T - The type of the value to be retrieved.
-         */
-        export type Getter<T> = { (): T }
-    }
     export class Computed<T> extends Readonly<T> {
-        constructor(getter: Signal.Computed.Getter<T>, dependencies: Signal<unknown>[])
-        constructor(getter: Signal.Computed.Getter<T>, depsArray: Signal<unknown>[]) {
-            let dependencies = depsArray
+        /**
+         * Initializes a new Computed signal that derives its value using the provided getter function.
+         * @param getter - A function that computes the signal's value.
+         * @param dependencies - An array of signals that this computed signal depends on.
+         */
+        constructor(getter: () => T, dependencies: Signal<unknown>[]) {
+            let depsArray = dependencies
             super((follower, immediate) => {
                 if (immediate) {
                     follower(getter())
@@ -111,7 +139,7 @@ export namespace Signal {
 
                 let unfollows: Signal.Unfollower[] = []
                 let cache: T | undefined
-                for (let dependency of dependencies) {
+                for (let dependency of depsArray) {
                     unfollows.push(
                         dependency.follow(() => {
                             if (cache !== (cache = getter())) {
@@ -141,29 +169,27 @@ export namespace Signal {
  * @example
  * const count = ref(0); // Creates a state signal with initial value 0.
  */
-
 export let ref = <T>(initial: T): Signal.State<T> => new Signal.State<T>(initial)
 
 /**
- * Creates a new `Compute` signal that computes its value using the provided callback function.
+ * Creates a new `Computed` signal that calculates its value using the provided callback function.
  *
  * @template T - The type of the signal's value.
  * @param callback - The function that computes the signal's value.
  * @param dependencies - An array of signals that the computed signal depends on.
- * @returns A new `Compute` signal.
+ * @returns A new `Computed` signal.
  *
  * @example
  * const doubleCount = computed(() => count.val * 2, [count]); // Creates a computed signal that doubles `count`.
  */
-
 export let computed = <T>(
-    callback: Signal.Computed.Getter<T>,
+    callback: () => T,
     dependencies: Signal<unknown>[],
 ): Signal.Computed<T> => new Signal.Computed<T>(callback, dependencies)
 
 /**
  * Creates a readonly Signal that can be followed but not directly modified.
- * Useful for exposing a signal's value without allowing changes.
+ * This is useful for exposing a signal's value without allowing changes.
  *
  * @template T - The type of the signal's value.
  * @param followHandler - A function defining how the readonly signal is followed.
@@ -187,7 +213,6 @@ export let computed = <T>(
  * isPlayingSignal.follow(isPlaying => console.log(`Playing: ${isPlaying}`));
  * ```
  */
-
 export let readonly = <T>(followHandler: Signal<T>["follow"]) =>
     new Signal.Readonly<T>(followHandler)
 
@@ -203,7 +228,6 @@ export let readonly = <T>(followHandler: Signal<T>["follow"]) =>
  * @example
  * const data = awaited(fetchData(), null); // Creates a signal that holds the fetched data once the promise resolves.
  */
-
 export let awaited = <T, const U = null>(
     promise: Promise<T>,
     until: U = null as never,
