@@ -1,107 +1,108 @@
-let trackerStack = []
+let trackerStack = [];
 export class Signal {
-    start() {}
-    #stop
+    start() { }
+    #stop;
     track() {
-        trackerStack.at(-1)?.add(this)
+        trackerStack.at(-1)?.add(this);
     }
-    #followers = new Set()
+    #followers = new Set();
     follow(follower, immediate) {
-        let self = this
-        let followers = self.#followers
+        let self = this;
+        let followers = self.#followers;
         if (immediate) {
-            follower(self.val)
+            follower(self.val);
         }
-        followers.add(follower)
+        followers.add(follower);
         if (followers.size === 1) {
-            this.#stop = self.start()
+            this.#stop = self.start();
         }
         return () => {
             if (followers.delete(follower) && !followers.size) {
-                self.#stop?.()
+                self.#stop?.();
             }
-        }
+        };
     }
     emit(value = this.val) {
         for (let follower of this.#followers) {
-            follower(value)
+            follower(value);
         }
     }
 }
-Signal.State = class extends Signal {
-    value
-    constructor(value) {
-        super()
-        this.value = value
-    }
-    get val() {
-        this.track()
-        return this.value
-    }
-    set val(value) {
-        let self = this
-        // Updates value and checks if it has changed
-        if (self.value !== (self.value = value)) {
-            self.emit()
+(function (Signal) {
+    class State extends Signal {
+        value;
+        constructor(value) {
+            super();
+            this.value = value;
+        }
+        get val() {
+            this.track();
+            return this.value;
+        }
+        set val(value) {
+            let self = this;
+            // Updates value and checks if it has changed
+            if (self.value !== (self.value = value)) {
+                self.emit();
+            }
         }
     }
-}
-let Outdated = Symbol()
-Signal.Compute = class extends Signal {
-    getter
-    constructor(getter) {
-        super()
-        this.getter = getter
-    }
-    #dependencies = new Map()
-    #cache = Outdated
-    #updateAndTrack() {
-        let self = this
-        let dependencies = self.#dependencies
-        let trackedSet = new Set()
-        trackerStack.push(trackedSet)
-        let value = self.getter()
-        trackerStack.pop()
-        trackedSet.delete(self)
-        // Updates value and checks if it has changed
-        if (self.#cache !== (self.#cache = value)) {
-            self.emit()
+    Signal.State = State;
+    const Outdated = Symbol();
+    class Compute extends Signal {
+        getter;
+        constructor(getter) {
+            super();
+            this.getter = getter;
         }
-        // Unfollow and remove dependencies that are no longer being tracked
-        dependencies.forEach((unfollow, dependency) => {
-            if (trackedSet.has(dependency)) return
-            unfollow()
-            dependencies.delete(dependency)
-        })
-        // Follow new dependencies
-        trackedSet.forEach((dependency) => {
-            if (dependencies.has(dependency)) return
-            dependencies.set(
-                dependency,
-                dependency.follow(() => self.#updateAndTrack()),
-            )
-        })
-    }
-    start(self = this) {
-        self.#updateAndTrack()
-        return () => {
-            self.#cache = Outdated
-            let dependencies = self.#dependencies
-            dependencies.forEach((unfollow) => unfollow())
-            dependencies.clear()
+        #dependencies = new Map();
+        #cache = Outdated;
+        #updateAndTrack() {
+            let self = this;
+            let dependencies = self.#dependencies;
+            let trackedSet = new Set();
+            trackerStack.push(trackedSet);
+            let value = self.getter();
+            trackerStack.pop();
+            trackedSet.delete(self);
+            // Updates value and checks if it has changed
+            if (self.#cache !== (self.#cache = value)) {
+                self.emit();
+            }
+            // Unfollow and remove dependencies that are no longer being tracked
+            dependencies.forEach((unfollow, dependency) => {
+                if (trackedSet.has(dependency))
+                    return;
+                unfollow();
+                dependencies.delete(dependency);
+            });
+            // Follow new dependencies
+            trackedSet.forEach((dependency) => {
+                if (dependencies.has(dependency))
+                    return;
+                dependencies.set(dependency, dependency.follow(() => self.#updateAndTrack()));
+            });
+        }
+        start(self = this) {
+            self.#updateAndTrack();
+            return () => {
+                self.#cache = Outdated;
+                let dependencies = self.#dependencies;
+                dependencies.forEach((unfollow) => unfollow());
+                dependencies.clear();
+            };
+        }
+        get val() {
+            let self = this;
+            self.track();
+            if (self.#cache === Outdated) {
+                setTimeout(self.follow(() => 0), 5000);
+            }
+            return self.#cache;
         }
     }
-    get val() {
-        let self = this
-        self.track()
-        self.#cache === Outdated &&
-            setTimeout(
-                self.follow(() => 0),
-                5000,
-            )
-        return self.#cache
-    }
-}
+    Signal.Compute = Compute;
+})(Signal || (Signal = {}));
 /**
  * Creates a new State signal with the provided initial value.
  * @template T - The type of the signal's value.
@@ -110,7 +111,7 @@ Signal.Compute = class extends Signal {
  * @example
  * const count = ref(0);
  */
-export let ref = (initial) => new Signal.State(initial)
+export let ref = (initial) => new Signal.State(initial);
 /**
  * Creates a new Compute signal that computes its value using the provided callback function.
  * @template T - The type of the signal's value.
@@ -119,7 +120,7 @@ export let ref = (initial) => new Signal.State(initial)
  * @example
  * const doubleCount = computed(() => count.val * 2);
  */
-export let computed = (callback) => new Signal.Compute(callback)
+export let computed = (callback) => new Signal.Compute(callback);
 /**
  * Creates a new Signal that resolves its value when the provided promise resolves.
  * @template T - The type of the promise's resolved value.
@@ -131,10 +132,10 @@ export let computed = (callback) => new Signal.Compute(callback)
  * const data = awaited(fetchData());
  */
 export let awaited = (promise, until = null) => {
-    let signal = ref(until)
-    promise.then((value) => (signal.val = value))
-    return signal
-}
+    let signal = ref(until);
+    promise.then((value) => (signal.val = value));
+    return signal;
+};
 /**
  * Creates an effect that reactively calls the provided callback function.
  * @template T - The type of the signal's value.
@@ -143,4 +144,4 @@ export let awaited = (promise, until = null) => {
  * @example
  * effect(() => console.log(count.val));
  */
-export let effect = (callback) => computed(callback).follow(() => 0)
+export let effect = (callback) => computed(callback).follow(() => 0);

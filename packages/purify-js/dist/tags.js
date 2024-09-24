@@ -44,11 +44,11 @@ let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, c
     if (!constructor) {
         custom.define(newTagName, (constructor = class extends document.createElement(tagname).constructor {
             #connectedCallbacks = new Set();
-            #disconnectedCallbacks = new Set();
-            #call(callback) {
-                let disconnectedCallback = callback();
+            // different connected callbacks might use same cleanup function
+            #disconnectedCallbacks = [];
+            #call(callback, disconnectedCallback = callback()) {
                 if (disconnectedCallback) {
-                    this.#disconnectedCallbacks.add(disconnectedCallback);
+                    this.#disconnectedCallbacks.push(disconnectedCallback);
                 }
             }
             connectedCallback() {
@@ -60,12 +60,17 @@ let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, c
                 for (let callback of this.#disconnectedCallbacks) {
                     callback();
                 }
+                this.#disconnectedCallbacks.length = 0;
             }
             onConnect(callback) {
-                this.#connectedCallbacks.add(callback);
-                if (this.isConnected) {
-                    this.#call(callback);
+                let self = this;
+                self.#connectedCallbacks.add(callback);
+                if (self.isConnected) {
+                    self.#call(callback);
                 }
+                return () => {
+                    self.#connectedCallbacks.delete(callback);
+                };
             }
         }), { extends: tagname });
     }
