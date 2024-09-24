@@ -96,12 +96,15 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                 (document.createElement(tagname).constructor as typeof HTMLElement)
             ) {
                 #connectedCallbacks = new Set<Enhanced.ConnectedCallback>()
-                #disconnectedCallbacks = new Set<Enhanced.DisconnectedCallback>()
+                // different connected callbacks might use same cleanup function
+                #disconnectedCallbacks: Enhanced.DisconnectedCallback[] = []
 
-                #call(callback: Enhanced.ConnectedCallback) {
-                    let disconnectedCallback = callback()
+                #call(
+                    callback: Enhanced.ConnectedCallback,
+                    disconnectedCallback = callback(),
+                ) {
                     if (disconnectedCallback) {
-                        this.#disconnectedCallbacks.add(disconnectedCallback)
+                        this.#disconnectedCallbacks.push(disconnectedCallback)
                     }
                 }
 
@@ -115,12 +118,17 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                     for (let callback of this.#disconnectedCallbacks) {
                         callback()
                     }
+                    this.#disconnectedCallbacks.length = 0
                 }
 
                 onConnect(callback: Enhanced.ConnectedCallback) {
-                    this.#connectedCallbacks.add(callback)
-                    if (this.isConnected) {
-                        this.#call(callback)
+                    let self = this
+                    self.#connectedCallbacks.add(callback)
+                    if (self.isConnected) {
+                        self.#call(callback)
+                    }
+                    return () => {
+                        self.#connectedCallbacks.delete(callback)
                     }
                 }
             }),
