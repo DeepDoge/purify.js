@@ -21,7 +21,7 @@
 
 | Library         | .min.js | .min.js.gz |
 | --------------- | ------- | ---------- |
-| **purify.js**   | 2.3kB   | 1.0kB      |
+| **purify.js**   | 2.0kB   | < 1.0kB    |
 | Preact 10.19.3  | 11.2kB  | 4.5kB      |
 | Solid 1.8.12    | 23kB    | 8.1kB      |
 | jQuery 3.7.1    | 85.1kB  | 29.7kB     |
@@ -36,16 +36,6 @@
 ## Installation 🍙
 
 To install **purify.js**, follow the [installation instructions](https://github.com/DeepDoge/purify.js/releases).
-
-## Key Features 🍚
-
--   **purify.js** uses signals.
--   **purify.js** provides built-in signals and utilities such as:
-    -   **`ref()`** state signal.
-    -   **`computed()`** computed signal.
-    -   **`awaited()`** converts a promise into a signal.
-    -   **`effect()`** follows and reacts to multiple signals.
--   **purify.js** allows direct DOM manipulation, because it can.
 
 ## Examples
 
@@ -65,7 +55,7 @@ function Counter() {
     const shadow = host.element.attachShadow({ mode: "open" })
 
     const count = ref(0)
-    const double = computed(() => count.val * 2)
+    const double = computed(() => count.val * 2, [count])
 
     shadow.append(
         fragment(

@@ -1,5 +1,3 @@
-let trackerStack: Set<Signal<any>>[] = []
-
 export namespace Signal {
     export type Cleanup = { (): unknown }
 
@@ -16,168 +14,200 @@ export namespace Signal {
 }
 
 export abstract class Signal<T> {
-    abstract get val(): T
+    public abstract follow(
+        follower: Signal.Follower<T>,
+        immediate?: boolean,
+    ): Signal.Unfollower
 
-    protected start(): Signal.Cleanup | void {}
-    #stop?: (() => void) | void
-
-    protected track() {
-        trackerStack.at(-1)?.add(this)
+    public get val() {
+        let returns: T
+        this.follow((value) => (returns = value), true)()
+        /// @ts-ignore // We know `follow` for will sure assign `returns` so ignore the error
+        return returns
     }
 
-    #followers = new Set<Signal.Follower<T>>()
-    follow(follower: Signal.Follower<T>, immediate?: boolean): Signal.Unfollower {
-        let self = this
-        let followers = self.#followers
-
-        if (immediate) {
-            follower(self.val)
-        }
-
-        followers.add(follower)
-        if (followers.size === 1) {
-            this.#stop = self.start()
-        }
-
-        return () => {
-            if (followers.delete(follower) && !followers.size) {
-                self.#stop?.()
-            }
-        }
-    }
-
-    emit(value = this.val) {
-        for (let follower of this.#followers) {
-            follower(value)
-        }
+    /**
+     * Creates a new computed Signal derived from the current Signal's value using the provided getter function.
+     * This allows for more complex transformations of the signal's value.
+     *
+     * @template U - The type of the derived signal's value.
+     * @param getter - A function that receives the current value of the signal and returns the derived value.
+     * @returns A new Compute signal that reflects changes in the source signal.
+     *
+     * @example
+     * ```ts
+     * const count = ref(0);
+     * const doubledCount = count.derive(value => value * 2);
+     * doubledCount.follow(value => console.log(value)); // Logs the doubled count value.
+     * ```
+     */
+    public derive<U>(getter: (value: T) => U): Signal.Computed<U> {
+        return computed(() => getter(this.val), [this])
     }
 }
 
 export namespace Signal {
     export class State<T> extends Signal<T> {
-        constructor(initial: T)
-        constructor(private value: T) {
+        private value: T
+
+        constructor(initial: T) {
             super()
+            this.value = initial
         }
 
-        get val() {
-            this.track()
-            return this.value
+        public override get val() {
+            return super.val
         }
 
-        set val(value: T) {
-            let self = this
+        public override set val(value: T) {
+            let changed = this.value !== value
+            this.value = value
+            if (changed) {
+                for (let follower of this.followers) {
+                    follower(value)
+                }
+            }
+        }
 
-            // Updates value and checks if it has changed
-            if (self.value !== (self.value = value)) {
-                self.emit()
+        private followers = new Set<Signal.Follower<T>>()
+        public override follow(
+            follower: Signal.Follower<T>,
+            immediate: boolean,
+        ): Signal.Unfollower {
+            if (immediate) {
+                follower(this.value)
+            }
+
+            this.followers.add(follower)
+
+            return () => {
+                this.followers.delete(follower)
             }
         }
     }
 
-    const Outdated = Symbol()
-    type Outdated = typeof Outdated
-    export namespace Compute {
+    export class Readonly<T> extends Signal<T> {
+        public follow: Signal<T>["follow"]
+
+        constructor(followHandler: Signal<T>["follow"]) {
+            super()
+            this.follow = followHandler
+        }
+    }
+
+    export namespace Computed {
         /**
          * A type representing a function that gets a value.
          * @template T - The type of the value to be retrieved.
          */
         export type Getter<T> = { (): T }
     }
-    export class Compute<T> extends Signal<T> {
-        constructor(private getter: Compute.Getter<T>) {
-            super()
-        }
+    export class Computed<T> extends Readonly<T> {
+        constructor(getter: Signal.Computed.Getter<T>, dependencies: Signal<unknown>[])
+        constructor(getter: Signal.Computed.Getter<T>, depsArray: Signal<unknown>[]) {
+            let dependencies = depsArray
+            super((follower, immediate) => {
+                if (immediate) {
+                    follower(getter())
+                }
 
-        #dependencies = new Map<Signal<unknown>, Signal.Unfollower>()
-        #cache: T | Outdated = Outdated
-        #updateAndTrack() {
-            let self = this
-            let dependencies = self.#dependencies
-            let trackedSet = new Set<Signal<any>>()
-            trackerStack.push(trackedSet)
-            let value = self.getter()
-            trackerStack.pop()
-            trackedSet.delete(self)
+                let unfollows: Signal.Unfollower[] = []
+                let cache: T | undefined
+                for (let dependency of dependencies) {
+                    unfollows.push(
+                        dependency.follow(() => {
+                            let value = getter()
+                            if (value !== cache) {
+                                follower(value)
+                                cache = value
+                            }
+                        }),
+                    )
+                }
 
-            // Updates value and checks if it has changed
-            if (self.#cache !== (self.#cache = value)) {
-                self.emit()
-            }
-
-            // Unfollow and remove dependencies that are no longer being tracked
-            dependencies.forEach((unfollow, dependency) => {
-                if (trackedSet.has(dependency)) return
-                unfollow()
-                dependencies.delete(dependency)
+                return () => {
+                    for (let unfollow of unfollows) {
+                        unfollow()
+                    }
+                }
             })
-
-            // Follow new dependencies
-            trackedSet.forEach((dependency) => {
-                if (dependencies.has(dependency)) return
-                dependencies.set(
-                    dependency,
-                    dependency.follow(() => self.#updateAndTrack()),
-                )
-            })
-        }
-
-        protected override start(self = this) {
-            self.#updateAndTrack()
-
-            return () => {
-                self.#cache = Outdated
-                let dependencies = self.#dependencies
-                dependencies.forEach((unfollow) => unfollow())
-                dependencies.clear()
-            }
-        }
-
-        get val() {
-            let self = this
-            self.track()
-            if (self.#cache === Outdated) {
-                setTimeout(
-                    self.follow(() => 0),
-                    5000,
-                )
-            }
-            return self.#cache as T
         }
     }
 }
 
 /**
- * Creates a new State signal with the provided initial value.
+ * Creates a new `State` signal with the provided initial value.
+ *
  * @template T - The type of the signal's value.
  * @param initial - The initial value of the signal.
- * @returns A new State signal.
+ * @returns A new `State` signal.
+ *
  * @example
- * const count = ref(0);
+ * const count = ref(0); // Creates a state signal with initial value 0.
  */
+
 export let ref = <T>(initial: T): Signal.State<T> => new Signal.State<T>(initial)
 
 /**
- * Creates a new Compute signal that computes its value using the provided callback function.
+ * Creates a new `Compute` signal that computes its value using the provided callback function.
+ *
  * @template T - The type of the signal's value.
- * @param callback - The function to compute the signal's value.
- * @returns A new Compute signal.
+ * @param callback - The function that computes the signal's value.
+ * @param dependencies - An array of signals that the computed signal depends on.
+ * @returns A new `Compute` signal.
+ *
  * @example
- * const doubleCount = computed(() => count.val * 2);
+ * const doubleCount = computed(() => count.val * 2, [count]); // Creates a computed signal that doubles `count`.
  */
-export let computed = <T>(callback: Signal.Compute.Getter<T>): Signal.Compute<T> =>
-    new Signal.Compute<T>(callback)
+
+export let computed = <T>(
+    callback: Signal.Computed.Getter<T>,
+    dependencies: Signal<unknown>[],
+): Signal.Computed<T> => new Signal.Computed<T>(callback, dependencies)
 
 /**
- * Creates a new Signal that resolves its value when the provided promise resolves.
- * @template T - The type of the promise's resolved value.
- * @template U - The type of the until value.
- * @param promise - The promise to await.
- * @param until - The value to resolve the signal with when the promise is not yet resolved.
- * @returns A new Signal that resolves its value when the provided promise resolves.
+ * Creates a readonly Signal that can be followed but not directly modified.
+ * Useful for exposing a signal's value without allowing changes.
+ *
+ * @template T - The type of the signal's value.
+ * @param followHandler - A function defining how the readonly signal is followed.
+ * @returns A new Readonly signal.
+ *
  * @example
- * const data = awaited(fetchData());
+ * ```ts
+ * // Create a readonly signal that reflects the video player's play state.
+ * const isPlayingSignal = readonly<boolean>((follower, immediate) => {
+ *   const onPlayPause = () => follower(videoElement.paused === false);
+ *   if (immediate) onPlayPause();
+ *   videoElement.addEventListener("play", onPlayPause);
+ *   videoElement.addEventListener("pause", onPlayPause);
+ *   return () => {
+ *     videoElement.removeEventListener("play", onPlayPause);
+ *     videoElement.removeEventListener("pause", onPlayPause);
+ *   };
+ * });
+ *
+ * // Consumers can follow `isPlayingSignal` but cannot modify its value.
+ * isPlayingSignal.follow(isPlaying => console.log(`Playing: ${isPlaying}`));
+ * ```
  */
+
+export let readonly = <T>(followHandler: Signal<T>["follow"]) =>
+    new Signal.Readonly<T>(followHandler)
+
+/**
+ * Creates a new signal that resolves its value when the provided promise resolves.
+ *
+ * @template T - The type of the promise's resolved value.
+ * @template U - The type of the `until` value used before the promise resolves.
+ * @param promise - The promise to await.
+ * @param until - The value to use until the promise resolves. Defaults to `null`.
+ * @returns A new signal that resolves to the promise's value or `until` value before the promise is fulfilled.
+ *
+ * @example
+ * const data = awaited(fetchData(), null); // Creates a signal that holds the fetched data once the promise resolves.
+ */
+
 export let awaited = <T, const U = null>(
     promise: Promise<T>,
     until: U = null as never,
@@ -186,14 +216,3 @@ export let awaited = <T, const U = null>(
     promise.then((value) => (signal.val = value))
     return signal
 }
-
-/**
- * Creates an effect that reactively calls the provided callback function.
- * @template T - The type of the signal's value.
- * @param callback - The function to call when the signal's value changes.
- * @returns An object that can be used to stop the effect.
- * @example
- * effect(() => console.log(count.val));
- */
-export let effect = <T>(callback: Signal.Compute.Getter<T>): Signal.Unfollower =>
-    computed(callback).follow(() => 0)
