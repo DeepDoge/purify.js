@@ -56,7 +56,7 @@ export namespace Signal {
         }
 
         public override get val() {
-            return super.val
+            return this.value
         }
 
         public override set val(value: T) {

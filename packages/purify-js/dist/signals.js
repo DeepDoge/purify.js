@@ -32,7 +32,7 @@ export class Signal {
             this.value = initial;
         }
         get val() {
-            return super.val;
+            return this.value;
         }
         set val(value) {
             if (this.value !== (this.value = value)) {
