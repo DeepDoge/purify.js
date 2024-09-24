@@ -60,9 +60,7 @@ export namespace Signal {
         }
 
         public override set val(value: T) {
-            let changed = this.value !== value
-            this.value = value
-            if (changed) {
+            if (this.value !== (this.value = value)) {
                 for (let follower of this.followers) {
                     follower(value)
                 }
@@ -116,10 +114,8 @@ export namespace Signal {
                 for (let dependency of dependencies) {
                     unfollows.push(
                         dependency.follow(() => {
-                            let value = getter()
-                            if (value !== cache) {
-                                follower(value)
-                                cache = value
+                            if (cache !== (cache = getter())) {
+                                follower(cache)
                             }
                         }),
                     )

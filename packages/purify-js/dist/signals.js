@@ -35,9 +35,7 @@ export class Signal {
             return super.val;
         }
         set val(value) {
-            let changed = this.value !== value;
-            this.value = value;
-            if (changed) {
+            if (this.value !== (this.value = value)) {
                 for (let follower of this.followers) {
                     follower(value);
                 }
@@ -74,10 +72,8 @@ export class Signal {
                 let cache;
                 for (let dependency of dependencies) {
                     unfollows.push(dependency.follow(() => {
-                        let value = getter();
-                        if (value !== cache) {
-                            follower(value);
-                            cache = value;
+                        if (cache !== (cache = getter())) {
+                            follower(cache);
                         }
                     }));
                 }
