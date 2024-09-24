@@ -1,4 +1,4 @@
-import { computed, fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 
 const { button, p, span } = tags;
 
@@ -6,8 +6,8 @@ const TRAFFIC_LIGHTS = ["red", "orange", "green"] as const;
 export function TrafficsLight() {
 	const lightIndex = ref(0);
 
-	const light = computed(
-		() => TRAFFIC_LIGHTS[lightIndex.val],
+	const light = lightIndex.derive(
+		(lightIndex) => TRAFFIC_LIGHTS[lightIndex],
 	);
 
 	function nextLight() {
@@ -20,17 +20,17 @@ export function TrafficsLight() {
 		p().children("Light is: ", light),
 		p().children(
 			"You must",
-			computed(() => {
-				if (light.val === "red") {
+			light.derive((light) => {
+				if (light === "red") {
 					return span().children("STOP");
-				} else if (light.val === "orange") {
+				} else if (light === "orange") {
 					return span().children("SLOW DOWN");
-				} else if (light.val === "green") {
+				} else if (light === "green") {
 					return span().children("GO");
 				}
-				light.val satisfies never;
+				light satisfies never;
 				throw new Error(
-					`Unhandled light: ${light.val}`,
+					`Unhandled light: ${light}`,
 				);
 			}),
 		),

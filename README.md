@@ -31,7 +31,7 @@
 
 ### Syntax
 
-[Compare Syntax](https://bafybeicggtmrz4he5r3npbyuswgv5rykjd45f5fj274u7hb6usi7ic64jq.ipfs.dweb.link)
+[Compare Syntax](https://bafybeiduxyhkk3stq7q3tsyhnpmtbzl7nauy24jyqtjwshfqixddfapfue.ipfs.dweb.link)
 
 ## Installation 🍙
 
@@ -42,7 +42,7 @@ To install **purify.js**, follow the [installation instructions](https://github.
 ### purify.js + ShadowRoot 🍤
 
 ```ts
-import { computed, css, fragment, ref, sheet, tags } from "purify-js"
+import { css, fragment, ref, tags } from "purify-js"
 
 const { div, button } = tags
 
@@ -55,7 +55,7 @@ function Counter() {
     const shadow = host.element.attachShadow({ mode: "open" })
 
     const count = ref(0)
-    const double = computed(() => count.val * 2, [count])
+    const double = count.derive((count) => count * 2)
 
     shadow.append(
         fragment(

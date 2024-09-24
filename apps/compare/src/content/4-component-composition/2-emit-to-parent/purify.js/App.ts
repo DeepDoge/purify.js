@@ -1,4 +1,4 @@
-import { computed, fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 import { AnswerButton } from "./AnswerButton";
 
 const { p } = tags;
@@ -21,7 +21,9 @@ export function App() {
 			onNo: onAnswerNo,
 		}),
 		p({ style: "font-size: 5em" }).children(
-			computed(() => (isHappy.val ? "😀" : "😥")),
+			isHappy.derive((isHappy) =>
+				isHappy ? "😀" : "😥",
+			),
 		),
 	);
 }

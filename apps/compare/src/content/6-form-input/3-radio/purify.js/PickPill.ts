@@ -1,4 +1,4 @@
-import { computed, fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 
 const { div, input, label } = tags;
 
@@ -11,14 +11,20 @@ export function PickPill() {
 		input()
 			.id("blue-pill")
 			.type("radio")
-			.checked(computed(() => picked.val === "blue"))
+			.checked(
+				picked.derive(
+					(picked) => picked === "blue",
+				),
+			)
 			.onchange(() => (picked.val = "blue")),
 		label({ for: "blue-pill" }).children("Blue pill"),
 
 		input()
 			.id("red-pill")
 			.type("radio")
-			.checked(computed(() => picked.val === "red"))
+			.checked(
+				picked.derive((picked) => picked === "red"),
+			)
 			.onchange(() => (picked.val = "red")),
 		label({ for: "red-pill" }).children("Red pill"),
 	);

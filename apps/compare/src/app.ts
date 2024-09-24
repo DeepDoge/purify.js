@@ -1,7 +1,7 @@
 import picoCss from "@picocss/pico/css/pico.css?raw";
 import highlightjs from "highlight.js";
 import highlightCss from "highlight.js/styles/atom-one-dark.css?raw";
-import { computed, fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 import { css, sheet } from "./css";
 import { Framework, getFrameworks } from "./frameworks";
 
@@ -41,8 +41,8 @@ getFrameworks().then((frameworks) => {
 	const primaryFrameworkKey = "purify.js";
 	const primaryFramework = frameworks[primaryFrameworkKey];
 
-	const path = computed(() => {
-		const [framework, group, example] = hash.val.slice(1).split("/");
+	const path = hash.derive((hash) => {
+		const [framework, group, example] = hash.slice(1).split("/");
 		return { framework, group, example };
 	});
 
@@ -73,7 +73,11 @@ getFrameworks().then((frameworks) => {
 						const primaryGroupItem = primaryGroups[primaryGroupKey];
 
 						const groupSection = section({ class: "group" })
-							.id(computed(() => `${compared.val.key}/${primaryGroupKey}`))
+							.id(
+								compared.derive(
+									(compared) => `${compared.key}/${primaryGroupKey}`,
+								),
+							)
 							.children(h2().children(primaryGroupItem.label));
 						host.append(groupSection.element);
 
@@ -83,9 +87,9 @@ getFrameworks().then((frameworks) => {
 
 							const exampleSection = section({ class: "example" })
 								.id(
-									computed(
-										() =>
-											`${compared.val.key}/${primaryGroupKey}/${primaryExampleKey}`,
+									compared.derive(
+										(compared) =>
+											`${compared.key}/${primaryGroupKey}/${primaryExampleKey}`,
 									),
 								)
 								.children(h3().children(primaryExample.label));
@@ -93,8 +97,8 @@ getFrameworks().then((frameworks) => {
 
 							const exampleItemsWrapper = div({ class: "items" }).children(
 								renderExampleItem(primaryFramework, primaryExample),
-								computed(() => {
-									const framework = compared.val.framework;
+								compared.derive((compared) => {
+									const framework = compared.framework;
 									const example =
 										framework.groups[primaryGroupKey].examples[
 											primaryExampleKey
@@ -127,8 +131,8 @@ getFrameworks().then((frameworks) => {
 										button()
 											.onclick(() => (currentFile.val = file))
 											.ariaCurrent(
-												computed(() =>
-													String(currentFile.val === file),
+												currentFile.derive((currentFile) =>
+													String(currentFile === file),
 												),
 											)
 											.children(file.name),
@@ -136,9 +140,9 @@ getFrameworks().then((frameworks) => {
 								}
 
 								exampleItemWrapper.children(
-									computed(() => {
+									currentFile.derive((currentFile) => {
 										const fileExtension =
-											currentFile.val.name.split(".").at(-1) ?? "";
+											currentFile.name.split(".").at(-1) ?? "";
 
 										const highlightResult =
 											(
@@ -149,10 +153,10 @@ getFrameworks().then((frameworks) => {
 											) ?
 												highlightjs.highlight(
 													"typescript",
-													currentFile.val.content,
+													currentFile.content,
 												)
 											:	highlightjs.highlightAuto(
-													currentFile.val.content,
+													currentFile.content,
 												);
 
 										return pre().children(
@@ -185,8 +189,10 @@ getFrameworks().then((frameworks) => {
 			.children(
 				summary().children(
 					div({ class: "item" }).children(
-						img().src(computed(() => compared.val.framework.iconSrc)),
-						computed(() => compared.val.framework.label),
+						img().src(
+							compared.derive((compared) => compared.framework.iconSrc),
+						),
+						compared.derive((compared) => compared.framework.label),
 					),
 				),
 				ul().children(
@@ -216,9 +222,9 @@ getFrameworks().then((frameworks) => {
 										class: "item",
 									})
 										.href(
-											computed(
-												() =>
-													`#${compared.val.key}/${groupKey}/${exampleKey}`,
+											compared.derive(
+												(compared) =>
+													`#${compared.key}/${groupKey}/${exampleKey}`,
 											),
 										)
 										.title(example.label)
