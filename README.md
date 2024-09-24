@@ -4,7 +4,7 @@
     <img width="100px" height="auto" alt="purify.js logo" src="https://ipfs.io/ipfs/QmPmZkHS66TTFiVpRQiyM7FbDZ3sKzkQEtWVeXuRp8cs9V" />
 </p>
 <p align="center">
-    Amazing DX with 1Kb
+    Simple, not Familiar
 </p>
 
 ---
