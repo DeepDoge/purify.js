@@ -1,13 +1,26 @@
 import { fragment, tags } from "purify-js";
-import "./style.css";
+import css from "./style.css?raw";
 
-const { h1, button } = tags;
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(css);
+
+const { div, h1, button } = tags;
 
 export function CssStyle() {
-	return fragment(
-		h1({ class: "title" }).children("I am red"),
-		button({
-			style: "font-size: 10rem",
-		}).children("I am a button"),
+	const host = div();
+	const shadow = host.element.attachShadow({
+		mode: "open",
+	});
+	shadow.adoptedStyleSheets.push(sheet);
+
+	shadow.append(
+		fragment(
+			h1({ class: "title" }).textContent("I am red"),
+			button({
+				style: "font-size: 10rem",
+			}).textContent("I am a button"),
+		),
 	);
+
+	return host;
 }

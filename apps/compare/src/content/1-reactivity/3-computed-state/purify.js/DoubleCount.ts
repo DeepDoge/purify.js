@@ -1,14 +1,10 @@
-import { computed, ref, tags } from "purify-js";
+import { ref, tags } from "purify-js";
 
 const { div } = tags;
 
-export function Name() {
+export function DoubleCount() {
 	const count = ref(10);
-	const doubleCount = computed(
-		() => count.val * 2,
-		[count],
-	);
-	const tripleCount = count.derive((count) => count * 3);
+	const doubleCount = count.derive((count) => count * 2);
 
-	return div().children(doubleCount, tripleCount);
+	return div().children(doubleCount);
 }

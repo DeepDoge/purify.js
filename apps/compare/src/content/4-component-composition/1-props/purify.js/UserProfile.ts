@@ -1,6 +1,6 @@
 import { fragment, tags } from "purify-js";
 
-const { p } = tags;
+const { div, p } = tags;
 
 export function UserProfile({
 	name = "",
@@ -8,16 +8,25 @@ export function UserProfile({
 	favouriteColors = [] as string[],
 	isAvailable = false,
 }) {
-	return fragment(
-		p().children("My name is ", name),
-		p().children("My age is ", age),
-		p().children(
-			"My favourite colors are ",
-			favouriteColors.join(", "),
-		),
-		p().children(
-			"I am ",
-			isAvailable ? "available" : "not available",
+	const host = div();
+	const shadow = host.element.attachShadow({
+		mode: "open",
+	});
+
+	shadow.append(
+		fragment(
+			p().children("My name is ", name),
+			p().children("My age is ", age),
+			p().children(
+				"My favourite colors are ",
+				favouriteColors.join(", "),
+			),
+			p().children(
+				"I am ",
+				isAvailable ? "available" : "not available",
+			),
 		),
 	);
+
+	return host;
 }

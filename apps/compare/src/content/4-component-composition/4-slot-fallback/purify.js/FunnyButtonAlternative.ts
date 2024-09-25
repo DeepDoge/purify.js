@@ -2,7 +2,7 @@ import { MemberOf, tags } from "purify-js";
 
 const { button, span } = tags;
 
-export function FunnyButton2(
+export function FunnyButtonAlternative(
 	children: MemberOf<HTMLButtonElement> = span().children(
 		"No content found",
 	),

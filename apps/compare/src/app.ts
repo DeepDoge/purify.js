@@ -48,7 +48,7 @@ getFrameworks().then((frameworks) => {
 
 	const compared = ref(calculateCompared(path.val));
 	function calculateCompared(pathValue: (typeof path)["val"]) {
-		const key = pathValue.framework || "solid";
+		const key = pathValue.framework || "lit";
 		return {
 			key,
 			framework: frameworks[key],

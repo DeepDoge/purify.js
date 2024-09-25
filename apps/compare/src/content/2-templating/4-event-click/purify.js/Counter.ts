@@ -10,9 +10,7 @@ export function Counter() {
 	}
 
 	return fragment(
-		p().children("Count: ", count),
-		button()
-			.onclick(incrementCount)
-			.children("Increment"),
+		p().children("Counter: ", count),
+		button().onclick(incrementCount).children("+1"),
 	);
 }

@@ -16,17 +16,19 @@ export function TrafficsLight() {
 	}
 
 	return fragment(
-		button().onclick(nextLight).children("Next light"),
+		button()
+			.onclick(nextLight)
+			.textContent("Next light"),
 		p().children("Light is: ", light),
 		p().children(
 			"You must",
 			light.derive((light) => {
 				if (light === "red") {
-					return span().children("STOP");
+					return span().textContent("STOP");
 				} else if (light === "orange") {
-					return span().children("SLOW DOWN");
+					return span().textContent("SLOW DOWN");
 				} else if (light === "green") {
-					return span().children("GO");
+					return span().textContent("GO");
 				}
 				light satisfies never;
 				throw new Error(
