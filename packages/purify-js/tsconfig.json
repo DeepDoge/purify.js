@@ -2,11 +2,11 @@
     "compilerOptions": {
         "lib": ["ESNext", "DOM"],
 
-        "module": "NodeNext",
-        "target": "ESNext",
+        "module": "ESNext",
+        "target": "ES2023",
 
         "moduleDetection": "force",
-        "moduleResolution": "NodeNext",
+        "moduleResolution": "Bundler",
 
         "outDir": "dist",
         "declaration": true,
@@ -19,5 +19,6 @@
         "noImplicitOverride": true,
         "checkJs": true
     },
-    "include": ["./lib"]
+    "include": ["./lib"],
+    "exclude": ["**/*.test.ts"]
 }

@@ -19,11 +19,14 @@ type NotEventHandler<T, K extends keyof T> =
             : true
         : true
 
-let instancesOf = <T extends (abstract new (...args: any[]) => any)[]>(
+let instancesOf = <T extends ((abstract new (...args: any[]) => any) | { [Symbol.hasInstance](value: any): any })[]>(
     target: unknown,
     ...constructors: T
-): target is T[number] extends abstract new (...args: any[]) => infer U ? U : never =>
-    constructors.some((constructor) => target instanceof constructor)
+): target is T[number] extends abstract new (...args: any[]) => infer U
+    ? U
+    : T[number] extends { [Symbol.hasInstance](value: any): value is infer U }
+      ? U
+      : never => constructors.some((constructor) => target instanceof constructor)
 
 /**
  * Creates a DocumentFragment containing the provided members.
@@ -44,9 +47,7 @@ export let fragment = (...members: MemberOf<DocumentFragment>[]) => {
     return fragment
 }
 
-export let toAppendable = (
-    value: unknown,
-): string | CharacterData | Element | DocumentFragment => {
+export let toAppendable = (value: unknown): string | CharacterData | Element | DocumentFragment => {
     if (value == null) {
         return ""
     }
@@ -58,9 +59,7 @@ export let toAppendable = (
     if (instancesOf(value, Signal)) {
         let wrapper = enchance("div")
         wrapper.style.display = "contents"
-        wrapper.onConnect(() =>
-            value.follow((value) => wrapper.replaceChildren(toAppendable(value)), true),
-        )
+        wrapper.onConnect(() => value.follow((value) => wrapper.replaceChildren(toAppendable(value)), true))
         return wrapper
     }
 
@@ -92,17 +91,12 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
     if (!constructor) {
         custom.define(
             newTagName,
-            (constructor = class extends (
-                (document.createElement(tagname).constructor as typeof HTMLElement)
-            ) {
+            (constructor = class extends (document.createElement(tagname).constructor as typeof HTMLElement) {
                 #connectedCallbacks = new Set<Enhanced.ConnectedCallback>()
                 // different connected callbacks might use same cleanup function
                 #disconnectedCallbacks: Enhanced.DisconnectedCallback[] = []
 
-                #call(
-                    callback: Enhanced.ConnectedCallback,
-                    disconnectedCallback = callback(),
-                ) {
+                #call(callback: Enhanced.ConnectedCallback, disconnectedCallback = callback()) {
                     if (disconnectedCallback) {
                         this.#disconnectedCallbacks.push(disconnectedCallback)
                     }
@@ -177,12 +171,7 @@ export let tags = new Proxy(
     {
         get:
             <T extends keyof HTMLElementTagNameMap>(_: never, tag: T) =>
-            (
-                attributes: Record<
-                    string,
-                    Builder.AttributeValue<Enhanced<HTMLElementTagNameMap[T]>>
-                > = {},
-            ) =>
+            (attributes: Record<string, Builder.AttributeValue<Enhanced<HTMLElementTagNameMap[T]>>> = {}) =>
                 Builder.Proxy(enchance(tag)).attributes(attributes),
     },
 ) as Tags
@@ -281,11 +270,7 @@ export namespace Builder {
         | (T extends Enhanced ? Signal<AttributeValue<T>> : never)
 
     export type Proxy<T extends Element> = Builder<T> & {
-        [K in keyof T as true extends
-            | IsReadonly<T, K>
-            | (IsFunction<T[K]> & NotEventHandler<T, K>)
-            ? never
-            : K]: (
+        [K in keyof T as true extends IsReadonly<T, K> | (IsFunction<T[K]> & NotEventHandler<T, K>) ? never : K]: (
             value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
                 ? U extends Event
                     ? (this: X, event: U & { currentTarget: T }) => R

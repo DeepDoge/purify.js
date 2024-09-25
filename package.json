@@ -14,7 +14,9 @@
     },
     "scripts": {
         "format": "prettier -w ./",
-        "compile": "tsc --project ./packages/purify-js/tsconfig.json",
+        "compile": "rm -rf ./packages/purify-js/dist && tsc --project ./packages/purify-js/tsconfig.json",
+        "test": "tsx --test ./packages/purify-js/lib/*.test.ts",
+        "test:dev": "tsx --test --watch ./packages/purify-js/lib/*.test.ts",
         "vite:dev": "npm run dev --prefix ./apps/vite",
         "vite:build": "npm run build --prefix ./apps/vite",
         "compare:dev": "npm run dev --prefix ./apps/compare",
@@ -22,9 +24,11 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.2.0",
+        "@types/node": "^22.7.0",
         "eslint": "^8.57.0",
         "prettier": "latest",
         "prettier-plugin-organize-imports": "latest",
+        "tsx": "^4.19.1",
         "typescript": "^5.4.5",
         "typescript-eslint": "^7.8.0"
     }
