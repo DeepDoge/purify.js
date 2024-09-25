@@ -19,15 +19,16 @@
 
 ### Size ⚡
 
-| Library         | .min.js | .min.js.gz |
-| --------------- | ------- | ---------- |
-| **purify.js**   | 2.0kB   | < 1.0kB    |
-| Preact 10.19.3  | 11.2kB  | 4.5kB      |
-| Solid 1.8.12    | 23kB    | 8.1kB      |
-| jQuery 3.7.1    | 85.1kB  | 29.7kB     |
-| Vue 3.4.15      | 110.4kB | 40kB       |
-| ReactDOM 18.2.0 | 130.2kB | 42kB       |
-| Angular 17.1.0  | 310kB   | 104kB      |
+| Library                                                                                  | .min.js | .min.js.gz |
+| ---------------------------------------------------------------------------------------- | ------- | ---------- |
+| **purify.js**                                                                            | 2.1kB   | < 1.0kB    |
+| Svelte 4.2.18 [(minimal)](https://github.com/DeepDoge/purify.js/tree/master/apps/svelte) | 3.8kB   | 1.8kB      |
+| Preact 10.19.3                                                                           | 11.2kB  | 4.5kB      |
+| Solid 1.8.12                                                                             | 23kB    | 8.1kB      |
+| jQuery 3.7.1                                                                             | 85.1kB  | 29.7kB     |
+| Vue 3.4.15                                                                               | 110.4kB | 40kB       |
+| ReactDOM 18.2.0                                                                          | 130.2kB | 42kB       |
+| Angular 17.1.0                                                                           | 310kB   | 104kB      |
 
 ### Syntax
 
