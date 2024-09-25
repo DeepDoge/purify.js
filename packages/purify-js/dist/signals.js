@@ -28,7 +28,10 @@ export class Signal {
     }
 }
 (function (Signal) {
-    class State extends Signal {
+    class Mutable extends Signal {
+    }
+    Signal.Mutable = Mutable;
+    class State extends Mutable {
         value;
         followers = new Set();
         /**

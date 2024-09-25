@@ -56,7 +56,12 @@ export abstract class Signal<T> {
 }
 
 export namespace Signal {
-    export class State<T> extends Signal<T> {
+    export abstract class Mutable<T> extends Signal<T> {
+        public abstract override get val(): T
+        public abstract override set val(value: T)
+    }
+
+    export class State<T> extends Mutable<T> {
         private value: T
         private followers = new Set<Signal.Follower<T>>()
 

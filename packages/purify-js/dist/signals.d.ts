@@ -46,7 +46,11 @@ export declare abstract class Signal<T> {
     derive<U>(getter: (value: T) => U): Signal.Computed<U>;
 }
 export declare namespace Signal {
-    class State<T> extends Signal<T> {
+    abstract class Mutable<T> extends Signal<T> {
+        abstract get val(): T;
+        abstract set val(value: T);
+    }
+    class State<T> extends Mutable<T> {
         private value;
         private followers;
         /**
