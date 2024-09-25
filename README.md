@@ -24,6 +24,7 @@
 | **purify.js**                                                                            | 2.1kB   | < 1.0kB    |
 | Svelte 4.2.18 [(minimal)](https://github.com/DeepDoge/purify.js/tree/master/apps/svelte) | 3.8kB   | 1.8kB      |
 | Preact 10.19.3                                                                           | 11.2kB  | 4.5kB      |
+| Lit 3.2.0 [(minimal)](https://github.com/DeepDoge/purify.js/tree/master/apps/lit)        | 16.2kB  | 6.0kB      |
 | Solid 1.8.12                                                                             | 23kB    | 8.1kB      |
 | jQuery 3.7.1                                                                             | 85.1kB  | 29.7kB     |
 | Vue 3.4.15                                                                               | 110.4kB | 40kB       |
