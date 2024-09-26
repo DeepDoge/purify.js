@@ -123,3 +123,5 @@ describe("Signals", () => {
         strictEqual(counter, 1)
     })
 })
+
+// TODO: computed shouldn't update without followers. and similar logic check
