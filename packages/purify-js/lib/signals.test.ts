@@ -1,6 +1,6 @@
 import { deepEqual, deepStrictEqual, strictEqual } from "node:assert"
 import { describe, it } from "node:test"
-import { computed, ref } from "./signals.js"
+import { computed, ref } from "./signals"
 
 describe("Signals", () => {
     it("Derive counter with immediate basics", () => {
