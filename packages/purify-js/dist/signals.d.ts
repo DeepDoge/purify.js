@@ -83,7 +83,7 @@ export declare namespace Signal {
          * unfollow(); // stops following
          */
         follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower;
-        emit(value?: T): void;
+        emit(): void;
     }
     /**
      * A signal that computes its value from other signals.

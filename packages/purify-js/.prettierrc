@@ -1,9 +1,9 @@
 {
-  "tabWidth": 4,
-  "printWidth": 120,
-  "semi": false,
-  "trailingComma": "all",
-  "arrowParens": "always",
-  "bracketSpacing": true,
-  "plugins": ["prettier-plugin-organize-imports"]
+    "tabWidth": 4,
+    "printWidth": 120,
+    "semi": false,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "plugins": ["prettier-plugin-organize-imports"]
 }

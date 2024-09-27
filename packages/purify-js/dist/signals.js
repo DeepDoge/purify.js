@@ -48,7 +48,8 @@ Signal.State = class extends Signal {
     set val(newValue) {
         let self = this
         if (self.#value === newValue) return
-        self.emit((self.#value = newValue))
+        self.#value = newValue
+        self.emit()
     }
     /**
      * Allows a function to follow changes to the signal's value.
@@ -73,10 +74,10 @@ Signal.State = class extends Signal {
             self.#followers.delete(follower)
         }
     }
-    emit(value = this.#value) {
+    emit() {
         let i = this.#followers.size
         for (let follower of this.#followers) {
-            if (i-- > 0) follower(value)
+            if (i-- > 0) follower(this.#value)
         }
     }
 }

@@ -1,5 +1,7 @@
 import { Signal } from "./signals.js"
 
+type Not<T extends boolean> = false extends T ? true : false
+type Equal<A, B> = A extends B ? (B extends A ? true : false) : false
 type IsReadonly<T, K extends keyof T> =
     (<T_1>() => T_1 extends { [Q in K]: T[K] } ? 1 : 2) extends <T_2>() => T_2 extends {
         readonly [Q_1 in K]: T[K]
@@ -10,14 +12,14 @@ type IsReadonly<T, K extends keyof T> =
         : false
 type IsFunction<T> = T extends Fn ? true : false
 type Fn = (...args: any[]) => any
-type NotEventHandler<T, K extends keyof T> =
+type IsEventHandler<T, K extends keyof T> =
     NonNullable<T[K]> extends (this: any, event: infer U) => any
         ? U extends Event
             ? K extends `on${any}`
-                ? false
-                : true
-            : true
-        : true
+                ? true
+                : false
+            : false
+        : false
 
 let instancesOf = <T extends ((abstract new (...args: any[]) => any) | { [Symbol.hasInstance](value: any): any })[]>(
     target: unknown,
@@ -57,10 +59,11 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
     }
 
     if (instancesOf(value, Signal)) {
-        let wrapper = enchance("div")
-        wrapper.style.display = "contents"
-        wrapper.onConnect(() => value.follow((value) => wrapper.replaceChildren(toAppendable(value)), true))
-        return wrapper
+        return toAppendable(
+            tags["div"]({ style: "display:contents" }).onConnect((element) =>
+                value.follow((value) => element.replaceChildren(toAppendable(value)), true),
+            ),
+        )
     }
 
     if (instancesOf(value, Builder)) {
@@ -75,16 +78,16 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 }
 
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback): void
+    onConnect(callback: Enhanced.ConnectedCallback<T>): void
 }
 export namespace Enhanced {
     export type DisconnectedCallback = () => void
-    export type ConnectedCallback = () => void | DisconnectedCallback
+    export type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback
 }
 
 let enchance = <T extends keyof HTMLElementTagNameMap>(
     tagname: T,
-    newTagName = `x-${tagname}`,
+    newTagName = `enchanced-${tagname}`,
     custom = customElements,
     constructor = custom.get(newTagName) as any,
 ): Enhanced<HTMLElementTagNameMap[T]> => {
@@ -92,11 +95,11 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
         custom.define(
             newTagName,
             (constructor = class extends (document.createElement(tagname).constructor as typeof HTMLElement) {
-                #connectedCallbacks = new Set<Enhanced.ConnectedCallback>()
+                #connectedCallbacks = new Set<Enhanced.ConnectedCallback<this>>()
                 // different connected callbacks might use same cleanup function
                 #disconnectedCallbacks: Enhanced.DisconnectedCallback[] = []
 
-                #call(callback: Enhanced.ConnectedCallback, disconnectedCallback = callback()) {
+                #call(callback: Enhanced.ConnectedCallback<this>, disconnectedCallback = callback(this)) {
                     if (disconnectedCallback) {
                         this.#disconnectedCallbacks.push(disconnectedCallback)
                     }
@@ -115,7 +118,7 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                     this.#disconnectedCallbacks.length = 0
                 }
 
-                onConnect(callback: Enhanced.ConnectedCallback) {
+                onConnect(callback: Enhanced.ConnectedCallback<this>) {
                     let self = this
                     self.#connectedCallbacks.add(callback)
                     if (self.isConnected) {
@@ -180,6 +183,9 @@ export let tags = new Proxy(
  * Builder class to construct a builder to populate an element with attributes and children.
  */
 export class Builder<T extends Element> {
+    public readonly element: T
+    public readonly onConnect: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined
+
     /**
      * Creates a builder for the given element.
      *
@@ -189,7 +195,9 @@ export class Builder<T extends Element> {
      *  .attributes({ class: 'hello', 'aria-hidden': 'false' })
      *  .children(span('Hello, World!'));
      */
-    constructor(public element: T) {}
+    constructor(element: T) {
+        this.onConnect = (this.element = element as any).onConnect
+    }
 
     /* 
         Since we access buildier from, BuilderProxy
@@ -197,13 +205,13 @@ export class Builder<T extends Element> {
         We don't wanna conflict with something that might come in the future.
     */
 
-    children(...members: MemberOf<T>[]) {
+    public children(...members: MemberOf<T>[]) {
         let element = this.element
         element.append(...members.map(toAppendable))
         return this
     }
 
-    attributes(attributes: Record<string, Builder.AttributeValue<T>>) {
+    public attributes(attributes: Record<string, Builder.AttributeValue<T>>) {
         let element = this.element
         for (let name in attributes) {
             let value = attributes[name]
@@ -242,15 +250,13 @@ export class Builder<T extends Element> {
      */
     static Proxy = <T extends Element>(element: T) =>
         new Proxy(new Builder(element), {
-            get: (target: any, name, proxy) =>
-                target[name] ??
+            get: (target: Builder<T>, name: PropertyKey, proxy) =>
+                (target as any)[name] ??
                 (name in element &&
-                    ((value: unknown) => {
+                    ((value: any) => {
                         if (instancesOf(value, Signal)) {
                             ;(element as never as Enhanced).onConnect(() =>
-                                value.follow((value) => {
-                                    ;(element as any)[name] = value
-                                }, true),
+                                value.follow(() => ((element as any)[name] = value), true),
                             )
                         } else {
                             ;(element as any)[name] = value
@@ -270,15 +276,19 @@ export namespace Builder {
         | (T extends Enhanced ? Signal<AttributeValue<T>> : never)
 
     export type Proxy<T extends Element> = Builder<T> & {
-        [K in keyof T as true extends IsReadonly<T, K> | (IsFunction<T[K]> & NotEventHandler<T, K>) ? never : K]: (
-            value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
-                ? U extends Event
-                    ? (this: X, event: U & { currentTarget: T }) => R
-                    : T[K]
-                : T extends Enhanced
-                  ? T[K] | Signal<T[K]>
-                  : T[K],
-        ) => Proxy<T>
+        [K in keyof T as true extends [IsEventHandler<T, K>, Not<IsFunction<T[K]>> & Not<IsReadonly<T, K>>][number]
+            ? K
+            : never]: T[K] extends (...args: infer Args) => void
+            ? (...args: Args) => Proxy<T>
+            : (
+                  value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
+                      ? U extends Event
+                          ? (this: X, event: U & { currentTarget: T }) => R
+                          : T[K]
+                      : T extends Enhanced
+                        ? T[K] | Signal<T[K]>
+                        : T[K],
+              ) => Proxy<T>
     }
 }
 

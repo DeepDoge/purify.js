@@ -27,10 +27,7 @@ export let toAppendable = (value) => {
         return value;
     }
     if (instancesOf(value, Signal)) {
-        let wrapper = enchance("div");
-        wrapper.style.display = "contents";
-        wrapper.onConnect(() => value.follow((value) => wrapper.replaceChildren(toAppendable(value)), true));
-        return wrapper;
+        return toAppendable(tags["div"]({ style: "display:contents" }).onConnect((element) => value.follow((value) => element.replaceChildren(toAppendable(value)), true)));
     }
     if (instancesOf(value, Builder)) {
         return value.element;
@@ -40,13 +37,13 @@ export let toAppendable = (value) => {
     }
     return String(value);
 };
-let enchance = (tagname, newTagName = `x-${tagname}`, custom = customElements, constructor = custom.get(newTagName)) => {
+let enchance = (tagname, newTagName = `enchanced-${tagname}`, custom = customElements, constructor = custom.get(newTagName)) => {
     if (!constructor) {
         custom.define(newTagName, (constructor = class extends document.createElement(tagname).constructor {
             #connectedCallbacks = new Set();
             // different connected callbacks might use same cleanup function
             #disconnectedCallbacks = [];
-            #call(callback, disconnectedCallback = callback()) {
+            #call(callback, disconnectedCallback = callback(this)) {
                 if (disconnectedCallback) {
                     this.#disconnectedCallbacks.push(disconnectedCallback);
                 }
@@ -111,6 +108,7 @@ export let tags = new Proxy({}, {
  */
 export class Builder {
     element;
+    onConnect;
     /**
      * Creates a builder for the given element.
      *
@@ -121,7 +119,7 @@ export class Builder {
      *  .children(span('Hello, World!'));
      */
     constructor(element) {
-        this.element = element;
+        this.onConnect = (this.element = element).onConnect;
     }
     /*
         Since we access buildier from, BuilderProxy
@@ -175,10 +173,7 @@ export class Builder {
                 ((value) => {
                     if (instancesOf(value, Signal)) {
                         ;
-                        element.onConnect(() => value.follow((value) => {
-                            ;
-                            element[name] = value;
-                        }, true));
+                        element.onConnect(() => value.follow(() => (element[name] = value), true));
                     }
                     else {
                         ;

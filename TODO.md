@@ -105,3 +105,8 @@ being in the dark was my problem with mainstream frameworks anyway
 it also simplifies code. i have this weird feeling that if i bare bone simplify everything without limitations
 everything will be a breeze some how by itself
 not familiar, but simple without limitations
+
+UPDATE:
+Ok, i defineanlty need to rewrite tags.ts file sometime.
+i need to somehow simplify it. so i have more space to work with
+rn im almost at 1kb, so cant do anything more

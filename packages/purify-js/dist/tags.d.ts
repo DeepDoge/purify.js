@@ -1,4 +1,5 @@
 import { Signal } from "./signals.js";
+type Not<T extends boolean> = false extends T ? true : false;
 type IsReadonly<T, K extends keyof T> = (<T_1>() => T_1 extends {
     [Q in K]: T[K];
 } ? 1 : 2) extends <T_2>() => T_2 extends {
@@ -6,7 +7,7 @@ type IsReadonly<T, K extends keyof T> = (<T_1>() => T_1 extends {
 } ? 1 : 2 ? true : false;
 type IsFunction<T> = T extends Fn ? true : false;
 type Fn = (...args: any[]) => any;
-type NotEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: any, event: infer U) => any ? U extends Event ? K extends `on${any}` ? false : true : true : true;
+type IsEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: any, event: infer U) => any ? U extends Event ? K extends `on${any}` ? true : false : false : false;
 /**
  * Creates a DocumentFragment containing the provided members.
  *
@@ -23,11 +24,11 @@ type NotEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: an
 export declare let fragment: (...members: MemberOf<DocumentFragment>[]) => DocumentFragment;
 export declare let toAppendable: (value: unknown) => string | CharacterData | Element | DocumentFragment;
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback): void;
+    onConnect(callback: Enhanced.ConnectedCallback<T>): void;
 };
 export declare namespace Enhanced {
     type DisconnectedCallback = () => void;
-    type ConnectedCallback = () => void | DisconnectedCallback;
+    type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback;
 }
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (attributes?: {
@@ -66,7 +67,8 @@ export declare let tags: Tags;
  * Builder class to construct a builder to populate an element with attributes and children.
  */
 export declare class Builder<T extends Element> {
-    element: T;
+    readonly element: T;
+    readonly onConnect: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined;
     /**
      * Creates a builder for the given element.
      *
@@ -98,7 +100,7 @@ export declare class Builder<T extends Element> {
 export declare namespace Builder {
     type AttributeValue<T extends Element> = string | number | boolean | bigint | null | (T extends Enhanced ? Signal<AttributeValue<T>> : never);
     type Proxy<T extends Element> = Builder<T> & {
-        [K in keyof T as true extends IsReadonly<T, K> | (IsFunction<T[K]> & NotEventHandler<T, K>) ? never : K]: (value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R ? U extends Event ? (this: X, event: U & {
+        [K in keyof T as true extends [IsEventHandler<T, K>, Not<IsFunction<T[K]>> & Not<IsReadonly<T, K>>][number] ? K : never]: T[K] extends (...args: infer Args) => void ? (...args: Args) => Proxy<T> : (value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R ? U extends Event ? (this: X, event: U & {
             currentTarget: T;
         }) => R : T[K] : T extends Enhanced ? T[K] | Signal<T[K]> : T[K]) => Proxy<T>;
     };
