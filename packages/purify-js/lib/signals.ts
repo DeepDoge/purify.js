@@ -83,11 +83,7 @@ export namespace Signal {
         public override set val(newValue) {
             let self = this
             if (self.#value === newValue) return
-            self.#value = newValue
-            let i = self.#followers.size
-            for (let follower of self.#followers) {
-                if (i-- > 0) follower(newValue)
-            }
+            self.emit((self.#value = newValue))
         }
 
         /**
@@ -113,6 +109,13 @@ export namespace Signal {
 
             return () => {
                 self.#followers.delete(follower)
+            }
+        }
+
+        public emit(value: T = this.#value) {
+            let i = this.#followers.size
+            for (let follower of this.#followers) {
+                if (i-- > 0) follower(value)
             }
         }
     }
