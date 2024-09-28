@@ -40,7 +40,7 @@ export abstract class Signal<T> implements SignalLike<T> {
      * console.log(derivedSignal.val); // logs: 15
      */
     public derive<U>(getter: (value: T) => U) {
-        return computed([this], () => getter(this.val))
+        return computed((add) => getter(add(this).val))
     }
 }
 
@@ -57,6 +57,8 @@ export namespace Signal {
      */
     export type Unfollower = { (): void }
 
+    const FOLLOWERS = Symbol()
+
     /**
      * A signal whose value can be updated.
      *
@@ -68,7 +70,7 @@ export namespace Signal {
      * state.val = 42; // logs: 42
      */
     export class State<T> extends Signal<T> {
-        #followers = new Set<Signal.Follower<T>>()
+        public [FOLLOWERS] = new Set<Signal.Follower<T>>()
         #value: T
 
         constructor(initial: T) {
@@ -81,10 +83,9 @@ export namespace Signal {
         }
 
         public override set val(newValue) {
-            let self = this
-            if (self.#value === newValue) return
-            self.#value = newValue
-            self.emit()
+            if (this.#value === newValue) return
+            this.#value = newValue
+            this.emit()
         }
 
         /**
@@ -101,24 +102,28 @@ export namespace Signal {
          * unfollow(); // stops following
          */
         public override follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower {
-            let self = this
             if (immediate) {
-                follower(self.#value)
+                follower(this.#value)
             }
 
-            self.#followers.add(follower)
+            this[FOLLOWERS].add(follower)
 
             return () => {
-                self.#followers.delete(follower)
+                this[FOLLOWERS].delete(follower)
             }
         }
 
         public emit() {
-            let i = this.#followers.size
-            for (let follower of this.#followers) {
+            let i = this[FOLLOWERS].size
+            for (let follower of this[FOLLOWERS]) {
                 if (i-- > 0) follower(this.#value)
             }
         }
+    }
+
+    export namespace Computed {
+        export type Getter<T> = (add: AddDependency) => T
+        export type AddDependency = <T extends SignalLike<unknown>>(newDependency: T) => T
     }
 
     /**
@@ -133,24 +138,44 @@ export namespace Signal {
      * console.log(computedSignal.val); // logs: 30
      */
     export class Computed<T> extends Signal<T> {
-        #dependencies: SignalLike<unknown>[]
-        #getter: () => T
+        #dependencies = new Map<SignalLike<unknown>, Signal.Unfollower>()
+        #getter: Computed.Getter<T>
+        #state = ref<T>(0 as never)
 
-        constructor(dependencies: SignalLike<unknown>[], getter: () => T) {
+        constructor(getter: Computed.Getter<T>) {
             super()
-            this.#dependencies = dependencies
             this.#getter = getter
         }
 
-        #cache = {} as T
-        #previousCache = this.#cache
+        #update() {
+            let self = this
+            let newDependencies = new Set<SignalLike<unknown>>()
+            let val = (self.#state.val = self.#getter((dependency) => {
+                newDependencies.add(dependency)
+                return dependency
+            }))
 
-        #followerCount = 0
-        #counter = 0
+            for (let [dependency, unfollow] of self.#dependencies) {
+                if (!newDependencies.has(dependency)) {
+                    unfollow()
+                    self.#dependencies.delete(dependency)
+                }
+            }
+
+            for (let dependency of newDependencies) {
+                if (!self.#dependencies.has(dependency)) {
+                    self.#dependencies.set(
+                        dependency,
+                        dependency.follow(() => self.#update()),
+                    )
+                }
+            }
+
+            return val
+        }
 
         public override get val(): T {
-            let self = this
-            return self.#followerCount ? self.#cache : self.#getter()
+            return this.#state[FOLLOWERS].size ? this.#state.val : this.#getter((x) => x)
         }
 
         /**
@@ -168,32 +193,20 @@ export namespace Signal {
          */
         public override follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower {
             let self = this
-            if (immediate) {
-                follower(self.val)
+            if (!self.#state[FOLLOWERS].size) {
+                // start
+                this.#update()
             }
-            self.#followerCount++
 
-            let unfollows: Signal.Unfollower[] = []
-            for (let dependency of self.#dependencies) {
-                unfollows.push(
-                    dependency.follow(() => {
-                        if (!self.#counter) {
-                            self.#counter = self.#followerCount
-                            self.#cache = self.#getter()
-                        }
-                        self.#counter--
-                        if (self.#previousCache !== (self.#previousCache = self.#cache)) {
-                            follower(self.#cache)
-                        }
-                    }),
-                )
-            }
+            let unfollow = self.#state.follow(follower, immediate)
 
             return () => {
-                for (let unfollow of unfollows) {
-                    unfollow()
+                unfollow()
+                if (!self.#state[FOLLOWERS].size) {
+                    // stop
+                    self.#dependencies.forEach((unfollow) => unfollow())
+                    self.#dependencies.clear()
                 }
-                this.#followerCount--
             }
         }
     }
@@ -228,8 +241,7 @@ export let ref = <T>(value: T): Signal.State<T> => new Signal.State(value)
  * const sum = computed([a, b], () => a.val + b.val);
  * console.log(sum.val); // logs: 3
  */
-export let computed = <T>(dependencies: SignalLike<unknown>[], getter: () => T): Signal.Computed<T> =>
-    new Signal.Computed(dependencies, getter)
+export let computed = <T>(getter: Signal.Computed.Getter<T>): Signal.Computed<T> => new Signal.Computed(getter)
 
 /**
  * Creates a new signal that will resolve with the result of a promise.

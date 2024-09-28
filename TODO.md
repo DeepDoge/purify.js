@@ -110,3 +110,16 @@ UPDATE:
 Ok, i defineanlty need to rewrite tags.ts file sometime.
 i need to somehow simplify it. so i have more space to work with
 rn im almost at 1kb, so cant do anything more
+
+UPDATE 2:
+went back to dynamic depenedencies, because of the recursive dependencies,
+but instead of discovering dependecies from the stack call, now i add them manully in the callback
+which gives more control to me, makes it more verbose.
+also kept the derive function which lets me quickly create one dependency computed signals
+
+I can't squize signals anymore.
+So if i wanna continue i should remove fat from tags somehow
+maybe rethink the whole think
+focus on enchanced elements
+maybe make it all about enchanced elements
+can simplify things there fore makes it smaller, maybe

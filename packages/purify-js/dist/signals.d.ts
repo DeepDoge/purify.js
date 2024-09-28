@@ -45,15 +45,16 @@ export declare namespace Signal {
      *
      * @template T The type of the signal value.
      */
-    type Follower<T> = {
+    export type Follower<T> = {
         (value: T): unknown;
     };
     /**
      * A function to stop following a signal.
      */
-    type Unfollower = {
+    export type Unfollower = {
         (): void;
     };
+    const FOLLOWERS: unique symbol;
     /**
      * A signal whose value can be updated.
      *
@@ -64,8 +65,9 @@ export declare namespace Signal {
      * state.follow(val => console.log(val)); // logs: 0
      * state.val = 42; // logs: 42
      */
-    class State<T> extends Signal<T> {
+    export class State<T> extends Signal<T> {
         #private;
+        [FOLLOWERS]: Set<Follower<T>>;
         constructor(initial: T);
         get val(): T;
         set val(newValue: T);
@@ -85,6 +87,10 @@ export declare namespace Signal {
         follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower;
         emit(): void;
     }
+    export namespace Computed {
+        type Getter<T> = (add: AddDependency) => T;
+        type AddDependency = <T extends SignalLike<unknown>>(newDependency: T) => T;
+    }
     /**
      * A signal that computes its value from other signals.
      *
@@ -96,9 +102,9 @@ export declare namespace Signal {
      * const computedSignal = computed([signal1, signal2], () => signal1.val + signal2.val);
      * console.log(computedSignal.val); // logs: 30
      */
-    class Computed<T> extends Signal<T> {
+    export class Computed<T> extends Signal<T> {
         #private;
-        constructor(dependencies: SignalLike<unknown>[], getter: () => T);
+        constructor(getter: Computed.Getter<T>);
         get val(): T;
         /**
          * Follows changes to the computed signal.
@@ -115,6 +121,7 @@ export declare namespace Signal {
          */
         follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower;
     }
+    export {};
 }
 /**
  * Creates a new state signal with an initial value.
@@ -144,7 +151,7 @@ export declare let ref: <T>(value: T) => Signal.State<T>;
  * const sum = computed([a, b], () => a.val + b.val);
  * console.log(sum.val); // logs: 3
  */
-export declare let computed: <T>(dependencies: SignalLike<unknown>[], getter: () => T) => Signal.Computed<T>;
+export declare let computed: <T>(getter: Signal.Computed.Getter<T>) => Signal.Computed<T>;
 /**
  * Creates a new signal that will resolve with the result of a promise.
  *

@@ -27,7 +27,7 @@ export let toAppendable = (value) => {
         return value;
     }
     if (instancesOf(value, Signal)) {
-        return toAppendable(tags["div"]({ style: "display:contents" }).use(({ element }) => element.onConnect(() => value.follow((value) => element.replaceChildren(toAppendable(value)), true))));
+        return toAppendable(tags["div"]({ style: "display:contents" }).use((element) => value.follow((value) => element.replaceChildren(toAppendable(value)), true)));
     }
     if (instancesOf(value, Builder)) {
         return value.element;
@@ -121,7 +121,7 @@ export class Builder {
         this.element = element;
     }
     use(callback) {
-        callback(this);
+        this.element.onConnect(callback);
         return this;
     }
     /*
@@ -147,7 +147,6 @@ export class Builder {
                 }
             };
             if (instancesOf(value, Signal)) {
-                // @ts-ignore
                 element.onConnect(() => value.follow(setOrRemoveAttribute, true));
             }
             else {
@@ -175,7 +174,6 @@ export class Builder {
             (name in element &&
                 ((value) => {
                     if (instancesOf(value, Signal)) {
-                        ;
                         element.onConnect(() => value.follow((value) => (element[name] = value), true));
                     }
                     else {

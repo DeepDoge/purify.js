@@ -22,9 +22,10 @@ export class Signal {
      * console.log(derivedSignal.val); // logs: 15
      */
     derive(getter) {
-        return computed([this], () => getter(this.val))
+        return computed((add) => getter(add(this).val))
     }
 }
+let FOLLOWERS = Symbol()
 /**
  * A signal whose value can be updated.
  *
@@ -36,7 +37,7 @@ export class Signal {
  * state.val = 42; // logs: 42
  */
 Signal.State = class extends Signal {
-    #followers = new Set()
+    [FOLLOWERS] = new Set()
     #value
     constructor(initial) {
         super()
@@ -46,10 +47,9 @@ Signal.State = class extends Signal {
         return this.#value
     }
     set val(newValue) {
-        let self = this
-        if (self.#value === newValue) return
-        self.#value = newValue
-        self.emit()
+        if (this.#value === newValue) return
+        this.#value = newValue
+        this.emit()
     }
     /**
      * Allows a function to follow changes to the signal's value.
@@ -65,18 +65,17 @@ Signal.State = class extends Signal {
      * unfollow(); // stops following
      */
     follow(follower, immediate) {
-        let self = this
         if (immediate) {
-            follower(self.#value)
+            follower(this.#value)
         }
-        self.#followers.add(follower)
+        this[FOLLOWERS].add(follower)
         return () => {
-            self.#followers.delete(follower)
+            this[FOLLOWERS].delete(follower)
         }
     }
     emit() {
-        let i = this.#followers.size
-        for (let follower of this.#followers) {
+        let i = this[FOLLOWERS].size
+        for (let follower of this[FOLLOWERS]) {
             if (i-- > 0) follower(this.#value)
         }
     }
@@ -93,20 +92,38 @@ Signal.State = class extends Signal {
  * console.log(computedSignal.val); // logs: 30
  */
 Signal.Computed = class extends Signal {
-    #dependencies
+    #dependencies = new Map()
     #getter
-    constructor(dependencies, getter) {
+    #state = ref(0)
+    constructor(getter) {
         super()
-        this.#dependencies = dependencies
         this.#getter = getter
     }
-    #cache = {}
-    #previousCache = this.#cache
-    #followerCount = 0
-    #counter = 0
-    get val() {
+    #update() {
         let self = this
-        return self.#followerCount ? self.#cache : self.#getter()
+        let newDependencies = new Set()
+        let val = (self.#state.val = self.#getter((dependency) => {
+            newDependencies.add(dependency)
+            return dependency
+        }))
+        for (let [dependency, unfollow] of self.#dependencies) {
+            if (!newDependencies.has(dependency)) {
+                unfollow()
+                self.#dependencies.delete(dependency)
+            }
+        }
+        for (let dependency of newDependencies) {
+            if (!self.#dependencies.has(dependency)) {
+                self.#dependencies.set(
+                    dependency,
+                    dependency.follow(() => self.#update()),
+                )
+            }
+        }
+        return val
+    }
+    get val() {
+        return this.#state[FOLLOWERS].size ? this.#state.val : this.#getter((x) => x)
     }
     /**
      * Follows changes to the computed signal.
@@ -123,30 +140,18 @@ Signal.Computed = class extends Signal {
      */
     follow(follower, immediate) {
         let self = this
-        if (immediate) {
-            follower(self.val)
+        if (!self.#state[FOLLOWERS].size) {
+            // start
+            this.#update()
         }
-        self.#followerCount++
-        let unfollows = []
-        for (let dependency of self.#dependencies) {
-            unfollows.push(
-                dependency.follow(() => {
-                    if (!self.#counter) {
-                        self.#counter = self.#followerCount
-                        self.#cache = self.#getter()
-                    }
-                    self.#counter--
-                    if (self.#previousCache !== (self.#previousCache = self.#cache)) {
-                        follower(self.#cache)
-                    }
-                }),
-            )
-        }
+        let unfollow = self.#state.follow(follower, immediate)
         return () => {
-            for (let unfollow of unfollows) {
-                unfollow()
+            unfollow()
+            if (!self.#state[FOLLOWERS].size) {
+                // stop
+                self.#dependencies.forEach((unfollow) => unfollow())
+                self.#dependencies.clear()
             }
-            this.#followerCount--
         }
     }
 }
@@ -178,7 +183,7 @@ export let ref = (value) => new Signal.State(value)
  * const sum = computed([a, b], () => a.val + b.val);
  * console.log(sum.val); // logs: 3
  */
-export let computed = (dependencies, getter) => new Signal.Computed(dependencies, getter)
+export let computed = (getter) => new Signal.Computed(getter)
 /**
  * Creates a new signal that will resolve with the result of a promise.
  *

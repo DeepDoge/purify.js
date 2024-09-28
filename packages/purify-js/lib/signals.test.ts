@@ -34,7 +34,7 @@ describe("Signals", () => {
     it("Computed multiple dependency", () => {
         const a = ref(0)
         const b = ref(0)
-        const ab = computed([a, b], () => `${a.val},${b.val}`)
+        const ab = computed((add) => `${add(a).val},${add(b).val}`)
 
         const results: string[] = []
         ab.follow((ab) => results.push(ab))
@@ -50,39 +50,36 @@ describe("Signals", () => {
     it("Computed multi follower should call getter once", () => {
         let counter = 0
         const a = ref(0)
-        const b = computed([a], () => counter++)
+        const b = a.derive(() => counter++)
+        b.follow(() => {})
+        b.follow(() => {})
         b.follow(() => {})
         b.follow(() => {})
 
         a.val++
 
-        strictEqual(counter, 1)
+        strictEqual(counter, 1 + 1) // +1 for the initial dependency discovery
     })
 
     it("Computed shouldn't call followers if the value is the same as the previous value", () => {
         const a = ref(0)
-        const b = computed([a], () => "hello")
+        const b = a.derive((a) => a % 2)
         const results: unknown[] = []
         b.follow((value) => {
             results.push(value)
         })
 
-        a.val++
-        a.val++
-        a.val++
-        a.val++
-        a.val++
-        a.val++
-        a.val++
-        a.val++
+        a.val = 1
+        a.val = 3
+        a.val = 2
 
-        deepStrictEqual(results, ["hello"])
+        deepStrictEqual(results, [1, 0])
     })
 
     it("Computed should update as many times as the dependencies changes", () => {
         let counter = 0
         const a = ref(0)
-        const b = computed([a], () => {
+        const b = a.derive(() => {
             counter++
         })
         b.follow(() => {})
@@ -91,15 +88,23 @@ describe("Signals", () => {
         a.val++
         a.val++
 
-        strictEqual(counter, 2)
+        strictEqual(counter, 2 + 1) // +1 for the initial dependency discovery
     })
 
     it("Computed shouldn't run without followers", () => {
         let counter = 0
         const a = ref(0)
-        computed([a], () => counter++)
+        a.derive(() => counter++)
 
         a.val++
+
+        strictEqual(counter, 0)
+    })
+
+    it("Computed shouldn't discover without followers", () => {
+        let counter = 0
+        const a = ref(0)
+        a.derive(() => counter++)
 
         strictEqual(counter, 0)
     })

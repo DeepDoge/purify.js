@@ -24,12 +24,12 @@ type IsEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: any
 export declare let fragment: (...members: MemberOf<DocumentFragment>[]) => DocumentFragment;
 export declare let toAppendable: (value: unknown) => string | CharacterData | Element | DocumentFragment;
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback<T>): Enhanced.OffConnected;
+    onConnect(callback: Enhanced.ConnectedCallback<Enhanced<T>>): Enhanced.OffConnected;
 };
 export declare namespace Enhanced {
     type OffConnected = () => void;
     type DisconnectedCallback = () => void;
-    type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback;
+    type ConnectedCallback<T extends Enhanced> = (element: T) => void | DisconnectedCallback;
 }
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (attributes?: {
@@ -67,7 +67,7 @@ export declare let tags: Tags;
 /**
  * Builder class to construct a builder to populate an element with attributes and children.
  */
-export declare class Builder<T extends Element> {
+export declare class Builder<T extends Enhanced> {
     readonly element: T;
     /**
      * Creates a builder for the given element.
@@ -79,7 +79,7 @@ export declare class Builder<T extends Element> {
      *  .children(span('Hello, World!'));
      */
     constructor(element: T);
-    use(callback: (builder: this) => void): this;
+    use(callback: Enhanced.ConnectedCallback<T>): this;
     children(...members: MemberOf<T>[]): this;
     attributes(attributes: Record<string, Builder.AttributeValue<T>>): this;
     /**
@@ -96,14 +96,14 @@ export declare class Builder<T extends Element> {
      *  .onclick(() => console.log('clicked!'));
      *  .ariaLabel("Hello, World!");
      */
-    static Proxy: <T_1 extends Element>(element: T_1) => Builder.Proxy<T_1>;
+    static Proxy: <T_1 extends Enhanced>(element: T_1) => Builder.Proxy<T_1>;
 }
 export declare namespace Builder {
     type AttributeValue<T extends Element> = string | number | boolean | bigint | null | (T extends Enhanced ? Signal<AttributeValue<T>> : never);
-    type Proxy<T extends Element> = Builder<T> & {
+    type Proxy<T extends Enhanced> = Builder<T> & {
         [K in keyof T as true extends [IsEventHandler<T, K>, Not<IsFunction<T[K]>> & Not<IsReadonly<T, K>>][number] ? K : never]: T[K] extends (...args: infer Args) => void ? (...args: Args) => Proxy<T> : (value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R ? U extends Event ? (this: X, event: U & {
             currentTarget: T;
-        }) => R : T[K] : T extends Enhanced ? T[K] | Signal<T[K]> : T[K]) => Proxy<T>;
+        }) => R : T[K] : T[K] | Signal<T[K]>) => Proxy<T>;
     };
 }
 export type ChildNodeOf<TParentNode extends ParentNode> = DocumentFragment | CharacterData | (TParentNode extends SVGElement ? TParentNode extends SVGForeignObjectElement ? Element : SVGElement : TParentNode extends HTMLElement ? Element : TParentNode extends MathMLElement ? MathMLElement : Element);

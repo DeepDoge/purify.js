@@ -60,8 +60,8 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 
     if (instancesOf(value, Signal)) {
         return toAppendable(
-            tags["div"]({ style: "display:contents" }).use(({ element }) =>
-                element.onConnect(() => value.follow((value) => element.replaceChildren(toAppendable(value)), true)),
+            tags["div"]({ style: "display:contents" }).use((element) =>
+                value.follow((value) => element.replaceChildren(toAppendable(value)), true),
             ),
         )
     }
@@ -78,12 +78,12 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 }
 
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback<T>): Enhanced.OffConnected
+    onConnect(callback: Enhanced.ConnectedCallback<Enhanced<T>>): Enhanced.OffConnected
 }
 export namespace Enhanced {
     export type OffConnected = () => void
     export type DisconnectedCallback = () => void
-    export type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback
+    export type ConnectedCallback<T extends Enhanced> = (element: T) => void | DisconnectedCallback
 }
 
 let enchance = <T extends keyof HTMLElementTagNameMap>(
@@ -183,7 +183,7 @@ export let tags = new Proxy(
 /**
  * Builder class to construct a builder to populate an element with attributes and children.
  */
-export class Builder<T extends Element> {
+export class Builder<T extends Enhanced> {
     public readonly element: T
 
     /**
@@ -199,8 +199,9 @@ export class Builder<T extends Element> {
         this.element = element
     }
 
-    public use(callback: (builder: this) => void) {
-        callback(this)
+    public use(callback: Enhanced.ConnectedCallback<T>): this
+    public use(callback: Enhanced.ConnectedCallback<any>) {
+        this.element.onConnect(callback)
         return this
     }
 
@@ -230,7 +231,6 @@ export class Builder<T extends Element> {
             }
 
             if (instancesOf(value, Signal)) {
-                // @ts-ignore
                 element.onConnect(() => value.follow(setOrRemoveAttribute, true))
             } else {
                 setOrRemoveAttribute(value)
@@ -253,16 +253,14 @@ export class Builder<T extends Element> {
      *  .onclick(() => console.log('clicked!'));
      *  .ariaLabel("Hello, World!");
      */
-    static Proxy = <T extends Element>(element: T) =>
+    static Proxy = <T extends Enhanced>(element: T) =>
         new Proxy(new Builder(element), {
             get: (target: Builder<T>, name: PropertyKey, proxy) =>
                 (target as any)[name] ??
                 (name in element &&
-                    ((value: any) => {
+                    ((value: unknown) => {
                         if (instancesOf(value, Signal)) {
-                            ;(element as never as Enhanced).onConnect(() =>
-                                value.follow((value) => ((element as any)[name] = value), true),
-                            )
+                            element.onConnect(() => value.follow((value) => ((element as any)[name] = value), true))
                         } else {
                             ;(element as any)[name] = value
                         }
@@ -280,7 +278,7 @@ export namespace Builder {
         | null
         | (T extends Enhanced ? Signal<AttributeValue<T>> : never)
 
-    export type Proxy<T extends Element> = Builder<T> & {
+    export type Proxy<T extends Enhanced> = Builder<T> & {
         [K in keyof T as true extends [IsEventHandler<T, K>, Not<IsFunction<T[K]>> & Not<IsReadonly<T, K>>][number]
             ? K
             : never]: T[K] extends (...args: infer Args) => void
@@ -290,9 +288,7 @@ export namespace Builder {
                       ? U extends Event
                           ? (this: X, event: U & { currentTarget: T }) => R
                           : T[K]
-                      : T extends Enhanced
-                        ? T[K] | Signal<T[K]>
-                        : T[K],
+                      : T[K] | Signal<T[K]>,
               ) => Proxy<T>
     }
 }
