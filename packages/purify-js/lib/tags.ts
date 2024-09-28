@@ -60,7 +60,7 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 
     if (instancesOf(value, Signal)) {
         return toAppendable(
-            tags["div"]({ style: "display:contents" }).onConnect((element) =>
+            tags["div"]({ style: "display:contents" }).use((element) =>
                 value.follow((value) => element.replaceChildren(toAppendable(value)), true),
             ),
         )
@@ -184,7 +184,7 @@ export let tags = new Proxy(
  */
 export class Builder<T extends Element> {
     public readonly element: T
-    public readonly onConnect: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined
+    public readonly use: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined
 
     /**
      * Creates a builder for the given element.
@@ -196,7 +196,7 @@ export class Builder<T extends Element> {
      *  .children(span('Hello, World!'));
      */
     constructor(element: T) {
-        this.onConnect = (this.element = element as any).onConnect?.bind(element)
+        this.use = (this.element = element as any).onConnect?.bind(element)
     }
 
     /* 
