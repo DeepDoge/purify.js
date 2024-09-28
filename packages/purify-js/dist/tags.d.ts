@@ -68,7 +68,7 @@ export declare let tags: Tags;
  */
 export declare class Builder<T extends Element> {
     readonly element: T;
-    readonly onConnect: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined;
+    readonly use: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined;
     /**
      * Creates a builder for the given element.
      *
