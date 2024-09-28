@@ -60,8 +60,8 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 
     if (instancesOf(value, Signal)) {
         return toAppendable(
-            tags["div"]({ style: "display:contents" }).use((element) =>
-                value.follow((value) => element.replaceChildren(toAppendable(value)), true),
+            tags["div"]({ style: "display:contents" }).use(({ element }) =>
+                element.onConnect(() => value.follow((value) => element.replaceChildren(toAppendable(value)), true)),
             ),
         )
     }
@@ -78,9 +78,10 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 }
 
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback<T>): void
+    onConnect(callback: Enhanced.ConnectedCallback<T>): Enhanced.OffConnected
 }
 export namespace Enhanced {
+    export type OffConnected = () => void
     export type DisconnectedCallback = () => void
     export type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback
 }
@@ -184,7 +185,6 @@ export let tags = new Proxy(
  */
 export class Builder<T extends Element> {
     public readonly element: T
-    public readonly use: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined
 
     /**
      * Creates a builder for the given element.
@@ -196,7 +196,12 @@ export class Builder<T extends Element> {
      *  .children(span('Hello, World!'));
      */
     constructor(element: T) {
-        this.use = (this.element = element as any).onConnect?.bind(element)
+        this.element = element
+    }
+
+    public use(callback: (builder: this) => void) {
+        callback(this)
+        return this
     }
 
     /* 
@@ -256,7 +261,7 @@ export class Builder<T extends Element> {
                     ((value: any) => {
                         if (instancesOf(value, Signal)) {
                             ;(element as never as Enhanced).onConnect(() =>
-                                value.follow(() => ((element as any)[name] = value), true),
+                                value.follow((value) => ((element as any)[name] = value), true),
                             )
                         } else {
                             ;(element as any)[name] = value

@@ -24,9 +24,10 @@ type IsEventHandler<T, K extends keyof T> = NonNullable<T[K]> extends (this: any
 export declare let fragment: (...members: MemberOf<DocumentFragment>[]) => DocumentFragment;
 export declare let toAppendable: (value: unknown) => string | CharacterData | Element | DocumentFragment;
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback<T>): void;
+    onConnect(callback: Enhanced.ConnectedCallback<T>): Enhanced.OffConnected;
 };
 export declare namespace Enhanced {
+    type OffConnected = () => void;
     type DisconnectedCallback = () => void;
     type ConnectedCallback<T extends HTMLElement> = (element: T) => void | DisconnectedCallback;
 }
@@ -68,7 +69,6 @@ export declare let tags: Tags;
  */
 export declare class Builder<T extends Element> {
     readonly element: T;
-    readonly use: T extends HTMLElement ? Enhanced<T>["onConnect"] : undefined;
     /**
      * Creates a builder for the given element.
      *
@@ -79,6 +79,7 @@ export declare class Builder<T extends Element> {
      *  .children(span('Hello, World!'));
      */
     constructor(element: T);
+    use(callback: (builder: this) => void): this;
     children(...members: MemberOf<T>[]): this;
     attributes(attributes: Record<string, Builder.AttributeValue<T>>): this;
     /**

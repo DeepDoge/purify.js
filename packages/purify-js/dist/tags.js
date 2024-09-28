@@ -27,7 +27,7 @@ export let toAppendable = (value) => {
         return value;
     }
     if (instancesOf(value, Signal)) {
-        return toAppendable(tags["div"]({ style: "display:contents" }).use((element) => value.follow((value) => element.replaceChildren(toAppendable(value)), true)));
+        return toAppendable(tags["div"]({ style: "display:contents" }).use(({ element }) => element.onConnect(() => value.follow((value) => element.replaceChildren(toAppendable(value)), true))));
     }
     if (instancesOf(value, Builder)) {
         return value.element;
@@ -108,7 +108,6 @@ export let tags = new Proxy({}, {
  */
 export class Builder {
     element;
-    use;
     /**
      * Creates a builder for the given element.
      *
@@ -119,7 +118,11 @@ export class Builder {
      *  .children(span('Hello, World!'));
      */
     constructor(element) {
-        this.use = (this.element = element).onConnect?.bind(element);
+        this.element = element;
+    }
+    use(callback) {
+        callback(this);
+        return this;
     }
     /*
         Since we access buildier from, BuilderProxy
@@ -173,7 +176,7 @@ export class Builder {
                 ((value) => {
                     if (instancesOf(value, Signal)) {
                         ;
-                        element.onConnect(() => value.follow(() => (element[name] = value), true));
+                        element.onConnect(() => value.follow((value) => (element[name] = value), true));
                     }
                     else {
                         ;
