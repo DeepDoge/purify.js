@@ -196,7 +196,7 @@ export class Builder<T extends Element> {
      *  .children(span('Hello, World!'));
      */
     constructor(element: T) {
-        this.onConnect = (this.element = element as any).onConnect
+        this.onConnect = (this.element = element as any).onConnect?.bind(element)
     }
 
     /* 
