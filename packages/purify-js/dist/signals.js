@@ -25,7 +25,6 @@ export class Signal {
         return computed((add) => getter(add(this).val))
     }
 }
-let FOLLOWERS = Symbol()
 /**
  * A signal whose value can be updated.
  *
@@ -37,11 +36,12 @@ let FOLLOWERS = Symbol()
  * state.val = 42; // logs: 42
  */
 Signal.State = class extends Signal {
-    [FOLLOWERS] = new Set()
+    #followers = new Set()
     #value
-    constructor(initial) {
+    constructor(initial, startStop) {
         super()
         this.#value = initial
+        this.#start = startStop
     }
     get val() {
         return this.#value
@@ -51,6 +51,8 @@ Signal.State = class extends Signal {
         this.#value = newValue
         this.emit()
     }
+    #start
+    #stop
     /**
      * Allows a function to follow changes to the signal's value.
      *
@@ -65,17 +67,24 @@ Signal.State = class extends Signal {
      * unfollow(); // stops following
      */
     follow(follower, immediate) {
+        if (!this.#followers.size) {
+            this.#stop = this.#start?.((value) => (this.val = value))
+        }
         if (immediate) {
             follower(this.#value)
         }
-        this[FOLLOWERS].add(follower)
+        this.#followers.add(follower)
         return () => {
-            this[FOLLOWERS].delete(follower)
+            this.#followers.delete(follower)
+            if (!this.#followers.size) {
+                this.#stop?.()
+                this.#stop = null
+            }
         }
     }
     emit() {
-        let i = this[FOLLOWERS].size
-        for (let follower of this[FOLLOWERS]) {
+        let i = this.#followers.size
+        for (let follower of this.#followers) {
             if (i-- > 0) follower(this.#value)
         }
     }
@@ -92,38 +101,44 @@ Signal.State = class extends Signal {
  * console.log(computedSignal.val); // logs: 30
  */
 Signal.Computed = class extends Signal {
-    #dependencies = new Map()
     #getter
-    #state = ref(0)
+    #state
     constructor(getter) {
         super()
         this.#getter = getter
-    }
-    #update() {
-        let self = this
-        let newDependencies = new Set()
-        let val = (self.#state.val = self.#getter((dependency) => {
-            newDependencies.add(dependency)
-            return dependency
-        }))
-        for (let [dependency, unfollow] of self.#dependencies) {
-            if (!newDependencies.has(dependency)) {
-                unfollow()
-                self.#dependencies.delete(dependency)
-            }
-        }
-        for (let dependency of newDependencies) {
-            if (!self.#dependencies.has(dependency)) {
-                self.#dependencies.set(
-                    dependency,
-                    dependency.follow(() => self.#update()),
+        let dependencies = new Map()
+        this.#state = ref(0, (set) => {
+            let update = () => {
+                let newDependencies = new Set()
+                set(
+                    getter((dependency) => {
+                        newDependencies.add(dependency)
+                        return dependency
+                    }),
                 )
+                for (let [dependency, unfollow] of dependencies) {
+                    if (!newDependencies.has(dependency)) {
+                        unfollow()
+                        dependencies.delete(dependency)
+                    }
+                }
+                for (let dependency of newDependencies) {
+                    if (!dependencies.has(dependency)) {
+                        dependencies.set(dependency, dependency.follow(update))
+                    }
+                }
             }
-        }
-        return val
+            update()
+            this.#getter = null
+            return () => {
+                this.#getter = getter
+                dependencies.forEach((unfollow) => unfollow())
+                dependencies.clear()
+            }
+        })
     }
     get val() {
-        return this.#state[FOLLOWERS].size ? this.#state.val : this.#getter((x) => x)
+        return this.#getter ? this.#getter((x) => x) : this.#state.val
     }
     /**
      * Follows changes to the computed signal.
@@ -139,20 +154,7 @@ Signal.Computed = class extends Signal {
      * signal.val = 6; // logs: 12
      */
     follow(follower, immediate) {
-        let self = this
-        if (!self.#state[FOLLOWERS].size) {
-            // start
-            this.#update()
-        }
-        let unfollow = self.#state.follow(follower, immediate)
-        return () => {
-            unfollow()
-            if (!self.#state[FOLLOWERS].size) {
-                // stop
-                self.#dependencies.forEach((unfollow) => unfollow())
-                self.#dependencies.clear()
-            }
-        }
+        return this.#state.follow(follower, immediate)
     }
 }
 /**
@@ -168,7 +170,7 @@ Signal.Computed = class extends Signal {
  * count.val = 5;
  * console.log(count.val); // logs: 5
  */
-export let ref = (value) => new Signal.State(value)
+export let ref = (value, startStop) => new Signal.State(value, startStop)
 /**
  * Creates a new computed signal from other signals.
  *

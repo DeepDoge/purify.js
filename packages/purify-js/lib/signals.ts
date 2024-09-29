@@ -57,7 +57,11 @@ export namespace Signal {
      */
     export type Unfollower = { (): void }
 
-    const FOLLOWERS = Symbol()
+    export namespace State {
+        export type Setter<T> = (value: T) => void
+        export type Start<T> = (set: Setter<T>) => Stop | void
+        export type Stop = () => void
+    }
 
     /**
      * A signal whose value can be updated.
@@ -70,12 +74,13 @@ export namespace Signal {
      * state.val = 42; // logs: 42
      */
     export class State<T> extends Signal<T> {
-        public [FOLLOWERS] = new Set<Signal.Follower<T>>()
+        #followers = new Set<Signal.Follower<T>>()
         #value: T
 
-        constructor(initial: T) {
+        constructor(initial: T, startStop?: Signal.State.Start<T>) {
             super()
             this.#value = initial
+            this.#start = startStop
         }
 
         public override get val() {
@@ -87,6 +92,9 @@ export namespace Signal {
             this.#value = newValue
             this.emit()
         }
+
+        #start: Signal.State.Start<T> | undefined
+        #stop: Signal.State.Stop | undefined | void | null
 
         /**
          * Allows a function to follow changes to the signal's value.
@@ -102,20 +110,28 @@ export namespace Signal {
          * unfollow(); // stops following
          */
         public override follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower {
+            if (!this.#followers.size) {
+                this.#stop = this.#start?.((value) => (this.val = value))
+            }
+
             if (immediate) {
                 follower(this.#value)
             }
 
-            this[FOLLOWERS].add(follower)
+            this.#followers.add(follower)
 
             return () => {
-                this[FOLLOWERS].delete(follower)
+                this.#followers.delete(follower)
+                if (!this.#followers.size) {
+                    this.#stop?.()
+                    this.#stop = null
+                }
             }
         }
 
         public emit() {
-            let i = this[FOLLOWERS].size
-            for (let follower of this[FOLLOWERS]) {
+            let i = this.#followers.size
+            for (let follower of this.#followers) {
                 if (i-- > 0) follower(this.#value)
             }
         }
@@ -138,44 +154,51 @@ export namespace Signal {
      * console.log(computedSignal.val); // logs: 30
      */
     export class Computed<T> extends Signal<T> {
-        #dependencies = new Map<SignalLike<unknown>, Signal.Unfollower>()
-        #getter: Computed.Getter<T>
-        #state = ref<T>(0 as never)
+        #getter: Computed.Getter<T> | undefined | null
+        #state: Signal.State<T>
 
         constructor(getter: Computed.Getter<T>) {
             super()
             this.#getter = getter
-        }
 
-        #update() {
-            let self = this
-            let newDependencies = new Set<SignalLike<unknown>>()
-            let val = (self.#state.val = self.#getter((dependency) => {
-                newDependencies.add(dependency)
-                return dependency
-            }))
+            let dependencies = new Map<SignalLike<unknown>, Signal.Unfollower>()
 
-            for (let [dependency, unfollow] of self.#dependencies) {
-                if (!newDependencies.has(dependency)) {
-                    unfollow()
-                    self.#dependencies.delete(dependency)
-                }
-            }
-
-            for (let dependency of newDependencies) {
-                if (!self.#dependencies.has(dependency)) {
-                    self.#dependencies.set(
-                        dependency,
-                        dependency.follow(() => self.#update()),
+            this.#state = ref<T>(0 as never, (set) => {
+                let update = () => {
+                    let newDependencies = new Set<SignalLike<unknown>>()
+                    set(
+                        getter((dependency) => {
+                            newDependencies.add(dependency)
+                            return dependency
+                        }),
                     )
-                }
-            }
 
-            return val
+                    for (let [dependency, unfollow] of dependencies) {
+                        if (!newDependencies.has(dependency)) {
+                            unfollow()
+                            dependencies.delete(dependency)
+                        }
+                    }
+
+                    for (let dependency of newDependencies) {
+                        if (!dependencies.has(dependency)) {
+                            dependencies.set(dependency, dependency.follow(update))
+                        }
+                    }
+                }
+                update()
+                this.#getter = null
+
+                return () => {
+                    this.#getter = getter
+                    dependencies.forEach((unfollow) => unfollow())
+                    dependencies.clear()
+                }
+            })
         }
 
         public override get val(): T {
-            return this.#state[FOLLOWERS].size ? this.#state.val : this.#getter((x) => x)
+            return this.#getter ? this.#getter((x) => x) : this.#state.val
         }
 
         /**
@@ -192,22 +215,7 @@ export namespace Signal {
          * signal.val = 6; // logs: 12
          */
         public override follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower {
-            let self = this
-            if (!self.#state[FOLLOWERS].size) {
-                // start
-                this.#update()
-            }
-
-            let unfollow = self.#state.follow(follower, immediate)
-
-            return () => {
-                unfollow()
-                if (!self.#state[FOLLOWERS].size) {
-                    // stop
-                    self.#dependencies.forEach((unfollow) => unfollow())
-                    self.#dependencies.clear()
-                }
-            }
+            return this.#state.follow(follower, immediate)
         }
     }
 }
@@ -225,7 +233,7 @@ export namespace Signal {
  * count.val = 5;
  * console.log(count.val); // logs: 5
  */
-export let ref = <T>(value: T): Signal.State<T> => new Signal.State(value)
+export let ref = <T>(value: T, startStop?: Signal.State.Start<T>): Signal.State<T> => new Signal.State(value, startStop)
 
 /**
  * Creates a new computed signal from other signals.

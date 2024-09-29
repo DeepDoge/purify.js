@@ -45,16 +45,20 @@ export declare namespace Signal {
      *
      * @template T The type of the signal value.
      */
-    export type Follower<T> = {
+    type Follower<T> = {
         (value: T): unknown;
     };
     /**
      * A function to stop following a signal.
      */
-    export type Unfollower = {
+    type Unfollower = {
         (): void;
     };
-    const FOLLOWERS: unique symbol;
+    namespace State {
+        type Setter<T> = (value: T) => void;
+        type Start<T> = (set: Setter<T>) => Stop | void;
+        type Stop = () => void;
+    }
     /**
      * A signal whose value can be updated.
      *
@@ -65,10 +69,9 @@ export declare namespace Signal {
      * state.follow(val => console.log(val)); // logs: 0
      * state.val = 42; // logs: 42
      */
-    export class State<T> extends Signal<T> {
+    class State<T> extends Signal<T> {
         #private;
-        [FOLLOWERS]: Set<Follower<T>>;
-        constructor(initial: T);
+        constructor(initial: T, startStop?: Signal.State.Start<T>);
         get val(): T;
         set val(newValue: T);
         /**
@@ -87,7 +90,7 @@ export declare namespace Signal {
         follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower;
         emit(): void;
     }
-    export namespace Computed {
+    namespace Computed {
         type Getter<T> = (add: AddDependency) => T;
         type AddDependency = <T extends SignalLike<unknown>>(newDependency: T) => T;
     }
@@ -102,7 +105,7 @@ export declare namespace Signal {
      * const computedSignal = computed([signal1, signal2], () => signal1.val + signal2.val);
      * console.log(computedSignal.val); // logs: 30
      */
-    export class Computed<T> extends Signal<T> {
+    class Computed<T> extends Signal<T> {
         #private;
         constructor(getter: Computed.Getter<T>);
         get val(): T;
@@ -121,7 +124,6 @@ export declare namespace Signal {
          */
         follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower;
     }
-    export {};
 }
 /**
  * Creates a new state signal with an initial value.
@@ -136,7 +138,7 @@ export declare namespace Signal {
  * count.val = 5;
  * console.log(count.val); // logs: 5
  */
-export declare let ref: <T>(value: T) => Signal.State<T>;
+export declare let ref: <T>(value: T, startStop?: Signal.State.Start<T>) => Signal.State<T>;
 /**
  * Creates a new computed signal from other signals.
  *
