@@ -7,7 +7,7 @@ export function bind<
 	signal: Signal.State<T>,
 	propertyName: P,
 	eventName: keyof HTMLElementEventMap | (string & {}),
-): Enhanced.OnConnected<Enhanced & { [_ in P]: T }> {
+): Enhanced.OnConnected<HTMLElement & { [_ in P]: T }> {
 	return (element) => {
 		const handler = () =>
 			(signal.val = element[propertyName]);
