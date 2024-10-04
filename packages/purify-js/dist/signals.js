@@ -22,141 +22,145 @@ export class Signal {
      * console.log(derivedSignal.val); // logs: 15
      */
     derive(getter) {
-        return computed((add) => getter(add(this).val))
+        return computed((add) => getter(add(this).val));
     }
 }
-/**
- * A signal whose value can be updated.
- *
- * @template T The type of the value.
- *
- * @example
- * const state = new Signal.State(0);
- * state.follow(val => console.log(val)); // logs: 0
- * state.val = 42; // logs: 42
- */
-Signal.State = class extends Signal {
-    #followers = new Set()
-    #value
-    constructor(initial, startStop) {
-        super()
-        this.#value = initial
-        this.#start = startStop
-    }
-    get val() {
-        return this.#value
-    }
-    set val(newValue) {
-        if (this.#value === newValue) return
-        this.#value = newValue
-        this.emit()
-    }
-    #start
-    #stop
+(function (Signal) {
     /**
-     * Allows a function to follow changes to the signal's value.
+     * A signal whose value can be updated.
      *
-     * @param follower A function to be called when the value changes.
-     * @param immediate Whether to call the follower immediately with the current value.
-     * @returns A function to unfollow the signal.
+     * @template T The type of the value.
      *
      * @example
-     * const state = new Signal.State(10);
-     * const unfollow = state.follow(val => console.log(val), true); // logs: 10
-     * state.val = 20; // logs: 20
-     * unfollow(); // stops following
+     * const state = new Signal.State(0);
+     * state.follow(val => console.log(val)); // logs: 0
+     * state.val = 42; // logs: 42
      */
-    follow(follower, immediate) {
-        if (!this.#followers.size) {
-            this.#stop = this.#start?.((value) => (this.val = value))
+    class State extends Signal {
+        #followers = new Set();
+        #value;
+        constructor(initial, startStop) {
+            super();
+            this.#value = initial;
+            this.#start = startStop;
         }
-        if (immediate) {
-            follower(this.#value)
+        get val() {
+            return this.#value;
         }
-        this.#followers.add(follower)
-        return () => {
-            this.#followers.delete(follower)
+        set val(newValue) {
+            if (this.#value === newValue)
+                return;
+            this.#value = newValue;
+            this.emit();
+        }
+        #start;
+        #stop;
+        /**
+         * Allows a function to follow changes to the signal's value.
+         *
+         * @param follower A function to be called when the value changes.
+         * @param immediate Whether to call the follower immediately with the current value.
+         * @returns A function to unfollow the signal.
+         *
+         * @example
+         * const state = new Signal.State(10);
+         * const unfollow = state.follow(val => console.log(val), true); // logs: 10
+         * state.val = 20; // logs: 20
+         * unfollow(); // stops following
+         */
+        follow(follower, immediate) {
             if (!this.#followers.size) {
-                this.#stop?.()
-                this.#stop = null
+                this.#stop = this.#start?.((value) => (this.val = value));
             }
-        }
-    }
-    emit() {
-        let i = this.#followers.size
-        for (let follower of this.#followers) {
-            if (i-- > 0) follower(this.#value)
-        }
-    }
-}
-/**
- * A signal that computes its value from other signals.
- *
- * @template T The type of the computed value.
- *
- * @example
- * const signal1 = ref(10);
- * const signal2 = ref(20);
- * const computedSignal = computed([signal1, signal2], () => signal1.val + signal2.val);
- * console.log(computedSignal.val); // logs: 30
- */
-Signal.Computed = class extends Signal {
-    #getter
-    #state
-    constructor(getter) {
-        super()
-        this.#getter = getter
-        let dependencies = new Map()
-        this.#state = ref(0, (set) => {
-            let update = () => {
-                let newDependencies = new Set()
-                set(
-                    getter((dependency) => {
-                        newDependencies.add(dependency)
-                        return dependency
-                    }),
-                )
-                for (let [dependency, unfollow] of dependencies) {
-                    if (!newDependencies.has(dependency)) {
-                        unfollow()
-                        dependencies.delete(dependency)
-                    }
-                }
-                for (let dependency of newDependencies) {
-                    if (!dependencies.has(dependency)) {
-                        dependencies.set(dependency, dependency.follow(update))
-                    }
-                }
+            if (immediate) {
+                follower(this.#value);
             }
-            update()
-            this.#getter = null
+            this.#followers.add(follower);
             return () => {
-                this.#getter = getter
-                dependencies.forEach((unfollow) => unfollow())
-                dependencies.clear()
+                this.#followers.delete(follower);
+                if (!this.#followers.size) {
+                    this.#stop?.();
+                    this.#stop = null;
+                }
+            };
+        }
+        emit() {
+            let i = this.#followers.size;
+            for (let follower of this.#followers) {
+                if (i-- > 0)
+                    follower(this.#value);
             }
-        })
+        }
     }
-    get val() {
-        return this.#getter ? this.#getter((x) => x) : this.#state.val
-    }
+    Signal.State = State;
     /**
-     * Follows changes to the computed signal.
+     * A signal that computes its value from other signals.
      *
-     * @param follower A function to be called when the value changes.
-     * @param immediate Whether to call the follower immediately with the current value.
-     * @returns A function to unfollow the signal.
+     * @template T The type of the computed value.
      *
      * @example
-     * const signal = ref(5);
-     * const computedSignal = computed([signal], () => signal.val * 2);
-     * computedSignal.follow(val => console.log(val), true); // logs: 10
-     * signal.val = 6; // logs: 12
+     * const signal1 = ref(10);
+     * const signal2 = ref(20);
+     * const computedSignal = computed([signal1, signal2], () => signal1.val + signal2.val);
+     * console.log(computedSignal.val); // logs: 30
      */
-    follow(follower, immediate) {
-        return this.#state.follow(follower, immediate)
+    class Computed extends Signal {
+        #getter;
+        #state;
+        constructor(getter) {
+            super();
+            this.#getter = getter;
+            let dependencies = new Map();
+            this.#state = ref(0, (set) => {
+                let update = () => {
+                    let newDependencies = new Set();
+                    set(getter((dependency) => {
+                        newDependencies.add(dependency);
+                        return dependency;
+                    }));
+                    for (let [dependency, unfollow] of dependencies) {
+                        if (!newDependencies.has(dependency)) {
+                            unfollow();
+                            dependencies.delete(dependency);
+                        }
+                    }
+                    for (let dependency of newDependencies) {
+                        if (!dependencies.has(dependency)) {
+                            dependencies.set(dependency, dependency.follow(update));
+                        }
+                    }
+                };
+                update();
+                this.#getter = null;
+                return () => {
+                    this.#getter = getter;
+                    dependencies.forEach((unfollow) => unfollow());
+                    dependencies.clear();
+                };
+            });
+        }
+        get val() {
+            return this.#getter ? this.#getter((x) => x) : this.#state.val;
+        }
+        /**
+         * Follows changes to the computed signal.
+         *
+         * @param follower A function to be called when the value changes.
+         * @param immediate Whether to call the follower immediately with the current value.
+         * @returns A function to unfollow the signal.
+         *
+         * @example
+         * const signal = ref(5);
+         * const computedSignal = computed([signal], () => signal.val * 2);
+         * computedSignal.follow(val => console.log(val), true); // logs: 10
+         * signal.val = 6; // logs: 12
+         */
+        follow(follower, immediate) {
+            return this.#state.follow(follower, immediate);
+        }
     }
-}
+    Signal.Computed = Computed;
+})(Signal || (Signal = {}));
 /**
  * Creates a new state signal with an initial value.
  *
@@ -170,7 +174,7 @@ Signal.Computed = class extends Signal {
  * count.val = 5;
  * console.log(count.val); // logs: 5
  */
-export let ref = (value, startStop) => new Signal.State(value, startStop)
+export let ref = (value, startStop) => new Signal.State(value, startStop);
 /**
  * Creates a new computed signal from other signals.
  *
@@ -185,7 +189,7 @@ export let ref = (value, startStop) => new Signal.State(value, startStop)
  * const sum = computed([a, b], () => a.val + b.val);
  * console.log(sum.val); // logs: 3
  */
-export let computed = (getter) => new Signal.Computed(getter)
+export let computed = (getter) => new Signal.Computed(getter);
 /**
  * Creates a new signal that will resolve with the result of a promise.
  *
@@ -200,7 +204,7 @@ export let computed = (getter) => new Signal.Computed(getter)
  * dataSignal.follow(data => console.log(data)); // logs the resolved data when ready
  */
 export let awaited = (promise, until = null) => {
-    let signal = ref(until)
-    promise.then((value) => (signal.val = value))
-    return signal
-}
+    let signal = ref(until);
+    promise.then((value) => (signal.val = value));
+    return signal;
+};

@@ -29,7 +29,7 @@ export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
 };
 export declare namespace Enhanced {
     type OnDisconnected = () => void;
-    type OnConnected<T extends HTMLElement> = (element: Enhanced<T>) => void | OnDisconnected;
+    type OnConnected<T extends HTMLElement = HTMLElement> = (element: Enhanced<T>) => void | OnDisconnected;
     type OffConnected = () => void;
 }
 export type Tags = {
