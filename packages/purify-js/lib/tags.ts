@@ -88,7 +88,7 @@ export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
 }
 export namespace Enhanced {
     export type OnDisconnected = () => void
-    export type OnConnected<T extends HTMLElement> = (element: Enhanced<T>) => void | OnDisconnected
+    export type OnConnected<T extends HTMLElement = HTMLElement> = (element: Enhanced<T>) => void | OnDisconnected
     export type OffConnected = () => void
 }
 
