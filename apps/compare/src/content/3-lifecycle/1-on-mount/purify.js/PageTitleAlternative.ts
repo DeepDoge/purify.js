@@ -1,4 +1,4 @@
-import { fragment, readonly, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 
 const { p } = tags;
 
@@ -11,16 +11,12 @@ export function PageTitleAlternative() {
 	return host;
 }
 
-const title = readonly<string>((follower, immediate) => {
-	if (immediate) {
-		follower(document.title);
-	}
-
+const title = ref("", (set) => {
 	document.title ||= "";
 	const titleElement = document.querySelector("title")!;
 
 	const observer = new MutationObserver((mutations) =>
-		follower(mutations[0].target.nodeValue ?? ""),
+		set(mutations[0].target.nodeValue ?? ""),
 	);
 
 	observer.observe(titleElement, {
@@ -28,6 +24,8 @@ const title = readonly<string>((follower, immediate) => {
 		characterData: true,
 		childList: true,
 	});
+
+	set(document.title);
 
 	return () => {
 		observer.disconnect();

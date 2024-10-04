@@ -124,11 +124,6 @@ export class Builder {
         this.element.onConnect(callback);
         return this;
     }
-    /*
-        Since we access buildier from, BuilderProxy
-        Make sure to only use and override names that already exist in HTMLElement(s)
-        We don't wanna conflict with something that might come in the future.
-    */
     children(...members) {
         let element = this.element;
         element.append(...members.map(toAppendable));

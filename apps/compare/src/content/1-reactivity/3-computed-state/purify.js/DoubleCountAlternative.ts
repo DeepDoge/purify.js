@@ -5,8 +5,7 @@ const { div } = tags;
 export function DoubleCountAlternative() {
 	const count = ref(10);
 	const doubleCount = computed(
-		() => count.val * 2,
-		[count],
+		(add) => add(count).val * 2,
 	);
 
 	return div().children(doubleCount);

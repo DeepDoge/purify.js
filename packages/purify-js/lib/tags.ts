@@ -21,6 +21,12 @@ type IsEventHandler<T, K extends keyof T> =
             : false
         : false
 
+type ToKebabCase<S extends string> = S extends `${infer First}${infer Rest}`
+    ? First extends Lowercase<First>
+        ? `${First}${ToKebabCase<Rest>}`
+        : `-${Lowercase<First>}${ToKebabCase<Rest>}`
+    : S
+
 let instancesOf = <T extends ((abstract new (...args: any[]) => any) | { [Symbol.hasInstance](value: any): any })[]>(
     target: unknown,
     ...constructors: T
@@ -78,12 +84,12 @@ export let toAppendable = (value: unknown): string | CharacterData | Element | D
 }
 
 export type Enhanced<T extends HTMLElement = HTMLElement> = T & {
-    onConnect(callback: Enhanced.ConnectedCallback<Enhanced<T>>): Enhanced.OffConnected
+    onConnect(callback: Enhanced.OnConnected<T>): Enhanced.OffConnected
 }
 export namespace Enhanced {
+    export type OnDisconnected = () => void
+    export type OnConnected<T extends HTMLElement> = (element: Enhanced<T>) => void | OnDisconnected
     export type OffConnected = () => void
-    export type DisconnectedCallback = () => void
-    export type ConnectedCallback<T extends Enhanced> = (element: T) => void | DisconnectedCallback
 }
 
 let enchance = <T extends keyof HTMLElementTagNameMap>(
@@ -96,11 +102,11 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
         custom.define(
             newTagName,
             (constructor = class extends (document.createElement(tagname).constructor as typeof HTMLElement) {
-                #connectedCallbacks = new Set<Enhanced.ConnectedCallback<this>>()
+                #connectedCallbacks = new Set<Enhanced.OnConnected<HTMLElement>>()
                 // different connected callbacks might use same cleanup function
-                #disconnectedCallbacks: Enhanced.DisconnectedCallback[] = []
+                #disconnectedCallbacks: Enhanced.OnDisconnected[] = []
 
-                #call(callback: Enhanced.ConnectedCallback<this>, disconnectedCallback = callback(this)) {
+                #call(callback: Enhanced.OnConnected<HTMLElement>, disconnectedCallback = callback(this)) {
                     if (disconnectedCallback) {
                         this.#disconnectedCallbacks.push(disconnectedCallback)
                     }
@@ -119,7 +125,7 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
                     this.#disconnectedCallbacks.length = 0
                 }
 
-                onConnect(callback: Enhanced.ConnectedCallback<this>) {
+                onConnect(callback: Enhanced.OnConnected<HTMLElement>) {
                     let self = this
                     self.#connectedCallbacks.add(callback)
                     if (self.isConnected) {
@@ -138,9 +144,9 @@ let enchance = <T extends keyof HTMLElementTagNameMap>(
 }
 
 export type Tags = {
-    [K in keyof HTMLElementTagNameMap]: (attributes?: {
-        [name: string]: Builder.AttributeValue<Enhanced<HTMLElementTagNameMap[K]>>
-    }) => Builder.Proxy<Enhanced<HTMLElementTagNameMap[K]>>
+    [K in keyof HTMLElementTagNameMap]: (
+        attributes?: Builder.Attributes<Enhanced<HTMLElementTagNameMap[K]>>,
+    ) => Builder.Proxy<Enhanced<HTMLElementTagNameMap[K]>>
 }
 
 /**
@@ -175,7 +181,7 @@ export let tags = new Proxy(
     {
         get:
             <T extends keyof HTMLElementTagNameMap>(_: never, tag: T) =>
-            (attributes: Record<string, Builder.AttributeValue<Enhanced<HTMLElementTagNameMap[T]>>> = {}) =>
+            (attributes: Builder.Attributes<Enhanced<HTMLElementTagNameMap[T]>> = {}) =>
                 Builder.Proxy(enchance(tag)).attributes(attributes),
     },
 ) as Tags
@@ -183,8 +189,8 @@ export let tags = new Proxy(
 /**
  * Builder class to construct a builder to populate an element with attributes and children.
  */
-export class Builder<T extends Enhanced> {
-    public readonly element: T
+export class Builder<T extends HTMLElement> {
+    public readonly element: Enhanced<T>
 
     /**
      * Creates a builder for the given element.
@@ -195,29 +201,22 @@ export class Builder<T extends Enhanced> {
      *  .attributes({ class: 'hello', 'aria-hidden': 'false' })
      *  .children(span('Hello, World!'));
      */
-    constructor(element: T) {
+    constructor(element: Enhanced<T>) {
         this.element = element
     }
 
-    public use(callback: Enhanced.ConnectedCallback<T>): this
-    public use(callback: Enhanced.ConnectedCallback<any>) {
+    public use(callback: Enhanced.OnConnected<T>) {
         this.element.onConnect(callback)
         return this
     }
 
-    /* 
-        Since we access buildier from, BuilderProxy
-        Make sure to only use and override names that already exist in HTMLElement(s)
-        We don't wanna conflict with something that might come in the future.
-    */
-
-    public children(...members: MemberOf<T>[]) {
+    public children(...members: MemberOf<Enhanced<T>>[]) {
         let element = this.element
         element.append(...members.map(toAppendable))
         return this
     }
 
-    public attributes(attributes: Record<string, Builder.AttributeValue<T>>) {
+    public attributes(attributes: Builder.Attributes<Enhanced<T>>) {
         let element = this.element
         for (let name in attributes) {
             let value = attributes[name]
@@ -253,7 +252,7 @@ export class Builder<T extends Enhanced> {
      *  .onclick(() => console.log('clicked!'));
      *  .ariaLabel("Hello, World!");
      */
-    static Proxy = <T extends Enhanced>(element: T) =>
+    static Proxy = <T extends HTMLElement>(element: Enhanced<T>) =>
         new Proxy(new Builder(element), {
             get: (target: Builder<T>, name: PropertyKey, proxy) =>
                 (target as any)[name] ??
@@ -269,27 +268,42 @@ export class Builder<T extends Enhanced> {
                     })),
         }) as Builder.Proxy<T>
 }
+
 export namespace Builder {
-    export type AttributeValue<T extends Element> =
+    export type Attributes<T extends Element> = {
+        class?: T extends Enhanced ? string | Signal<string> : string
+        id?: string | Signal<string>
+        style?: T extends Enhanced ? string | Signal<string> : string
+        title?: string | Signal<string>
+    } & {
+        [K in keyof ARIAMixin as ToKebabCase<K>]?: T extends Enhanced
+            ? ARIAMixin[K] | Signal<ARIAMixin[K]>
+            : ARIAMixin[K]
+    } & {
+        [key: string]: DefaultAttributeValue<T>
+    }
+
+    type DefaultAttributeValue<T extends Element> =
         | string
         | number
         | boolean
         | bigint
         | null
-        | (T extends Enhanced ? Signal<AttributeValue<T>> : never)
+        | (T extends Enhanced ? Signal<DefaultAttributeValue<T>> : never)
 
-    export type Proxy<T extends Enhanced> = Builder<T> & {
+    export type Proxy<T extends HTMLElement> = _Proxy<Enhanced<T>>
+    type _Proxy<T extends Enhanced> = Builder<T> & {
         [K in keyof T as true extends [IsEventHandler<T, K>, Not<IsFunction<T[K]>> & Not<IsReadonly<T, K>>][number]
             ? K
             : never]: T[K] extends (...args: infer Args) => void
-            ? (...args: Args) => Proxy<T>
+            ? (...args: Args) => _Proxy<T>
             : (
                   value: NonNullable<T[K]> extends (this: infer X, event: infer U) => infer R
                       ? U extends Event
                           ? (this: X, event: U & { currentTarget: T }) => R
                           : T[K]
                       : T[K] | Signal<T[K]>,
-              ) => Proxy<T>
+              ) => _Proxy<T>
     }
 }
 

@@ -1,4 +1,4 @@
-import { fragment, readonly, tags } from "purify-js";
+import { fragment, ref, tags } from "purify-js";
 
 const { p } = tags;
 
@@ -12,14 +12,11 @@ export function TimeAlternative() {
 	return host;
 }
 
-const time = readonly<string>((follower, immediate) => {
-	if (immediate) {
-		follower(new Date().toLocaleTimeString());
-	}
-
+const time = ref("", (set) => {
 	const interval = setInterval(() => {
-		follower(new Date().toLocaleTimeString());
+		set(new Date().toLocaleTimeString());
 	}, 1000);
 
+	set(new Date().toLocaleTimeString());
 	return () => clearInterval(interval);
 });
