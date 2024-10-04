@@ -1,0 +1,27 @@
+name: Auto Tag Version
+
+on:
+    push:
+        branches:
+            - master
+    workflow_dispatch: # allows manual trigger
+
+jobs:
+    tag_version:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout repo
+              uses: actions/checkout@v3
+
+            - name: get package.json version
+              id: get_version
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+            - name: create new tag
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                  git tag v${{ env.VERSION }} -m "tag for version ${{ env.VERSION }}"
+                  git push origin v${{ env.VERSION }}

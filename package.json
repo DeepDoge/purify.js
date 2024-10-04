@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "purify-js",
-    "version": "0.0.0",
+    "version": "0.0.226",
     "workspaces": [
         "./apps/*",
         "./packages/*"
