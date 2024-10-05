@@ -19,16 +19,14 @@ jobs:
                   VERSION=$(node -p "require('./package.json').version")
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-            - name: check if remote tag exists
-              run: |
-                  if git ls-remote --tags origin | grep -q "refs/tags/${{ env.VERSION }}"; then
-                    echo "Tag ${{ env.VERSION }} already exists remotely"
-                    exit 0
-                  fi
-
             - name: create new tag
               run: |
                   git config --global user.name "github-actions[bot]"
                   git config --global user.email "github-actions[bot]@users.noreply.github.com"
-                  git tag ${{ env.VERSION }} -m "tag for version ${{ env.VERSION }}"
-                  git push origin ${{ env.VERSION }}
+                  {
+                      git tag ${{ env.VERSION }} -m "tag for version ${{ env.VERSION }}" &&
+                      git push origin ${{ env.VERSION }}
+                  } || {
+                      echo "Tag ${{ env.VERSION }} already exists or another error occurred"
+                      exit 0
+                  }
