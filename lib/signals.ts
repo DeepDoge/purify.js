@@ -7,6 +7,13 @@ export abstract class Signal<T> {
         follower: Signal.Follower<T>,
         immediate?: boolean
     ): Signal.Unfollower
+
+    public derive<R>(getter: (value: T) => R): Signal.Computed<R> {
+        return computed(() => {
+            Dependency.add(this)
+            return Dependency.track(() => getter(this.val))
+        })
+    }
 }
 
 export declare namespace Signal {
@@ -101,7 +108,7 @@ Signal.Computed = class<T> extends Signal<T> {
         this.#state = ref<T>(0 as never, (set) => {
             let update = () => {
                 let newDependencies = new Set<Signal<unknown>>()
-                let newValue = Dependency.track(newDependencies, getter)
+                let newValue = Dependency.track(getter, newDependencies)
                 newDependencies.delete(this)
                 set(newValue)
 
