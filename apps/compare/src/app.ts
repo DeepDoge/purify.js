@@ -1,5 +1,5 @@
 import picoCss from "@picocss/pico/css/pico.css?raw"
-import { computed, fragment, ref, tags } from "@purifyjs/purify"
+import { computed, fragment, ref, tags } from "@purifyjs/core"
 import highlightjs from "highlight.js"
 import highlightCss from "highlight.js/styles/atom-one-dark.css?raw"
 import { css, sheet } from "./css"
@@ -27,12 +27,12 @@ getFrameworks().then((frameworks) => {
         button,
         hr,
         strong,
-        link,
+        link
     } = tags
 
     document.head.append(
         link().rel("icon").type("image/svg+xml").href(frameworks["purify.js"].iconSrc)
-            .element,
+            .element
     )
 
     const hash = ref(location.hash)
@@ -51,7 +51,7 @@ getFrameworks().then((frameworks) => {
         const key = pathValue.framework || "lit"
         return {
             key,
-            framework: frameworks[key],
+            framework: frameworks[key]
         }
     }
     path.follow((value) => {
@@ -85,8 +85,8 @@ getFrameworks().then((frameworks) => {
                                 .id(
                                     computed(
                                         () =>
-                                            `${compared.val.key}/${primaryGroupKey}/${primaryExampleKey}`,
-                                    ),
+                                            `${compared.val.key}/${primaryGroupKey}/${primaryExampleKey}`
+                                    )
                                 )
                                 .children(h3().children(primaryExample.label))
                             groupSection.children(exampleSection)
@@ -101,23 +101,23 @@ getFrameworks().then((frameworks) => {
                                         ]
                                     if (!example) return null
                                     return renderExampleItem(framework, example)
-                                }),
+                                })
                             )
                             exampleSection.children(exampleItemsWrapper, hr())
 
                             function renderExampleItem(
                                 framework: Framework,
-                                exampleItem: Framework.Example,
+                                exampleItem: Framework.Example
                             ) {
                                 const exampleItemWrapper = div({
-                                    class: "item",
+                                    class: "item"
                                 })
 
                                 exampleItemWrapper.children(
                                     div({ class: "framework-title" }).children(
                                         img().src(framework.iconSrc),
-                                        strong().children(framework.label),
-                                    ),
+                                        strong().children(framework.label)
+                                    )
                                 )
 
                                 const currentFile = ref(exampleItem.files[0])
@@ -130,10 +130,10 @@ getFrameworks().then((frameworks) => {
                                             .onclick(() => (currentFile.val = file))
                                             .ariaCurrent(
                                                 computed(() =>
-                                                    String(currentFile.val === file),
-                                                ),
+                                                    String(currentFile.val === file)
+                                                )
                                             )
-                                            .children(file.name),
+                                            .children(file.name)
                                     )
                                 }
 
@@ -151,18 +151,18 @@ getFrameworks().then((frameworks) => {
                                             ) ?
                                                 highlightjs.highlight(
                                                     "typescript",
-                                                    currentFile.val.content,
+                                                    currentFile.val.content
                                                 )
                                             :   highlightjs.highlightAuto(
-                                                    currentFile.val.content,
+                                                    currentFile.val.content
                                                 )
 
                                         return pre().children(
                                             code({
-                                                class: `language-${highlightResult.language}`,
-                                            }).innerHTML(highlightResult.value),
+                                                class: `language-${highlightResult.language}`
+                                            }).innerHTML(highlightResult.value)
                                         )
-                                    }),
+                                    })
                                 )
 
                                 return exampleItemWrapper
@@ -171,8 +171,8 @@ getFrameworks().then((frameworks) => {
                     }
 
                     return host
-                })(),
-            ),
+                })()
+            )
         )
 
         return host
@@ -188,8 +188,8 @@ getFrameworks().then((frameworks) => {
                 summary().children(
                     div({ class: "item" }).children(
                         img().src(computed(() => compared.val.framework.iconSrc)),
-                        computed(() => compared.val.framework.label),
-                    ),
+                        computed(() => compared.val.framework.label)
+                    )
                 ),
                 ul().children(
                     Object.entries(frameworks).map(([frameworkKey, framework]) =>
@@ -198,10 +198,10 @@ getFrameworks().then((frameworks) => {
                                 .href(`#${frameworkKey}`)
                                 .onclick(() => setTimeout(() => (open.val = false)))
                                 .title(framework.label)
-                                .children(img().src(framework.iconSrc), framework.label),
-                        ),
-                    ),
-                ),
+                                .children(img().src(framework.iconSrc), framework.label)
+                        )
+                    )
+                )
             )
     }
 
@@ -215,22 +215,22 @@ getFrameworks().then((frameworks) => {
                             Object.entries(group.examples).map(([exampleKey, example]) =>
                                 li().children(
                                     a({
-                                        class: "item",
+                                        class: "item"
                                     })
                                         .href(
                                             computed(
                                                 () =>
-                                                    `#${compared.val.key}/${groupKey}/${exampleKey}`,
-                                            ),
+                                                    `#${compared.val.key}/${groupKey}/${exampleKey}`
+                                            )
                                         )
                                         .title(example.label)
-                                        .children(example.label),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
+                                        .children(example.label)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
     }
 

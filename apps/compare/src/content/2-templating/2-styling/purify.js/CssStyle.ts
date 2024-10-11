@@ -1,4 +1,4 @@
-import { fragment, tags } from "@purifyjs/purify";
+import { fragment, tags } from "@purifyjs/core";
 import css from "./style.css?raw";
 
 const sheet = new CSSStyleSheet();

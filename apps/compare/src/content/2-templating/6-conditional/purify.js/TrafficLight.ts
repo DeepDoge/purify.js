@@ -1,4 +1,4 @@
-import { fragment, ref, tags } from "@purifyjs/purify";
+import { fragment, ref, tags } from "@purifyjs/core";
 
 const { button, p, span } = tags;
 

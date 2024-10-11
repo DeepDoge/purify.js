@@ -6,6 +6,6 @@ import {
     ref,
     Signal,
     tags,
-    toAppendable,
-} from "@purifyjs/purify"
+    toAppendable
+} from "@purifyjs/core"
 console.log(Builder, Signal, awaited, computed, fragment, ref, tags, toAppendable)

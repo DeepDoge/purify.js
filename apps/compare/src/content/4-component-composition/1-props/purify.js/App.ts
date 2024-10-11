@@ -1,4 +1,4 @@
-import { fragment, tags } from "@purifyjs/purify";
+import { fragment, tags } from "@purifyjs/core";
 import { UserProfile } from "./UserProfile";
 
 const { div } = tags;

@@ -1,4 +1,4 @@
-import { ref, tags } from "@purifyjs/purify";
+import { ref, tags } from "@purifyjs/core";
 
 const { h1 } = tags;
 

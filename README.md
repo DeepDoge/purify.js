@@ -45,7 +45,7 @@ To install **purify.js**, follow the
 ### purify.js + ShadowRoot 🍤
 
 ```ts
-import { css, fragment, ref, tags } from "@purifyjs/purify"
+import { css, fragment, ref, tags } from "@purifyjs/core"
 
 const { div, button } = tags
 

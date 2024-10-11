@@ -1,4 +1,4 @@
-import { tags } from "@purifyjs/purify";
+import { tags } from "@purifyjs/core";
 
 const { input } = tags;
 

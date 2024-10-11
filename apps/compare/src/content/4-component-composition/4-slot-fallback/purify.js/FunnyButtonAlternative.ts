@@ -1,4 +1,4 @@
-import { MemberOf, tags } from "@purifyjs/purify";
+import { MemberOf, tags } from "@purifyjs/core";
 
 const { button, span } = tags;
 

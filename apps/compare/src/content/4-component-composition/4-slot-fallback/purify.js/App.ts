@@ -1,4 +1,4 @@
-import { fragment } from "@purifyjs/purify";
+import { fragment } from "@purifyjs/core";
 import { FunnyButton } from "./FunnyButton";
 import { FunnyButtonAlternative } from "./FunnyButtonAlternative";
 

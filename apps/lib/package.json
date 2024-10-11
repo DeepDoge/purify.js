@@ -1,5 +1,5 @@
 {
-    "name": "@purifyjs/purify",
+    "name": "@purifyjs/core",
     "type": "module",
     "exports": {
         ".": {
