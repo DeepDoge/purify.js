@@ -22,7 +22,8 @@ export declare namespace Signal {
 
     class State<T> extends Signal<T> {
         constructor(initial: T, startStop?: Signal.State.Start<T>)
-        public val: T
+        public get val(): T
+        public set val(newValue: T)
         public follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower
         public emit(): void
     }
@@ -35,7 +36,7 @@ export declare namespace Signal {
 
     class Computed<T> extends Signal<T> {
         constructor(getter: Signal.Computed.Getter<T>)
-        public val: T
+        public get val(): T
         public follow(follower: Follower<T>, immediate?: boolean): Signal.Unfollower
     }
 
