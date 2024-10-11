@@ -1,4 +1,4 @@
-import { fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "@purifyjs/purify";
 import { AnswerButton } from "./AnswerButton";
 
 const { p } = tags;

@@ -1,4 +1,4 @@
-import { fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "@purifyjs/purify";
 import { bind } from "./util-bind";
 
 const { p, input } = tags;

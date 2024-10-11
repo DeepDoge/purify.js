@@ -1,4 +1,5 @@
-With [`@marko/cli`’s `build` or `serve`](https://github.com/marko-js/cli/tree/main/packages/serve)
+With
+[`@marko/cli`’s `build` or `serve`](https://github.com/marko-js/cli/tree/main/packages/serve)
 
 ```
 index.marko // index page "/"

@@ -6,9 +6,12 @@ export default class App extends Component {
 }
 
 class State {
-	@tracked isLoading = false;
-	@tracked error = null;
-	@tracked data = null;
+	@tracked
+	isLoading = false;
+	@tracked
+	error = null;
+	@tracked
+	data = null;
 }
 
 function getUsers() {

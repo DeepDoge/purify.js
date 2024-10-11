@@ -2,7 +2,7 @@ With [solid-app-router](https://github.com/solidjs/solid-app-router)
 
 ```jsx
 import { render } from "solid-js/web";
-import { Router, Routes, Route } from "solid-app-router";
+import { Route, Router, Routes } from "solid-app-router";
 import About from "./About";
 import Home from "./Home";
 

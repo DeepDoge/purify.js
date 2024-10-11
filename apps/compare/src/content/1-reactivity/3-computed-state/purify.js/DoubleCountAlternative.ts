@@ -1,4 +1,4 @@
-import { computed, ref, tags } from "purify-js";
+import { computed, ref, tags } from "@purifyjs/purify";
 
 const { div } = tags;
 

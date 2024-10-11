@@ -21,13 +21,15 @@ export default function App() {
 	return {
 		oninit: fetchUsers,
 		view() {
-			if (isLoading)
+			if (isLoading) {
 				return m("p", "Fetching users...");
-			if (error)
+			}
+			if (error) {
 				return m(
 					"p",
 					"An error occurred while fetching users",
 				);
+			}
 			return users.map((user) =>
 				m(
 					"li",

@@ -1,4 +1,4 @@
-import { fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "@purifyjs/purify";
 import { UserProfile } from "./UserProfile";
 
 export type User = {

@@ -12,6 +12,8 @@ import {
 	`,
 })
 export class AnswerButtonComponent {
-	@Output() yes = new EventEmitter<void>();
-	@Output() no = new EventEmitter<void>();
+	@Output()
+	yes = new EventEmitter<void>();
+	@Output()
+	no = new EventEmitter<void>();
 }

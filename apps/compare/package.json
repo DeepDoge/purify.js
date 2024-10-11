@@ -1,18 +1,17 @@
 {
-	"name": "compare",
-	"private": true,
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite --host",
-		"build": "vite build",
-		"preview": "vite preview --host",
-		"format": "prettier -w ./"
-	},
-	"devDependencies": {
-		"@picocss/pico": "^2.0.6",
-		"highlight.js": "^11.9.0",
-		"vite-plugin-singlefile": "^2.0.2",
-		"prettier-plugin-svelte": "^3.2.6"
-	}
+    "name": "@scope/compare",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host",
+        "build": "vite build",
+        "preview": "vite preview --host"
+    },
+    "dependencies": {
+        "@picocss/pico": "^2.0.6",
+        "highlight.js": "^11.10.0"
+    },
+    "devDependencies": {
+        "vite": "^5.4.8",
+        "vite-plugin-singlefile": "^2.0.2"
+    }
 }

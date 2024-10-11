@@ -1,4 +1,4 @@
-import { awaited, fragment, tags } from "purify-js";
+import { awaited, fragment, tags } from "@purifyjs/purify";
 import { fetchUsers } from "./fetchUsers";
 
 const { p, ul, li, img } = tags;

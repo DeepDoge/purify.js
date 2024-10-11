@@ -1,11 +1,11 @@
 import {
-    Builder,
-    Signal,
     awaited,
+    Builder,
     computed,
     fragment,
     ref,
+    Signal,
     tags,
     toAppendable,
-} from "purify-js"
+} from "@purifyjs/purify"
 console.log(Builder, Signal, awaited, computed, fragment, ref, tags, toAppendable)

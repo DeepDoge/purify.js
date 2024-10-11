@@ -1,4 +1,4 @@
-import { fragment, tags } from "purify-js";
+import { fragment, tags } from "@purifyjs/purify";
 
 const { button, slot, span } = tags;
 

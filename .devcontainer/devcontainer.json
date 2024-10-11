@@ -10,8 +10,7 @@
             "extensions": [
                 "esbenp.prettier-vscode",
                 "dbaeumer.vscode-eslint",
-                "pushqrdx.inline-html",
-                "EditorConfig.EditorConfig"
+                "pushqrdx.inline-html"
             ]
         }
     },

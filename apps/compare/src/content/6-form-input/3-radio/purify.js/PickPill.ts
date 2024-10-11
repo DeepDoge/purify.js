@@ -1,4 +1,4 @@
-import { fragment, ref, tags } from "purify-js";
+import { fragment, ref, tags } from "@purifyjs/purify";
 
 const { div, input, label } = tags;
 
@@ -7,7 +7,6 @@ export function PickPill() {
 
 	return fragment(
 		div().children("Picked: ", picked),
-
 		input()
 			.id("blue-pill")
 			.type("radio")
@@ -18,7 +17,6 @@ export function PickPill() {
 			)
 			.onchange(() => (picked.val = "blue")),
 		label({ for: "blue-pill" }).children("Blue pill"),
-
 		input()
 			.id("red-pill")
 			.type("radio")

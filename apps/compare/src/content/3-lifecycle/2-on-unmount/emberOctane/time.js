@@ -3,7 +3,8 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
 export default class Time extends Component {
-	@tracked time = new Date().toLocaleTimeString();
+	@tracked
+	time = new Date().toLocaleTimeString();
 
 	constructor(owner, args) {
 		super(owner, args);

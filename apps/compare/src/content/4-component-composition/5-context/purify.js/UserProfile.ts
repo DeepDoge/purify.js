@@ -1,4 +1,4 @@
-import { tags } from "purify-js";
+import { tags } from "@purifyjs/purify";
 import { userState } from "./App";
 
 const { div, h2, p, button } = tags;

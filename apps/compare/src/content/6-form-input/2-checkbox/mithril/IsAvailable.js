@@ -8,7 +8,6 @@ export default function IsAvailable() {
 		view: () =>
 			m(
 				"",
-
 				m("input", {
 					id: "is-available",
 					type: "checkbox",

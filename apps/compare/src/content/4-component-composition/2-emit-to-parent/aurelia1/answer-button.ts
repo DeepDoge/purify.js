@@ -5,7 +5,8 @@ import {
 
 @customElement("answer-button")
 export class AnswerButton {
-	@bindable actionHandler;
+	@bindable
+	actionHandler;
 
 	clickYes() {
 		this.actionHandler({

@@ -1,4 +1,4 @@
-import { fragment, tags } from "purify-js";
+import { fragment, tags } from "@purifyjs/purify";
 
 const { div, h1 } = tags;
 

@@ -2,7 +2,8 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
 export default class ColorSelect extends Component {
-	@tracked selectedColorId = 2;
+	@tracked
+	selectedColorId = 2;
 
 	select = (event) =>
 		(this.selectedColorId = event.target.value);

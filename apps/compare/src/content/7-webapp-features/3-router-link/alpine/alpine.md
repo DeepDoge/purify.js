@@ -1,4 +1,5 @@
-Using [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Location/hash)
+Using
+[location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Location/hash)
 
 ```html
 <nav>

@@ -1,4 +1,4 @@
-import { Enhanced, Signal } from "purify-js";
+import { Enhanced, Signal } from "@purifyjs/purify";
 
 export function bind<
 	T,

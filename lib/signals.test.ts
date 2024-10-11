@@ -1,11 +1,11 @@
 import { deepEqual, deepStrictEqual, strictEqual } from "node:assert"
 import { describe, it } from "node:test"
-import { computed, ref } from "./signals"
+import { computed, ref } from "./signals.ts"
 
 describe("Signals", () => {
     it("Derive counter with immediate basics", () => {
         const value = ref(0)
-        const double = value.derive((value) => value * 2)
+        const double = computed(() => value.val * 2)
 
         const results: number[] = []
         double.follow((value) => results.push(value), true)
@@ -19,7 +19,7 @@ describe("Signals", () => {
 
     it("Derive counter without immediate basics", () => {
         const value = ref(0)
-        const double = value.derive((value) => value * 2)
+        const double = computed(() => value.val * 2)
 
         const results: number[] = []
         double.follow((value) => results.push(value))
@@ -34,7 +34,7 @@ describe("Signals", () => {
     it("Computed multiple dependency", () => {
         const a = ref(0)
         const b = ref(0)
-        const ab = computed((add) => `${add(a).val},${add(b).val}`)
+        const ab = computed(() => `${a.val},${b.val}`)
 
         const results: string[] = []
         ab.follow((ab) => results.push(ab))
@@ -50,7 +50,10 @@ describe("Signals", () => {
     it("Computed multi follower should call getter once", () => {
         let counter = 0
         const a = ref(0)
-        const b = a.derive(() => counter++)
+        const b = computed(() => {
+            a.val
+            counter++
+        })
         b.follow(() => {})
         b.follow(() => {})
         b.follow(() => {})
@@ -63,7 +66,7 @@ describe("Signals", () => {
 
     it("Computed shouldn't call followers if the value is the same as the previous value", () => {
         const a = ref(0)
-        const b = a.derive((a) => a % 2)
+        const b = computed(() => a.val % 2)
         const results: unknown[] = []
         b.follow((value) => {
             results.push(value)
@@ -79,7 +82,8 @@ describe("Signals", () => {
     it("Computed should update as many times as the dependencies changes", () => {
         let counter = 0
         const a = ref(0)
-        const b = a.derive(() => {
+        const b = computed(() => {
+            a.val
             counter++
         })
         b.follow(() => {})
@@ -94,7 +98,10 @@ describe("Signals", () => {
     it("Computed shouldn't run without followers", () => {
         let counter = 0
         const a = ref(0)
-        a.derive(() => counter++)
+        computed(() => {
+            a.val
+            counter++
+        })
 
         a.val++
 
@@ -104,7 +111,10 @@ describe("Signals", () => {
     it("Computed shouldn't discover without followers", () => {
         let counter = 0
         const a = ref(0)
-        a.derive(() => counter++)
+        computed(() => {
+            a.val
+            counter++
+        })
 
         strictEqual(counter, 0)
     })

@@ -1,4 +1,6 @@
-With <a href="https://v3.nuxtjs.org/guide/directory-structure/pages#navigation">Nuxt 3</a>
+With
+<a href="https://v3.nuxtjs.org/guide/directory-structure/pages#navigation">Nuxt
+3</a>
 
 ```vue
 <template>

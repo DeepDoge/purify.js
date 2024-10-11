@@ -1,15 +1,12 @@
 {
     "compilerOptions": {
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
-        "types": ["vite/client"],
 
         "module": "ESNext",
         "target": "ESNext",
 
-        "moduleResolution": "Bundler",
         "noEmit": true,
         "moduleDetection": "force",
-
         "esModuleInterop": true,
 
         "skipLibCheck": true,
@@ -17,7 +14,7 @@
         "noUncheckedIndexedAccess": true,
         "noPropertyAccessFromIndexSignature": true,
         "exactOptionalPropertyTypes": true,
-        "checkJs": true
+        "noImplicitOverride": true
     },
-    "include": ["."]
+    "include": ["lib"]
 }
