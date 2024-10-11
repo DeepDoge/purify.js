@@ -9,7 +9,7 @@
         "test": "tsx --test ./lib/*.test.ts",
         "test:dev": "tsx --test --watch ./lib/*.test.ts",
         "publish": "jsr publish",
-        "publish:dry": "jsr publish --dry-run",
+        "publish:dry": "jsr publish --dry-run --allow-dirty",
         "vite:dev": "npm run dev --prefix ./apps/vite",
         "vite:build": "npm run build --prefix ./apps/vite",
         "compare:dev": "npm run dev --prefix ./apps/compare",
