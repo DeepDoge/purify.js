@@ -1,4 +1,4 @@
-import { Enhanced, Signal } from "@purifyjs/core";
+import { Lifecycle, Signal } from "@purifyjs/core";
 
 export function bind<
 	T,
@@ -7,7 +7,7 @@ export function bind<
 	signal: Signal.State<T>,
 	propertyName: P,
 	eventName: keyof HTMLElementEventMap | (string & {}),
-): Enhanced.OnConnected<HTMLElement & { [_ in P]: T }> {
+): Lifecycle.OnConnected<HTMLElement & { [_ in P]: T }> {
 	return (element) => {
 		const handler = () =>
 			(signal.val = element[propertyName]);

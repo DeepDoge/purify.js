@@ -4,7 +4,7 @@ export default defineConfig({
     build: {
         target: "esnext",
         modulePreload: {
-            polyfill: false,
-        },
-    },
+            polyfill: false
+        }
+    }
 })

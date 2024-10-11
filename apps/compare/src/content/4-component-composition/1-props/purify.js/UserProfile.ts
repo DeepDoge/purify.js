@@ -1,4 +1,4 @@
-import { fragment, tags } from "@purifyjs/core";
+import { tags } from "@purifyjs/core";
 
 const { div, p } = tags;
 
@@ -8,25 +8,16 @@ export function UserProfile({
 	favouriteColors = [] as string[],
 	isAvailable = false,
 }) {
-	const host = div();
-	const shadow = host.element.attachShadow({
-		mode: "open",
-	});
-
-	shadow.append(
-		fragment(
-			p().children("My name is ", name),
-			p().children("My age is ", age),
-			p().children(
-				"My favourite colors are ",
-				favouriteColors.join(", "),
-			),
-			p().children(
-				"I am ",
-				isAvailable ? "available" : "not available",
-			),
+	return div().children(
+		p().children("My name is ", name),
+		p().children("My age is ", age),
+		p().children(
+			"My favourite colors are ",
+			favouriteColors.join(", "),
+		),
+		p().children(
+			"I am ",
+			isAvailable ? "available" : "not available",
 		),
 	);
-
-	return host;
 }

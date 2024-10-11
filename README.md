@@ -33,24 +33,24 @@
 
 ### Syntax
 
-[Compare Syntax](https://bafybeici7qujgoz3bvlyyu6oxngtmsgriywwuh7zi2fgtzasnpi3vh4mte.ipfs.dweb.link)
+[Compare Syntax](https://bafybeigez3hth3c4ryra4g4itnertz5mdyhqegv6tzfntnchhtocayx2l4.ipfs.dweb.link)
 
 ## Installation 🍙
 
 To install **purify.js**, follow the
-[installation instructions](https://github.com/DeepDoge/purify.js/releases).
+[jsr.io/@purifyjs/core](https://jsr.io/@purifyjs/core).
 
 ## Examples
 
 ### purify.js + ShadowRoot 🍤
 
 ```ts
-import { css, fragment, ref, tags } from "@purifyjs/core"
+import { fragment, ref, tags } from "@purifyjs/core"
 
 const { div, button } = tags
 
 function App() {
-    return div({ id: "app" }).children(Counter())
+    return div().id("app").children(Counter())
 }
 
 function Counter() {

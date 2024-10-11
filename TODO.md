@@ -57,7 +57,7 @@ here some starting point for the new signals:
 abstract class Signal<T> {
     public abstract follow(
         follower: Signal.Follower<T>,
-        immediate?: boolean,
+        immediate?: boolean
     ): Signal.Unfollower
 
     get val() {

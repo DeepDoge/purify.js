@@ -1,10 +1,10 @@
 const contentImports = import.meta.glob("./content/**/*", {
     query: "?raw",
-    import: "default",
+    import: "default"
 })
 const iconImports = import.meta.glob("./icons/**/*", {
     query: "?url",
-    import: "default",
+    import: "default"
 })
 
 export type Framework = {
@@ -61,19 +61,19 @@ export async function getFrameworks() {
         frameworks[framework] ??= {
             label: `${framework[0].toUpperCase()}${framework.slice(1)}`,
             iconSrc,
-            groups: {},
+            groups: {}
         }
         frameworks[framework].groups[group] ??= {
             label: toLabel(group),
-            examples: {},
+            examples: {}
         }
         frameworks[framework].groups[group].examples[example] ??= {
             label: toLabel(example),
-            files: [],
+            files: []
         }
         frameworks[framework].groups[group].examples[example].files.push({
             name: file,
-            content,
+            content
         })
     }
     return frameworks

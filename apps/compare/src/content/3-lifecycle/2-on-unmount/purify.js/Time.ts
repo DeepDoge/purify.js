@@ -3,15 +3,14 @@ import { ref, tags } from "@purifyjs/core";
 const { p } = tags;
 
 export function Time() {
-	const host = p();
-
 	const time = ref(new Date().toLocaleTimeString());
-	host.element.onConnect(() => {
-		const interval = setInterval(() => {
-			time.val = new Date().toLocaleTimeString();
-		}, 1000);
-		return () => clearInterval(interval);
-	});
 
-	return host.children("Current time: ", time);
+	return p()
+		.use(() => {
+			const interval = setInterval(() => {
+				time.val = new Date().toLocaleTimeString();
+			}, 1000);
+			return () => clearInterval(interval);
+		})
+		.children("Current time: ", time);
 }

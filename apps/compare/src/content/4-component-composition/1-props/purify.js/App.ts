@@ -1,24 +1,17 @@
-import { fragment, tags } from "@purifyjs/core";
+import { tags } from "@purifyjs/core";
 import { UserProfile } from "./UserProfile";
 
 const { div } = tags;
 
 export function App() {
-	const host = div().id("app");
-	const shadow = host.element.attachShadow({
-		mode: "open",
-	});
-
-	shadow.append(
-		fragment(
+	return div()
+		.id("app")
+		.children(
 			UserProfile({
 				name: "John",
 				age: 30,
 				favouriteColors: ["red", "green", "blue"],
 				isAvailable: true,
 			}),
-		),
-	);
-
-	return host;
+		);
 }

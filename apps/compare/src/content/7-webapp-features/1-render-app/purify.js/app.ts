@@ -1,15 +1,11 @@
-import { fragment, tags } from "@purifyjs/core";
+import { tags } from "@purifyjs/core";
 
 const { div, h1 } = tags;
 
 export function App() {
-	const host = div().id("app");
-	const shadow = host.element.attachShadow({
-		mode: "open",
-	});
-	shadow.append(fragment(h1().children("Hello World")));
-
-	return host;
+	return div()
+		.id("app")
+		.children(h1().children("Hello World"));
 }
 
 document.body.append(App().element);

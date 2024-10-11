@@ -6,6 +6,6 @@ export default defineConfig({
     appType: "spa",
     build: {
         target: "esnext",
-        emptyOutDir: true,
-    },
+        emptyOutDir: true
+    }
 })

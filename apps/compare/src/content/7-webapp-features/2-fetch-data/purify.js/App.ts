@@ -1,4 +1,9 @@
-import { awaited, fragment, tags } from "@purifyjs/core";
+import {
+	awaited,
+	computed,
+	fragment,
+	tags,
+} from "@purifyjs/core";
 import { fetchUsers } from "./fetchUsers";
 
 const { p, ul, li, img } = tags;
@@ -14,16 +19,16 @@ export function App() {
 	);
 
 	return fragment(
-		response.derive((response) => {
-			if (!response) {
+		computed(() => {
+			if (!response.val) {
 				return p().children("Fetching users...");
-			} else if (response instanceof Error) {
+			} else if (response.val instanceof Error) {
 				return p().children(
 					"An error occurred while fetching users",
 				);
 			} else {
 				return ul().children(
-					response.map((user) =>
+					response.val.map((user) =>
 						li().children(
 							img().src(
 								user.picture.thumbnail,
