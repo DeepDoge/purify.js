@@ -1,10 +1,11 @@
-let dependencyTrackingStack: Set<Signal<unknown>>[] = []
+import * as Dependency from "./dependency"
+export { Dependency }
 
 export abstract class Signal<T> {
     public abstract readonly val: T
     public abstract follow(
         follower: Signal.Follower<T>,
-        immediate?: boolean,
+        immediate?: boolean
     ): Signal.Unfollower
 }
 
@@ -33,25 +34,7 @@ export declare namespace Signal {
 
     namespace Computed {
         type Getter<T> = () => T
-        type AddDependency = <T extends Signal<unknown>>(newDependency: T) => T
     }
-
-    namespace dependency {
-        function add<T extends Signal<unknown>>(signal: T): void
-        function track<R>(set: Set<Signal<unknown>>, callAndTrack: () => R): R
-    }
-}
-
-Signal.dependency = {
-    add(signal: Signal<unknown>) {
-        dependencyTrackingStack.at(-1)?.add(signal)
-    },
-    track<R>(set: Set<Signal<unknown>>, callAndTrack: () => R): R {
-        dependencyTrackingStack.push(set)
-        let result = callAndTrack()
-        dependencyTrackingStack.pop()
-        return result
-    },
 }
 
 Signal.State = class<T> extends Signal<T> {
@@ -65,7 +48,7 @@ Signal.State = class<T> extends Signal<T> {
     }
 
     public get val() {
-        Signal.dependency.add(this)
+        Dependency.add(this)
         return this.#value
     }
     public set val(newValue: T) {
@@ -118,7 +101,7 @@ Signal.Computed = class<T> extends Signal<T> {
         this.#state = ref<T>(0 as never, (set) => {
             let update = () => {
                 let newDependencies = new Set<Signal<unknown>>()
-                let newValue = Signal.dependency.track(newDependencies, getter)
+                let newValue = Dependency.track(newDependencies, getter)
                 newDependencies.delete(this)
                 set(newValue)
 
@@ -147,7 +130,7 @@ Signal.Computed = class<T> extends Signal<T> {
     }
 
     public get val(): T {
-        Signal.dependency.add(this)
+        Dependency.add(this)
         return this.#getter ? this.#getter() : this.#state.val
     }
 
@@ -204,7 +187,7 @@ export let computed = <T>(getter: Signal.Computed.Getter<T>): Signal.Computed<T>
  */
 export let awaited = <T, const U = null>(
     promise: Promise<T>,
-    until: U = null as never,
+    until: U = null as never
 ): Signal<T | U> => {
     let signal = ref<T | U>(until)
     promise.then((value) => (signal.val = value))

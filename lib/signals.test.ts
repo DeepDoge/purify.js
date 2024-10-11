@@ -1,6 +1,6 @@
 import { deepEqual, deepStrictEqual, strictEqual } from "node:assert"
 import { describe, it } from "node:test"
-import { computed, ref } from "./signals.ts"
+import { computed, Dependency, ref } from "./signals"
 
 describe("Signals", () => {
     it("Derive counter with immediate basics", () => {
@@ -51,7 +51,7 @@ describe("Signals", () => {
         let counter = 0
         const a = ref(0)
         const b = computed(() => {
-            a.val
+            Dependency.add(a)
             counter++
         })
         b.follow(() => {})
@@ -83,7 +83,7 @@ describe("Signals", () => {
         let counter = 0
         const a = ref(0)
         const b = computed(() => {
-            a.val
+            Dependency.add(a)
             counter++
         })
         b.follow(() => {})
@@ -99,7 +99,7 @@ describe("Signals", () => {
         let counter = 0
         const a = ref(0)
         computed(() => {
-            a.val
+            Dependency.add(a)
             counter++
         })
 
@@ -112,7 +112,7 @@ describe("Signals", () => {
         let counter = 0
         const a = ref(0)
         computed(() => {
-            a.val
+            Dependency.add(a)
             counter++
         })
 

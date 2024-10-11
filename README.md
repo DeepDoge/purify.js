@@ -65,8 +65,8 @@ function Counter() {
             button({ class: "my-button", "data-count": count })
                 .onclick(() => count.val++)
                 .children("Count:", count),
-            ["Double:", double],
-        ),
+            ["Double:", double]
+        )
     )
     return host
 }

@@ -1,12 +1,6 @@
 import { Signal } from "./signals"
 
 type Not<T extends boolean> = false extends T ? true : false
-type Equal<A, B> =
-    A extends B ?
-        B extends A ?
-            true
-        :   false
-    :   false
 type IsReadonly<T, K extends keyof T> =
     (<T_1>() => T_1 extends { [Q in K]: T[K] } ? 1 : 2) extends (
         <T_2>() => T_2 extends {
@@ -41,7 +35,7 @@ let instancesOf = <
         | {
               [Symbol.hasInstance](value: unknown): unknown
           }
-    )[],
+    )[]
 >(
     target: unknown,
     ...constructors: T
@@ -70,7 +64,7 @@ export let fragment = (...members: MemberOf<DocumentFragment>[]): DocumentFragme
 }
 
 export let toAppendable = (
-    value: unknown,
+    value: unknown
 ): string | CharacterData | Element | DocumentFragment => {
     if (value == null) {
         return ""
@@ -85,9 +79,9 @@ export let toAppendable = (
             tags["div"]({ style: "display:contents" }).use((element) =>
                 value.follow(
                     (value) => element.replaceChildren(toAppendable(value)),
-                    true,
-                ),
-            ),
+                    true
+                )
+            )
         )
     }
 
@@ -137,17 +131,17 @@ export let tags = new Proxy(
             (
                 attributes: Builder.Attributes<
                     HTMLElementTagNameMap[T] & HTMLElementWithLifecycle
-                > = {},
+                > = {}
             ) =>
-                Builder.Proxy(withLifecycle(tag)).attributes(attributes),
-    },
+                Builder.Proxy(withLifecycle(tag)).attributes(attributes)
+    }
 ) as Tags
 
 export type Tags = {
     [K in keyof HTMLElementTagNameMap]: (
         attributes?: Builder.Attributes<
             HTMLElementTagNameMap[K] & HTMLElementWithLifecycle
-        >,
+        >
     ) => Builder.Proxy<HTMLElementTagNameMap[K] & HTMLElementWithLifecycle>
 }
 
@@ -157,7 +151,7 @@ export interface HTMLElementWithLifecycle extends HTMLElement {
 export namespace Lifecycle {
     export type OnDisconnected = () => void
     export type OnConnected<T extends HTMLElement = HTMLElement> = (
-        element: T,
+        element: T
     ) => void | OnDisconnected
     export type OffConnected = () => void
 }
@@ -165,7 +159,7 @@ export namespace Lifecycle {
 let withLifecycle = <T extends keyof HTMLElementTagNameMap>(
     tagname: T,
     newTagName = `enchanced-${tagname}`,
-    constructor = customElements.get(newTagName) as new () => HTMLElement,
+    constructor = customElements.get(newTagName) as new () => HTMLElement
 ) => {
     if (!constructor) {
         customElements.define(
@@ -179,7 +173,7 @@ let withLifecycle = <T extends keyof HTMLElementTagNameMap>(
 
                 #call(
                     callback: Lifecycle.OnConnected<HTMLElement>,
-                    disconnectedCallback = callback(this),
+                    disconnectedCallback = callback(this)
                 ) {
                     if (disconnectedCallback) {
                         this.#disconnectedCallbacks.push(disconnectedCallback)
@@ -210,7 +204,7 @@ let withLifecycle = <T extends keyof HTMLElementTagNameMap>(
                     }
                 }
             }),
-            { extends: tagname },
+            { extends: tagname }
         )
     }
 
@@ -297,15 +291,15 @@ Builder.Proxy = <T extends HTMLElementWithLifecycle>(element: T) =>
                         element.onConnect(() =>
                             value.follow(
                                 (value) => ((element as any)[name] = value),
-                                true,
-                            ),
+                                true
+                            )
                         )
                     } else {
                         ;(element as any)[name] = value
                     }
 
                     return proxy
-                })),
+                }))
     }) as never
 
 export namespace Builder {
@@ -345,7 +339,7 @@ export namespace Builder {
                     U extends Event ?
                         (this: X, event: U & { currentTarget: T }) => R
                     :   T[K]
-                :   T[K] | Signal<T[K]>,
+                :   T[K] | Signal<T[K]>
             ) => Proxy<T>
     }
 }
