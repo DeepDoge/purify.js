@@ -45,8 +45,8 @@ export let add = (signal: Signal<unknown>): void => {
  * ```ts
  * // Using track in a computed context to ignore further tracking
  * computed(() => {
- *      add(this); // Add the current signal for tracking
- *      return track(() => getter(this.val)); // Ignore further adds
+ *      add(signal); // Add the current signal for tracking
+ *      return track(() => getter(signal.val)); // Ignore further adds
  * });
  * ```
  */
