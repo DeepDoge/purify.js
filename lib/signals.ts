@@ -70,7 +70,8 @@ export declare namespace Signal {
          * lastAdded.follow(console.log)
          * arraySignal.push(123)
          * arraySignal.emit() // logs: 123
-         **/
+         * ```
+         */
         public emit(): void
     }
 
@@ -224,10 +225,12 @@ Signal.Computed = class<T> extends Signal<T> {
  * @returns {Signal.State<T>} A new state signal with the given initial value.
  *
  * @example
+ * ```ts
  * const count = ref(0);
  * count.follow(console.log)
  * count.val = 5; // logs: 5
  * count.val = 10; // logs: 10
+ * ```
  */
 export let ref = <T>(value: T, startStop?: Signal.State.Start<T>): Signal.State<T> =>
     new Signal.State(value, startStop)
@@ -240,11 +243,13 @@ export let ref = <T>(value: T, startStop?: Signal.State.Start<T>): Signal.State<
  * @returns {Signal.Computed<T>} A new computed signal.
  *
  * @example
+ * ```ts
  * const a = ref(1);
  * const b = ref(2);
  * const sum = computed(() => a.val + b.val);
  * sum.follow(console.log)
  * a.val++ // logs: 4
+ * ```
  */
 export let computed = <T>(getter: Signal.Computed.Getter<T>): Signal.Computed<T> =>
     new Signal.Computed(getter)
@@ -259,8 +264,10 @@ export let computed = <T>(getter: Signal.Computed.Getter<T>): Signal.Computed<T>
  * @returns {Signal<T | U>} A signal that updates when the promise resolves.
  *
  * @example
+ * ```ts
  * const dataSignal = awaited(fetchDataPromise, null);
  * dataSignal.follow((data) => console.log(data)); // logs the resolved data when ready
+ * ```
  */
 export let awaited = <T, const U = null>(
     promise: Promise<T>,

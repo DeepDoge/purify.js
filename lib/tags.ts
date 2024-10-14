@@ -41,12 +41,14 @@ let instancesOf = <T extends (abstract new (...args: never) => unknown)[]>(
  * @param members - The members to append to the fragment.
  * @returns  The created DocumentFragment.
  * @example
- * let frag = fragment(
+ * ```ts
+ * document.body.append(fragment(
  *      document.createElement('div'),
  *      div(),
  *      computed(() => count.val * 2),
  *      'Text content'
- * );
+ * ));
+ * ```
  */
 export let fragment = (...members: MemberOf<DocumentFragment>[]): DocumentFragment => {
     let fragment = document.createDocumentFragment()
@@ -99,9 +101,9 @@ export let toAppendable = (
  * It separates attributes and properties.
 
  * @example
- * let { div, span } = tags;
- *
  * ```ts
+ * let { div, span } = tags;
+ * 
  * div({ class: 'hello', 'aria-hidden': 'false' })
  *  .id("my-div")
  *  .ariaLabel("Hello, World!")
@@ -228,9 +230,11 @@ export class Builder<T extends HTMLElementWithLifecycle> {
      *
      * @param element - The element to build.
      * @example
+     * ```ts
      * new Builder(myDiv)
      *  .attributes({ class: 'hello', 'aria-hidden': 'false' })
      *  .children(span('Hello, World!'));
+     * ```
      */
     constructor(element: T) {
         this.element = element
@@ -279,11 +283,13 @@ export declare namespace Builder {
      * @returns The proxy for the Builder instance.
      *
      * @example
+     * ```ts
      * Builder.Proxy(myDiv)
      *  .attributes({ class: 'hello', 'aria-hidden': 'false' })
      *  .children(span('Hello, World!'));
      *  .onclick(() => console.log('clicked!'));
      *  .ariaLabel("Hello, World!");
+     * ```
      */
     function Proxy<T extends HTMLElementWithLifecycle>(element: T): Builder.Proxy<T>
 }
