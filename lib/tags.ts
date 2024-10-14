@@ -29,20 +29,11 @@ type ToKebabCase<S extends string> =
         :   `-${Lowercase<First>}${ToKebabCase<Rest>}`
     :   S
 
-let instancesOf = <
-    T extends (
-        | (abstract new (...args: unknown[]) => unknown)
-        | {
-              [Symbol.hasInstance](value: unknown): unknown
-          }
-    )[]
->(
+let instancesOf = <T extends (abstract new (...args: never) => unknown)[]>(
     target: unknown,
     ...constructors: T
-): target is T[number] extends abstract new (...args: any) => infer U ? U
-: T[number] extends { [Symbol.hasInstance](value: unknown): value is infer U } ? U
-: never =>
-    constructors.some((constructor) => target instanceof (constructor as { (): unknown }))
+): target is InstanceType<T[number]> =>
+    constructors.some((constructor) => target instanceof constructor)
 
 /**
  * Creates a DocumentFragment containing the provided members.
@@ -63,6 +54,12 @@ export let fragment = (...members: MemberOf<DocumentFragment>[]): DocumentFragme
     return fragment
 }
 
+/**
+ * Converts a value into an appendable format.
+ *
+ * @param {unknown} value - The value to convert.
+ * @returns {string | CharacterData | Element | DocumentFragment} The appendable value.
+ */
 export let toAppendable = (
     value: unknown
 ): string | CharacterData | Element | DocumentFragment => {
@@ -148,6 +145,7 @@ export type Tags = {
 export interface HTMLElementWithLifecycle extends HTMLElement {
     onConnect(callback: Lifecycle.OnConnected<this>): Lifecycle.OffConnected
 }
+
 export namespace Lifecycle {
     export type OnDisconnected = () => void
     export type OnConnected<T extends HTMLElement = HTMLElement> = (
@@ -156,6 +154,14 @@ export namespace Lifecycle {
     export type OffConnected = () => void
 }
 
+/**
+ * Creates HTMLElement for a given tag name with lifecycle methods.
+ *
+ * @param tagname - The name of the tag to enhance.
+ * @param newTagName - The new tag name for the enhanced element (optional).
+ * @param constructor - The constructor for the custom element (optional).
+ * @returns The enhanced element.
+ */
 let withLifecycle = <T extends keyof HTMLElementTagNameMap>(
     tagname: T,
     newTagName = `enchanced-${tagname}`,
@@ -284,18 +290,18 @@ export declare namespace Builder {
 Builder.Proxy = <T extends HTMLElementWithLifecycle>(element: T) =>
     new Proxy(new Builder(element), {
         get: (target: Builder<T>, name: PropertyKey, proxy) =>
-            (target as any)[name] ??
+            target[name as never] ??
             (name in element &&
                 ((value: unknown) => {
                     if (instancesOf(value, Signal)) {
                         element.onConnect(() =>
                             value.follow(
-                                (value) => ((element as any)[name] = value),
+                                (value) => (element[name as never] = value as never),
                                 true
                             )
                         )
                     } else {
-                        ;(element as any)[name] = value
+                        element[name as never] = value as never
                     }
 
                     return proxy
@@ -344,6 +350,9 @@ export namespace Builder {
     }
 }
 
+/**
+ * Possible child nodes of a given ParentNode type.
+ */
 export type ChildNodeOf<TParentNode extends ParentNode> =
     | DocumentFragment
     | CharacterData
@@ -355,6 +364,10 @@ export type ChildNodeOf<TParentNode extends ParentNode> =
       : TParentNode extends MathMLElement ? MathMLElement
       : Element)
 
+/**
+ * A union type representing the possible member types of a given ParentNode.
+ * Used in Builder.children() and fragment() functions
+ */
 export type MemberOf<T extends ParentNode> =
     | string
     | number

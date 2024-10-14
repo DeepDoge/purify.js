@@ -13,7 +13,8 @@
         "vite:dev": "npm run dev --prefix ./apps/vite",
         "vite:build": "npm run build --prefix ./apps/vite",
         "compare:dev": "npm run dev --prefix ./apps/compare",
-        "compare:build": "npm run build --prefix ./apps/compare"
+        "compare:build": "npm run build --prefix ./apps/compare",
+        "compare:publish": "npm run publish --prefix ./apps/compare"
     },
     "devDependencies": {
         "@types/node": "22.7.5",

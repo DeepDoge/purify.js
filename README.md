@@ -33,7 +33,7 @@
 
 ### Syntax
 
-[Compare Syntax](https://bafybeigez3hth3c4ryra4g4itnertz5mdyhqegv6tzfntnchhtocayx2l4.ipfs.dweb.link)
+[Compare Syntax](https://k51qzi5uqu5dmeqvzecv0iezk1gjnyesz1stniesrhjv1xuie6ru4kj1or1l3f.ipns.dweb.link)
 
 ## Installation 🍙
 
@@ -132,7 +132,3 @@ shouldn't cause any issues.
     attributes and properties of an element while building it, which is not
     currently possible with JSX. This distinction enhances clarity and control
     when defining element characteristics.
-
----
-
-> > > > > > > e309d77 (...)

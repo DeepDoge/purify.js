@@ -1,8 +1,5 @@
 import { fragment, tags } from "@purifyjs/core";
-import css from "./style.css?raw";
-
-const sheet = new CSSStyleSheet();
-sheet.replaceSync(css);
+import { css, sheet } from "./util-css";
 
 const { div, h1, button } = tags;
 
@@ -11,7 +8,7 @@ export function CssStyle() {
 	const shadow = host.element.attachShadow({
 		mode: "open",
 	});
-	shadow.adoptedStyleSheets.push(sheet);
+	shadow.adoptedStyleSheets.push(CssStyleSheet);
 
 	shadow.append(
 		fragment(
@@ -24,3 +21,9 @@ export function CssStyle() {
 
 	return host;
 }
+
+const CssStyleSheet = sheet(css`
+	.title {
+		color: red;
+	}
+`);
