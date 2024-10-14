@@ -33,7 +33,7 @@
 
 ### Syntax
 
-[Compare Syntax](https://k51qzi5uqu5dmeqvzecv0iezk1gjnyesz1stniesrhjv1xuie6ru4kj1or1l3f.ipns.dweb.link)
+[Compare Syntax](https://k51qzi5uqu5diab1u5cw78mw6ef5c32dzf4nonexnm973nslhuy6hur28z36i8.ipns.dweb.link)
 
 ## Installation 🍙
 
