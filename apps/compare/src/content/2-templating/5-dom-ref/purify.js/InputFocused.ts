@@ -3,13 +3,9 @@ import { Lifecycle, tags } from "@purifyjs/core";
 const { input } = tags;
 
 export function InputFocused() {
-	const host = input()
-    .use(autoFocus())
-    .type("text");
-
- return host;
+	return input().use(autoFocus()).type("text");
 }
 
 export function autoFocus(): Lifecycle.OnConnected {
-  return (element) => element.focus()
+	return (element) => element.focus();
 }
